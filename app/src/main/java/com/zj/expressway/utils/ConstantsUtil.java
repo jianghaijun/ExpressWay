@@ -16,8 +16,8 @@ public class ConstantsUtil {
     /**
      * 中交路径
      */
-    public static final String BASE_URL = "http://114.116.12.219:8012";
-    //public static final String BASE_URL = "http://192.168.1.119:8080/web/";
+    //public static final String BASE_URL = "http://114.116.12.219:8012";
+    public static final String BASE_URL = "http://192.168.1.119:8080/web/";
 
     /**
      * 施工人员选择质检负责人
@@ -34,13 +34,13 @@ public class ConstantsUtil {
     /**
      * 前缀
      */
-    public static String prefix = "/zjapp/";
-    //public static String prefix = "";
+    //public static String prefix = "/zjapp/";
+    public static String prefix = "";
     /**
      * accountId
      */
-    public static String ACCOUNT_ID = "zj_qyh_app_id";
-    //public static String ACCOUNT_ID = "sx_qyh_woa_id";
+    //public static String ACCOUNT_ID = "zj_qyh_app_id";
+    public static String ACCOUNT_ID = "sx_qyh_woa_id";
 
     /**
      * 参数格式
@@ -80,6 +80,10 @@ public class ConstantsUtil {
      * 屏幕高度
      */
     public static String SCREEN_HEIGHT = "SCREEN_HEIGHT";
+    /**
+     * 选中人员id
+     */
+    public static String SELECT_USER_ID = "SELECT_USER_ID";
     /**
      * OkHttpClient
      */
@@ -179,7 +183,31 @@ public class ConstantsUtil {
     /**
      * 按分部获取当日报表详情
      */
-    public static final String PROCESS_AND_PHOTO_LIST_TODAY = prefix + "getProcessAndPhotoListToday  ";
+    public static final String PROCESS_AND_PHOTO_LIST_TODAY = prefix + "getProcessAndPhotoListToday";
+    /**
+     * 获取人员结构
+     */
+    public static final String PERSONNEL_LIST = prefix + "getSysDepartmentUserAllTree";
+    /**
+     * 待办列表
+     */
+    public static final String TO_DO_LIST = prefix + "getTodoList";
+    /**
+     * 已办列表
+     */
+    public static final String HAS_TO_DO_LIST = prefix + "getHasTodoList";
+    /**
+     * 获取已办待办数量
+     */
+    public static final String FLOW_COUNT = prefix + "getFlowCount";
+    /**
+     * 获取流程节点
+     */
+    public static final String getHistory = prefix + "getHistory";
+    /**
+     * 新流程详情
+     */
+    public static final String FLOW_DETAILS = prefix + "getSubmitFlow";
 
     /**
      * 文件存储路径

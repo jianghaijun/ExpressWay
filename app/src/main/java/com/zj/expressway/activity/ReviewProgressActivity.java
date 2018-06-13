@@ -1,5 +1,6 @@
 package com.zj.expressway.activity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -14,17 +15,32 @@ import com.zj.expressway.R;
 import com.zj.expressway.adapter.WaterfallFlowTimeLineAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.DateUtils;
+import com.zj.expressway.utils.JsonUtils;
+import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.SpUtil;
+import com.zj.expressway.utils.ToastUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import cn.hutool.core.date.DateUtil;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  *                     _ooOoo_
@@ -63,6 +79,8 @@ public class ReviewProgressActivity extends BaseActivity {
     private WaterfallFlowTimeLineAdapter mAdapter;
     private DotItemDecoration mItemDecoration;
 
+    private Context mContext;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,21 +92,97 @@ public class ReviewProgressActivity extends BaseActivity {
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         txtTitle.setText("工序审核进度");
 
-        setData();
+        mContext = this;
 
-        initView();
+        getData();
+    }
+
+    /**
+     * 获取数据
+     */
+    private void getData() {
+        LoadingUtils.showLoading(mContext);
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("workId", getIntent().getStringExtra("workId"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
+        Request request = new Request.Builder()
+                .url(ConstantsUtil.BASE_URL + ConstantsUtil.getHistory)
+                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
+                .post(requestBody)
+                .build();
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                LoadingUtils.hideLoading();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showShort(mContext, getString(R.string.server_exception));
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    try {
+                        JSONObject obj = new JSONObject(jsonData);
+                        boolean resultFlag = obj.getBoolean("success");
+                        if (resultFlag) {
+                            final JSONArray jsonArray = new JSONArray(obj.getString("data"));
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    setData(jsonArray);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ToastUtil.showShort(mContext, getString(R.string.json_error));
+                            }
+                        });
+                        e.printStackTrace();
+                    }
+                    LoadingUtils.hideLoading();
+                } else {
+                    LoadingUtils.hideLoading();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastUtil.showShort(mContext, getString(R.string.json_error));
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**
      * 设置数据
      */
-    private void setData() {
-        for (int i = 0; i < 10; i++) {
-            WorkingBean bean = new WorkingBean();
-            bean.setProcessName("去小北门拿快递去小北门拿快递去小北门拿快递去小北门拿快递" + i);
-            bean.setDismissal(DateUtil.format(new Date(), "yyyy-MM-dd hh:mm:ss"));
-            mList.add(bean);
+    private void setData(JSONArray array) {
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                JSONObject obj = new JSONObject(array.get(i).toString());
+                WorkingBean bean = new WorkingBean();
+                bean.setProcessName(obj.getString("realName"));
+                bean.setFlowName(obj.getString("nodeName"));
+                bean.setContent(DateUtils.setDataToStr(obj.getLong("actionTime")));
+                bean.setProcessState(obj.getString("doTimeShow"));
+                mList.add(bean);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
+        initView();
     }
 
     /**
@@ -102,8 +196,6 @@ public class ReviewProgressActivity extends BaseActivity {
                 .setItemStyle(DotItemDecoration.STYLE_DRAW)
                 .setTopDistance(20)//dp
                 .setItemInterVal(10)//dp
-                //.setItemPaddingLeft(5)//default value equals to item interval value
-                //.setItemPaddingRight(5)//default value equals to item interval value
                 .setDotColor(ContextCompat.getColor(this, R.color.main_bg))
                 .setDotRadius(5)//dp
                 .setDotPaddingTop(0)
@@ -111,10 +203,7 @@ public class ReviewProgressActivity extends BaseActivity {
                 .setLineColor(ContextCompat.getColor(this, R.color.main_bg))
                 .setLineWidth(3)//dp
                 .setEndText("END")
-                //.setTextColor(Color.WHITE)
-                //.setTextSize(8)//sp
-                //.setDotPaddingText(5)//dp.The distance between the last dot and the end text
-                .setBottomDistance(40)//you can add a distance to make bottom line longer
+                .setBottomDistance(40)
                 .create();
         mItemDecoration.setSpanIndexListener(new SpanIndexListener() {
             @Override

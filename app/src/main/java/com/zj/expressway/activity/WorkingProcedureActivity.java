@@ -12,21 +12,37 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.SearchRecordBean;
+import com.zj.expressway.model.WorkingListModel;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.JsonUtils;
+import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
+import org.xutils.common.util.DensityUtil;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  *                     _ooOoo_
@@ -99,9 +115,8 @@ public class WorkingProcedureActivity extends BaseActivity {
         imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
 
         initViewPageData();
-        initRecyclerViewData();
-        initTabData();
         initSearchRecord();
+        initRecyclerViewData();
 
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
@@ -136,6 +151,8 @@ public class WorkingProcedureActivity extends BaseActivity {
                 searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
             }
         });
+
+        getTodoNum();
     }
 
     /**
@@ -155,13 +172,10 @@ public class WorkingProcedureActivity extends BaseActivity {
     /**
      * 添加选项卡数据
      */
-    private void initTabData() {
-        String s = "待拍照（20000）";
-        btnTakePicture.setText(s);
-        s = "待审核（10000）";
-        btnToBeAudited.setText(s);
-        s = "已完成（15000）";
-        btnFinish.setText(s);
+    private void initTabData(String str, String toDoNum, String hasToDoNum) {
+        btnTakePicture.setText("待拍照（" + str + "）");
+        btnToBeAudited.setText("已办（" + toDoNum + "）");
+        btnFinish.setText("待办办（" + hasToDoNum + "）");
     }
 
     /**
@@ -195,10 +209,81 @@ public class WorkingProcedureActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        takePictureActivity.setDate();
-        toBeAuditedActivity.setDate();
-        finishActivity.setDate();
+        takePictureActivity.setDate(1);
+        toBeAuditedActivity.setDate(2);
+        finishActivity.setDate(3);
     }
+
+    /**
+     * 获取数量
+     */
+    private void getTodoNum() {
+        LoadingUtils.showLoading(mContext);
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("flowId", "sxdehzl");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
+        Request request = new Request.Builder()
+                .url(ConstantsUtil.BASE_URL + ConstantsUtil.FLOW_COUNT)
+                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
+                .post(requestBody)
+                .build();
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                LoadingUtils.hideLoading();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showShort(mContext, getString(R.string.server_exception));
+                    }
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    try {
+                        JSONObject obj = new JSONObject(jsonData);
+                        boolean resultFlag = obj.getBoolean("success");
+                        if (resultFlag) {
+                            JSONObject jsonObject = new JSONObject(obj.getString("data"));
+                            final String toDoNum = jsonObject.getString("todoCount");
+                            final String hasTodoNum = jsonObject.getString("hasTodoCount");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    initTabData("0", toDoNum, hasTodoNum);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ToastUtil.showShort(mContext, getString(R.string.json_error));
+                            }
+                        });
+                        e.printStackTrace();
+                    }
+                    LoadingUtils.hideLoading();
+                } else {
+                    LoadingUtils.hideLoading();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ToastUtil.showShort(mContext, getString(R.string.json_error));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
 
     /**
      * 填充ViewPager的数据适配器

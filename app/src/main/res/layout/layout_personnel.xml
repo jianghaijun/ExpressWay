@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/actionBar"
+        layout="@layout/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/zero_dp"
+        android:layout_alignParentTop="true"
+        app:layout_heightPercent="8%" />
+
+    <TextView
+        android:id="@+id/txtNode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/five_dp"
+        android:background="@drawable/gray_stroke_white_solid_bg"
+        android:gravity="left|center"
+        android:minHeight="@dimen/forty"
+        android:padding="@dimen/five_dp"
+        android:textSize="@dimen/sixteen_sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/five_dp"
+        android:layout_marginRight="@dimen/five_dp"
+        android:background="@null">
+
+        <ListView
+            android:id="@+id/lvContractorList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/rlBottom"
+            android:layout_marginBottom="@dimen/one_dp"
+            android:background="@null"
+            android:divider="@color/gray"
+            android:dividerHeight="1dp"
+            android:scrollbars="none" />
+
+        <RelativeLayout
+            android:id="@+id/rlBottom"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/one_hundred_and_fifty_dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/five_dp"
+            android:layout_marginTop="@dimen/five_dp"
+            android:background="@drawable/gray_stroke_white_solid_bg">
+
+            <TextView
+                android:id="@+id/txtPersonal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/ten_dp"
+                android:text="@string/already_select"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <TextView
+                android:id="@+id/txtNoPerson"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/txtPersonal"
+                android:gravity="center"
+                android:text="@string/no_data"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <LinearLayout
+                android:id="@+id/llPersonal"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/fifty_dp"
+                android:layout_below="@+id/txtPersonal"
+                android:layout_marginLeft="@dimen/ten_dp"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/ten_dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/person" />
+
+                <TextView
+                    android:id="@+id/txtPersonalName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/five_dp"
+                    android:layout_marginRight="@dimen/five_dp"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/sixteen_sp" />
+
+                <ImageView
+                    android:id="@+id/ivDelete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/delete" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</com.zhy.android.percent.support.PercentLinearLayout>

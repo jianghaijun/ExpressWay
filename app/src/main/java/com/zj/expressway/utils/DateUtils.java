@@ -6,6 +6,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import cn.hutool.core.date.DateUtil;
+
 /**
  * 日期
  *
@@ -14,7 +16,16 @@ import java.util.Date;
  */
 @SuppressLint("SimpleDateFormat")
 public class DateUtils {
-
+    /**
+     * 获取系统当前日期
+     *
+     * @return
+     */
+    public static String setDataToStr(long lData) {
+        Date date = DateUtil.date(lData == 0 ? System.currentTimeMillis() : lData);
+        String strDate = DateUtil.format(date, "yyyy-MM-dd HH:mm:ss");
+        return strDate;
+    }
 
     /**
      * 日期比较大小

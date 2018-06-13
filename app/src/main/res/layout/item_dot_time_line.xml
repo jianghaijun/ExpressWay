@@ -7,22 +7,43 @@
     android:padding="@dimen/five_dp">
 
     <TextView
-        android:id="@+id/time"
+        android:id="@+id/txtUser"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/five_dp"
-        android:paddingLeft="@dimen/five_dp"
-        android:paddingRight="@dimen/five_dp"
+        android:padding="@dimen/five_dp"
         android:textColor="@color/white"
         android:textSize="@dimen/twelve_sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/white"
+        android:paddingLeft="@dimen/five_dp"
+        android:paddingRight="@dimen/five_dp" />
+
     <TextView
-        android:id="@+id/text"
+        android:id="@+id/txtArriveDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/five_dp"
+        android:padding="@dimen/five_dp"
+        android:textColor="@color/white"
+        android:textSize="@dimen/twelve_sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/white"
         android:paddingLeft="@dimen/five_dp"
-        android:paddingRight="@dimen/five_dp"
+        android:paddingRight="@dimen/five_dp" />
+
+    <TextView
+        android:id="@+id/txtUseTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/five_dp"
+        android:padding="@dimen/five_dp"
         android:textColor="@color/white"
         android:textSize="@dimen/twelve_sp" />
 </LinearLayout>

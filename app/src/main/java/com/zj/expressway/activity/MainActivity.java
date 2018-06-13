@@ -169,6 +169,8 @@ public class MainActivity extends BaseActivity {
         vpMain.setOnPageChangeListener(new MyOnPageChangeListener());
         vpMain.setAdapter(mPagerAdapter);
         vpMain.setCurrentItem(1);
+
+        appActivity.setDate(objList, new WorkingBean());
     }
 
     /**
@@ -244,7 +246,7 @@ public class MainActivity extends BaseActivity {
         appActivity.stopBanner();
     }
 
-    @Override
+    /*@Override
     protected void onResume() {
         super.onResume();
         if (!ConstantsUtil.isDownloadApk) {
@@ -256,7 +258,7 @@ public class MainActivity extends BaseActivity {
                 appActivity.setDate(objList, null);
             }
         }
-    }
+    }*/
 
     /**
      * 填充ViewPager的数据适配器

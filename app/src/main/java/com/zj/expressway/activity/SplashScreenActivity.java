@@ -57,6 +57,8 @@ public class SplashScreenActivity extends BaseActivity {
      */
     private void startNextActivity() {
         boolean isLoginFlag = (boolean) SpUtil.get(this, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
+        SpUtil.put(this, ConstantsUtil.TOKEN, "b7055c4fe607ed7a0f18657f5dd1c6c15d354957f883d6ad1f153ef84e9a753c66cd18d64da1d14224b6df3590b79b9e0b1c7aed240dfc23fd4f5e6a08c04fa665d908c4eea8f80a07c84e9be5682c9fe8364fed7826b064ee590527e2a8dadcac2bfa83d1058f217a8b2239721edbad01c3c688ebf77ea619249bfbf3f2b6364ac108f0cfe4feee7f28a5bc22aaead9");
+
         if (isLoginFlag) {
             startActivity(new Intent(this, MainActivity.class));
         } else {

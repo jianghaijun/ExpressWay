@@ -53,8 +53,9 @@ public class WaterfallFlowTimeLineAdapter extends RecyclerView.Adapter<Waterfall
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.time.setText(mList.get(position).getDismissal());
-        holder.textView.setText(mList.get(position).getProcessName());
+        holder.txtUser.setText(mList.get(position).getProcessName() + "   " + mList.get(position).getFlowName());
+        holder.txtArriveDate.setText("到达时间：" + mList.get(position).getContent());
+        holder.txtUseTime.setText("累计时长：" + mList.get(position).getProcessState());
     }
 
     @Override
@@ -63,13 +64,15 @@ public class WaterfallFlowTimeLineAdapter extends RecyclerView.Adapter<Waterfall
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView time;
-        TextView textView;
+        TextView txtUser;
+        TextView txtArriveDate;
+        TextView txtUseTime;
 
         public ViewHolder(View view) {
             super(view);
-            time = (TextView) view.findViewById(R.id.time);
-            textView = (TextView) view.findViewById(R.id.text);
+            txtUser = (TextView) view.findViewById(R.id.txtUser);
+            txtArriveDate = (TextView) view.findViewById(R.id.txtArriveDate);
+            txtUseTime = (TextView) view.findViewById(R.id.txtUseTime);
         }
     }
 

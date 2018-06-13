@@ -147,6 +147,11 @@
             android:name=".activity.SameDayProjectDetailsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
+        <!--人员选择-->
+        <activity
+            android:name=".activity.PersonnelSelectionActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

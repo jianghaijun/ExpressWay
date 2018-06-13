@@ -148,4 +148,6 @@
     <string name="input_working_name">请输入工序名称</string>
     <string name="commonly_used">常用工序</string>
     <string name="all">全部工序</string>
+    <string name="already_select">已选择人员</string>
+    <string name="no_data">未选中任何人员！</string>
 </resources>

@@ -727,62 +727,11 @@
     </ScrollView>
 
     <LinearLayout
-        android:id="@+id/llButton"
+        android:id="@+id/llButtons"
         android:layout_width="match_parent"
         android:layout_height="@dimen/fifty_dp"
         android:layout_alignParentBottom="true"
         android:background="@color/gray"
         android:orientation="horizontal"
-        android:padding="@dimen/five_dp">
-
-        <Button
-            android:id="@+id/btnLocalSave"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/five_dp"
-            android:layout_marginRight="@dimen/five_dp"
-            android:layout_weight="1"
-            android:background="@drawable/btn_blue"
-            android:text="@string/localSave"
-            android:textColor="@color/white"
-            android:textSize="@dimen/twelve_sp" />
-
-        <Button
-            android:id="@+id/btnLocalPreservation"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/five_dp"
-            android:layout_marginRight="@dimen/five_dp"
-            android:layout_weight="1"
-            android:background="@drawable/btn_blue"
-            android:text="@string/saveFixedPoint"
-            android:textColor="@color/white"
-            android:textSize="@dimen/twelve_sp" />
-
-        <Button
-            android:id="@+id/btnReject"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/five_dp"
-            android:layout_marginRight="@dimen/five_dp"
-            android:layout_weight="1"
-            android:background="@drawable/btn_blue"
-            android:text="@string/reject"
-            android:textColor="@color/white"
-            android:textSize="@dimen/twelve_sp" />
-
-        <Button
-            android:id="@+id/btnExamine"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="@dimen/five_dp"
-            android:layout_marginRight="@dimen/five_dp"
-            android:layout_weight="1"
-            android:background="@drawable/btn_blue"
-            android:text="@string/examine"
-            android:textColor="@color/white"
-            android:textSize="@dimen/twelve_sp" />
-
-
-    </LinearLayout>
+        android:padding="@dimen/five_dp" />
 </com.zhy.android.percent.support.PercentRelativeLayout>

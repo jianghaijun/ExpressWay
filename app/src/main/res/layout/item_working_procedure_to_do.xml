@@ -97,20 +97,13 @@
         android:background="@null"
         android:minHeight="@dimen/thirty_five">
 
-        <ImageView
-            android:id="@+id/imgViewTakePhoto"
-            android:layout_width="@dimen/twenty_dp"
-            android:layout_height="@dimen/twenty_dp"
+        <RelativeLayout
+            android:id="@+id/llRight"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/ten_dp"
-            android:background="@drawable/take_photos" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/ten_dp"
-            android:layout_toLeftOf="@+id/imgViewTakePhoto">
+            android:background="@null">
 
             <ImageView
                 android:id="@+id/imgViewProcedureState"
@@ -132,14 +125,21 @@
                 android:maxHeight="@dimen/thirty_five"
                 android:textColor="@color/black"
                 android:textSize="@dimen/twelve_sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/ten_dp"
+            android:layout_toLeftOf="@+id/llRight">
 
             <ImageView
                 android:id="@+id/imgViewPersonals"
                 android:layout_width="@dimen/twenty_dp"
                 android:layout_height="@dimen/twenty_dp"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/five_dp"
-                android:layout_toRightOf="@+id/txtProcedureState"
                 android:background="@drawable/personals" />
 
             <TextView

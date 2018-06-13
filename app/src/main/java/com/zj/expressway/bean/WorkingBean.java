@@ -63,8 +63,71 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String ext7;        // 层厚
     private String ext8;        // 层厚
     private String ext9;        // 层厚
-    private String ext10;        // 层厚
+    private String ext10;       // 层厚
     private String canCheck;
+    private String title;
+    private String sendUserName;
+    private String nodeName;
+    private String trackStatus;
+    private String flowId;
+    private String workId;
+    private String flowName;
+
+    public String getFlowId() {
+        return flowId;
+    }
+
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
+    }
+
+    public String getWorkId() {
+        return workId;
+    }
+
+    public void setWorkId(String workId) {
+        this.workId = workId;
+    }
+
+    public String getFlowName() {
+        return flowName;
+    }
+
+    public void setFlowName(String flowName) {
+        this.flowName = flowName;
+    }
+
+    public String getTrackStatus() {
+        return trackStatus;
+    }
+
+    public void setTrackStatus(String trackStatus) {
+        this.trackStatus = trackStatus;
+    }
+
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
+    }
+
+    public String getSendUserName() {
+        return sendUserName;
+    }
+
+    public void setSendUserName(String sendUserName) {
+        this.sendUserName = sendUserName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
     public String getCanCheck() {
         return canCheck;
