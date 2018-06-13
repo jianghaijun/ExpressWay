@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/eighty_dp"
+        android:background="@null">
+
+        <ImageView
+            android:id="@+id/imgViewUserAvatar"
+            android:layout_width="@dimen/sixty_dp"
+            android:layout_height="@dimen/sixty_dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:background="@drawable/user_avatar" />
+
+        <TextView
+            android:id="@+id/txtUserName"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:layout_toRightOf="@+id/imgViewUserAvatar"
+            android:gravity="center"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/twenty_sp" />
+
+        <Button
+            android:id="@+id/btnSignOut"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/sign_out_btn"
+            android:text="@string/sign_out"
+            android:textColor="@color/supervision"
+            android:textSize="@dimen/twenty_sp" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@null">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:text="@string/update_password"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/twenty_sp" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/twenty_dp"
+            android:background="@drawable/right_arrows" />
+
+        <ImageView
+            android:id="@+id/imgViewUpdatePassword"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@null">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:text="@string/version_check"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/twenty_sp" />
+
+        <TextView
+            android:id="@+id/txtVersion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/twenty_sp"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/twenty_sp" />
+
+        <ImageView
+            android:id="@+id/imgViewCheckVersion"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@null">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:text="@string/clean_up_caching"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/twenty_sp" />
+
+        <TextView
+            android:id="@+id/txtCachingSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/twenty_sp"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/twenty_sp" />
+
+        <ImageView
+            android:id="@+id/imgViewCleanUpCaching"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
+
+</com.zhy.android.percent.support.PercentLinearLayout>

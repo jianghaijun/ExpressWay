@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<litepal>
+    <dbname value="ZJ_EXPRESSWAY"/>
+    <version value="1"/>
+
+    <list>
+        <mapping class="com.zj.expressway.bean.PhotosBean"/>
+        <mapping class="com.zj.expressway.bean.ContractorBean"/>
+        <mapping class="com.zj.expressway.bean.WorkingBean"/>
+        <mapping class="com.zj.expressway.bean.UserInfo"/>
+        <mapping class="com.zj.expressway.bean.UserLevelBean"/>
+        <mapping class="com.zj.expressway.bean.SearchRecordBean"/>
+    </list>
+</litepal>

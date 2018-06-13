@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_bg"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/actionBar"
+        layout="@layout/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/zero_dp"
+        android:layout_alignParentTop="true"
+        app:layout_heightPercent="8%" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/ten_dp"
+        android:background="@null"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:orientation="vertical"
+                android:padding="@dimen/five_dp">
+
+                <TextView
+                    android:id="@+id/txtSameDayProjectDetail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <TableLayout
+                    android:id="@+id/tbSameDayProjectDetail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txtSameDayProjectDetail"
+                    android:layout_marginTop="@dimen/ten_dp"
+                    android:background="@color/main_bg"
+                    android:padding="@dimen/one_dp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlPhotos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/ten_dp"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:orientation="vertical"
+                android:padding="@dimen/five_dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/txtSameDayPhotos"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <TableLayout
+                    android:id="@+id/tbSameDayPhotos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/txtSameDayPhotos"
+                    android:layout_marginTop="@dimen/ten_dp"
+                    android:background="@color/main_bg"
+                    android:padding="@dimen/one_dp" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ScrollView>
+
+
+</com.zhy.android.percent.support.PercentLinearLayout>

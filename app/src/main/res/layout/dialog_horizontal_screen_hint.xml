@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/horizontal_screen_hint" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/twenty_dp"
+            android:text="请旋转屏幕至横屏拍照"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twenty_sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="@dimen/sixty_dp"
+        android:layout_height="@dimen/thirty_five"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/ten_dp"
+        android:layout_marginTop="@dimen/ten_dp"
+        android:background="@drawable/btn_blue"
+        android:text="@string/cancel"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp" />
+</RelativeLayout>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F6F6F6"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_one_dp"
+        android:background="@color/v_2_tab_color"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:id="@+id/rlLocalMsg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/one_px"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnLocalMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/fifty_dp"
+                android:layout_centerInParent="true"
+                android:background="@null"
+                android:text="@string/local_msg"
+                android:textColor="@color/main_check_bg" />
+
+            <TextView
+                android:id="@+id/txtLocalNum"
+                android:layout_width="@dimen/twenty_dp"
+                android:layout_height="@dimen/twenty_dp"
+                android:layout_alignRight="@+id/btnLocalMsg"
+                android:layout_alignTop="@+id/btnLocalMsg"
+                android:layout_marginRight="@dimen/five_dp"
+                android:layout_marginTop="@dimen/five_dp"
+                android:background="@drawable/design_point"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/eight_sp" />
+
+            <View
+                android:id="@+id/vLocalMsg"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/one_dp"
+                android:layout_below="@+id/btnLocalMsg"
+                android:background="@color/main_check_bg" />
+
+            <Button
+                android:id="@+id/btnLocal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlPersonalMsg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/one_px"
+            android:layout_weight="1"
+            android:background="@color/white"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnPersonalMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/fifty_dp"
+                android:layout_centerInParent="true"
+                android:background="@null"
+                android:text="@string/personal_msg"
+                android:textColor="@color/v_2_tab_color" />
+
+            <TextView
+                android:id="@+id/txtPersonalNum"
+                android:layout_width="@dimen/twenty_dp"
+                android:layout_height="@dimen/twenty_dp"
+                android:layout_alignRight="@+id/btnPersonalMsg"
+                android:layout_alignTop="@+id/btnPersonalMsg"
+                android:layout_marginRight="@dimen/five_dp"
+                android:layout_marginTop="@dimen/five_dp"
+                android:background="@drawable/design_point"
+                android:gravity="center"
+                android:textColor="@color/white"
+                android:textSize="@dimen/eight_sp" />
+
+            <View
+                android:id="@+id/vPersonalMsg"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/one_dp"
+                android:layout_below="@+id/btnPersonalMsg"
+                android:background="@color/v_2_tab_color" />
+
+            <Button
+                android:id="@+id/btnPersonal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/vpMsgMain"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

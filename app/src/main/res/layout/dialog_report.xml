@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <com.zhy.android.percent.support.PercentLinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@null"
+        android:orientation="vertical"
+        app:layout_heightPercent="40%h"
+        app:layout_widthPercent="60%w">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/prompt_dialog_reminder_bg"
+            android:padding="1dp"
+            app:layout_heightPercent="20%">
+
+            <TextView
+                android:id="@+id/txtTitle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="left|center"
+                android:paddingLeft="10dp"
+                android:text="选择人员"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            app:layout_heightPercent="55%">
+
+            <ListView
+                android:id="@+id/lvAuditors"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:divider="@color/gray"
+                android:dividerHeight="@dimen/one_px"
+                android:scrollbars="none" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_margin="@dimen/five_dp"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            app:layout_heightPercent="20%">
+
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/five_dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_blue"
+                android:text="@string/cancel"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <Button
+                android:id="@+id/btnQuery"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/five_dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_blue"
+                android:text="@string/query"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+        </LinearLayout>
+    </com.zhy.android.percent.support.PercentLinearLayout>
+
+</com.zhy.android.percent.support.PercentLinearLayout>

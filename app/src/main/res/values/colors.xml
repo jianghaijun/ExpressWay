@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+
+    <color name="main_bg">#0099FF</color>
+    <color name="main_check_bg">#0191f1</color>
+    <color name="v_2_tab_color">#8a8a8a</color>
+    <color name="tab_color">#F78E62</color>
+    <color name="v_2_tab_select_color">#13227A</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#D9D9D9</color>
+    <color name="gray_solid">#E3E3E3</color>
+    <color name="black">#000000</color>
+    <color name="gray_bg">#E8E8E8</color>
+    <color name="report_bg">#00315B</color>
+    <color name="supervision">#FC9603</color>
+
+    <color name="contractor_list">#FAF0FA</color>
+    <color name="upload_photos">#226F89</color>
+
+    <color name="ml_gray">#ff9e9e9e</color>
+    <color name="ml_red">#ffff0000</color>
+    <!-- 提示框背景 -->
+    <color name="prompt_dialog_bg">#838383</color>
+    <!-- 设置背景 -->
+    <color name="prompt_dialog_reminder_bg">#F2F2F2</color>
+    <!-- 深灰色 -->
+    <color name="dark_grey">#7F7F7F</color>
+
+    !-- 深灰色 -->
+    <color name="search_color">#888888</color>
+
+    <color name="cover_color">#66ffffff</color>
+
+</resources>

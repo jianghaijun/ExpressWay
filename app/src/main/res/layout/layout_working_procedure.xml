@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/actionBar"
+        layout="@layout/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/zero_dp"
+        android:layout_alignParentTop="true"
+        app:layout_heightPercent="8%" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/actionBar"
+        android:background="@null">
+
+        <LinearLayout
+            android:id="@+id/llTabs"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/fifty_one_dp"
+            android:background="@color/v_2_tab_color"
+            android:orientation="horizontal">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/one_px"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnTakePicture"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/fifty_dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/touch_bg"
+                    android:textColor="@color/main_check_bg" />
+
+                <View
+                    android:id="@+id/vTakePicture"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/one_dp"
+                    android:layout_below="@+id/btnTakePicture"
+                    android:background="@color/main_check_bg" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/one_px"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnToBeAudited"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/fifty_dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/touch_bg"
+                    android:textColor="@color/black" />
+
+                <View
+                    android:id="@+id/vToBeAudited"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/one_dp"
+                    android:layout_below="@+id/btnToBeAudited"
+                    android:background="@color/black" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btnFinish"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/fifty_dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/touch_bg"
+                    android:textColor="@color/black" />
+
+                <View
+                    android:id="@+id/vFinish"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/one_dp"
+                    android:layout_below="@+id/btnFinish"
+                    android:background="@color/black" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vpWorkingProcedure"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/llButtons"
+            android:layout_below="@+id/llTabs"
+            android:background="@null" />
+
+        <LinearLayout
+            android:id="@+id/llButtons"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/fifty_dp"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="@dimen/ten_dp"
+            android:background="@null"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnCommonlyUsed"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/five_dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_blue"
+                android:text="@string/commonly_used"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <Button
+                android:id="@+id/btnAll"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/five_dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_blue"
+                android:text="@string/all"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <com.mancj.materialsearchbar.MaterialSearchBar
+        android:id="@+id/searchBar"
+        style="@style/MaterialSearchBarLight"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:mt_hint="@string/input_working_name"
+        app:mt_maxSuggestionsCount="10"
+        app:mt_speechMode="false" />
+
+</com.zhy.android.percent.support.PercentRelativeLayout>

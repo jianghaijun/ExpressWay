@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_bg"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/actionBar"
+        layout="@layout/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/zero_dp"
+        android:layout_alignParentTop="true"
+        app:layout_heightPercent="10%" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:padding="@dimen/ten_dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/forty_five_dp"
+            android:layout_marginBottom="@dimen/ten_dp"
+            android:background="@null">
+
+            <TextView
+                android:id="@+id/txtNewPassWord"
+                android:layout_width="@dimen/one_hundred_dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/new_password"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/twenty_sp" />
+
+            <EditText
+                android:id="@+id/edtNewPassWord"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/ten_dp"
+                android:layout_toRightOf="@+id/txtNewPassWord"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:inputType="textPassword"
+                android:paddingLeft="@dimen/ten_dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/forty_five_dp"
+            android:layout_marginBottom="@dimen/ten_dp"
+            android:background="@null">
+
+            <TextView
+                android:id="@+id/txtQueryPassWord"
+                android:layout_width="@dimen/one_hundred_dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/query_password"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/twenty_sp" />
+
+            <EditText
+                android:id="@+id/edtQueryPassWord"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/ten_dp"
+                android:layout_toRightOf="@+id/txtQueryPassWord"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:inputType="textPassword"
+                android:paddingLeft="@dimen/ten_dp" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnQuery"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/forty_five_dp"
+            android:background="@drawable/btn_blue"
+            android:gravity="center"
+            android:text="@string/query"
+            android:textColor="@color/white"
+            android:textSize="@dimen/twenty_sp" />
+
+    </LinearLayout>
+
+</com.zhy.android.percent.support.PercentLinearLayout>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="@dimen/eighty_dp"
+        android:layout_height="@dimen/eighty_dp"
+        android:layout_marginRight="@dimen/ten_dp"
+        android:background="@null">
+
+        <ImageView
+            android:id="@+id/ivUpLoadPhone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/ivIsChoose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_margin="@dimen/five_dp"
+            android:background="@drawable/icon_image_un_select"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/txtStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/five_dp"
+            android:textColor="@color/supervision"
+            android:textSize="@dimen/fourteen_sp"
+            android:visibility="gone" />
+    </RelativeLayout>
+</LinearLayout>

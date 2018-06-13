@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--7.0手机相机处理-->
+<paths>
+    <external-path
+        name="external_files"
+        path="." />
+</paths>
