@@ -1,10 +1,14 @@
 package com.zj.expressway.bean;    //
 
+import org.litepal.crud.DataSupport;
+
+import java.io.Serializable;
+
 /**
  * Create dell By 2018/6/13 11:37
  */
 
-public class WorkFlowBean {
+public class WorkFlowBean extends DataSupport implements Serializable {
     private String modify_user_name;
     private String process_id;
     private String submitter;
@@ -32,7 +36,7 @@ public class WorkFlowBean {
     private String longitude;
     private String ext1;
     private String del_flag;
-    private Object work_id;
+    private String work_id;
     private long create_time;
     private long enter_time;
     private String second_level_id;
@@ -47,6 +51,33 @@ public class WorkFlowBean {
     private String photo_distance;
     private String create_user;
     private String remarks;
+    private String fileOperationFlag;
+    private String opinionShowFlag;
+    private String opinionContent;
+
+    public String getFileOperationFlag() {
+        return fileOperationFlag;
+    }
+
+    public void setFileOperationFlag(String fileOperationFlag) {
+        this.fileOperationFlag = fileOperationFlag;
+    }
+
+    public String getOpinionShowFlag() {
+        return opinionShowFlag;
+    }
+
+    public void setOpinionShowFlag(String opinionShowFlag) {
+        this.opinionShowFlag = opinionShowFlag;
+    }
+
+    public String getOpinionContent() {
+        return opinionContent;
+    }
+
+    public void setOpinionContent(String opinionContent) {
+        this.opinionContent = opinionContent;
+    }
 
     public String getModify_user_name() {
         return modify_user_name;
@@ -264,11 +295,11 @@ public class WorkFlowBean {
         this.del_flag = del_flag;
     }
 
-    public Object getWork_id() {
+    public String getWork_id() {
         return work_id;
     }
 
-    public void setWork_id(Object work_id) {
+    public void setWork_id(String work_id) {
         this.work_id = work_id;
     }
 

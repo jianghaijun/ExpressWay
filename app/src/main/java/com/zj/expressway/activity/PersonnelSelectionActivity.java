@@ -1,7 +1,9 @@
 package com.zj.expressway.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
@@ -22,6 +24,7 @@ import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PersonnelTreeAdapter;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.bean.NextShowFlow;
 import com.zj.expressway.bean.PersonnelBean;
 import com.zj.expressway.model.PersonnelListModel;
 import com.zj.expressway.tree.Node;
@@ -43,6 +46,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.qqtheme.framework.picker.OptionPicker;
+import cn.qqtheme.framework.widget.WheelView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -62,6 +67,8 @@ public class PersonnelSelectionActivity extends BaseActivity {
     private TextView txtPersonalName;
     @ViewInject(R.id.txtNoPerson)
     private TextView txtNoPerson;
+    @ViewInject(R.id.txtSelect)
+    private TextView txtSelect;
     @ViewInject(R.id.llPersonal)
     private LinearLayout llPersonal;
     // 工序人员List
@@ -73,6 +80,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
     private List<Node> allNode = new ArrayList<>();
     private List<Node> nodeList = new ArrayList<>();
     private Node selectNode;
+    private String reviewNodeId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +127,14 @@ public class PersonnelSelectionActivity extends BaseActivity {
                 }
             }
         });
+
+        if (ConstantsUtil.buttonModel != null && ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() > 0) {
+            txtSelect.setVisibility(View.VISIBLE);
+            txtSelect.setText("流程操作：" + ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeName());
+            reviewNodeId = ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId();
+        } else {
+            txtSelect.setVisibility(View.GONE);
+        }
 
         if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
             getData();
@@ -221,6 +237,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
         }
     }
 
+
     private void setParent(Node node) {
         nodeList.add(node);
 
@@ -229,6 +246,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
         }
     }
 
+    @SuppressLint("ParcelCreator")
     public class NoUnderlineSpan extends UnderlineSpan {
         @Override
         public void updateDrawState(TextPaint ds) {
@@ -237,6 +255,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
         }
     }
 
+    @SuppressLint("ParcelCreator")
     public class NoUnderlineAndColorSpan extends UnderlineSpan {
         @Override
         public void updateDrawState(TextPaint ds) {
@@ -245,6 +264,34 @@ public class PersonnelSelectionActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 展示选择框
+     */
+    private void showSelectDialog() {
+        int size = ConstantsUtil.buttonModel.getNextShowFlowInfoList().size();
+        List<NextShowFlow> dataList = ConstantsUtil.buttonModel.getNextShowFlowInfoList();
+        final String[] strList = new String[size];
+        final String[] idList = new String[size];
+        for (int i = 0; i < size; i++) {
+            strList[i] = dataList.get(i).getNextNodeName();
+            idList[i] = dataList.get(i).getNextNodeId();
+        }
+        OptionPicker picker = new OptionPicker(this, strList);
+        picker.setCanceledOnTouchOutside(true);
+        picker.setDividerRatio(WheelView.DividerConfig.FILL);
+        picker.setShadowColor(ContextCompat.getColor(mContext, R.color.main_bg), 80);
+        picker.setSelectedIndex(0);
+        picker.setCycleDisable(true);
+        picker.setTextSize(18);
+        picker.setOnOptionPickListener(new OptionPicker.OnOptionPickListener() {
+            @Override
+            public void onOptionPicked(int index, String item) {
+                reviewNodeId = idList[index];
+                txtSelect.setText("流程操作：" + strList[index]);
+            }
+        });
+        picker.show();
+    }
 
     /**
      * 获取数据
@@ -390,7 +437,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
         });
     }
 
-    @Event({R.id.imgBtnLeft, R.id.ivDelete, R.id.btnRight})
+    @Event({R.id.imgBtnLeft, R.id.ivDelete, R.id.btnRight, R.id.txtSelect})
     private void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBtnLeft:
@@ -403,7 +450,20 @@ public class PersonnelSelectionActivity extends BaseActivity {
                 llPersonal.setVisibility(View.GONE);
                 break;
             case R.id.btnRight:
-                ToastUtil.showShort(mContext, selectNode.getLevelName());
+                if (selectNode == null) {
+                    ToastUtil.showShort(mContext, "请先选择人员");
+                } else {
+                    Intent intent = new Intent();
+                    intent.putExtra("reviewNodeId", reviewNodeId);
+                    intent.putExtra("userId", selectNode.getLevelId());
+                    intent.putExtra("userName", selectNode.getLevelName());
+                    intent.putExtra("type", selectNode.getFolderFlag());
+                    setResult(Activity.RESULT_OK, intent);
+                    this.finish();
+                }
+                break;
+            case R.id.txtSelect:
+                showSelectDialog();
                 break;
         }
     }

@@ -11,7 +11,7 @@
         android:layout_height="@dimen/fifty_five_dp"
         android:layout_marginTop="@dimen/ten_dp">
 
-        <ImageView
+        <com.zj.expressway.view.TouchHighlightImageButton
             android:id="@+id/imgInfo"
             android:layout_width="@dimen/forty_five_dp"
             android:layout_height="@dimen/forty_five_dp"

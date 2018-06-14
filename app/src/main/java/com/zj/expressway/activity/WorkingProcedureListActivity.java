@@ -13,6 +13,7 @@ import com.zj.expressway.adapter.ToDoWorkingAdapter;
 import com.zj.expressway.adapter.WorkingProcedureListAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.base.BaseAdapter;
+import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.listener.ILoadCallback;
 import com.zj.expressway.listener.OnLoad;
 import com.zj.expressway.model.WorkingListModel;
@@ -23,11 +24,14 @@ import com.zj.expressway.utils.SpUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.litepal.crud.DataSupport;
 import org.xutils.common.util.DensityUtil;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -67,19 +71,21 @@ public class WorkingProcedureListActivity extends BaseActivity {
     private Activity mContext;
     private int viewType;
     private int sum = 0;
+    private String userId;
 
     public WorkingProcedureListActivity(Activity mContext, View layoutWorkingProcedure) {
         this.mContext = mContext;
         holder = new WorkingProcedureHolder();
         x.view().inject(holder, layoutWorkingProcedure);
+        userId = (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "");
     }
 
     public void setDate(int viewType) {
         this.viewType = viewType;
-        if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+        /*if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
             holder.rvMsg.setVisibility(View.GONE);
             holder.txtMsg.setVisibility(View.VISIBLE);
-        } else {
+        } else {*/
             holder.rvMsg.setVisibility(View.VISIBLE);
             holder.txtMsg.setVisibility(View.GONE);
             // 创建被装饰者类实例
@@ -95,12 +101,16 @@ public class WorkingProcedureListActivity extends BaseActivity {
                 @Override
                 public void load(int pagePosition, int pageSize, ILoadCallback callback) {
                     boolean isHave = pagePosition != 1 && (pagePosition-1) * pageSize > sum;
-                    getData(pagePosition, pageSize, callback, isHave);
+                    if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                        getLocalData(pagePosition, pageSize, callback, isHave);
+                    } else {
+                        getData(pagePosition, pageSize, callback, isHave);
+                    }
                 }
             });
             holder.rvMsg.setAdapter(baseAdapter);
             holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
-        }
+        /*}*/
     }
 
     /**
@@ -166,9 +176,24 @@ public class WorkingProcedureListActivity extends BaseActivity {
                                     // 数据的处理最终还是交给被装饰的adapter来处理
                                     if (!isHave) {
                                         if (viewType == 1) {
-                                            mAdapter.appendData(model.getData());
+                                            List<WorkingBean> bList = new ArrayList<WorkingBean>();
+                                            bList.add(new WorkingBean());
+                                            mAdapter.appendData(bList);
+                                            //mAdapter.appendData(model.getData());
                                         } else {
                                             toDoAdapter.appendData(model.getData());
+                                        }
+
+                                        if (model.getData() != null) {
+                                            for (WorkingBean bean : model.getData()) {
+                                                bean.setType(viewType+"");
+                                                bean.setUserId(userId);
+                                                if (viewType == 1) {
+                                                    bean.saveOrUpdate("processId=?", bean.getMainTablePrimaryId());
+                                                } else {
+                                                    bean.saveOrUpdate("processId=?", bean.getWorkId());
+                                                }
+                                            }
                                         }
                                     }
 
@@ -191,6 +216,47 @@ public class WorkingProcedureListActivity extends BaseActivity {
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                    }
+                } else {
+                    callback.onFailure();
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取本地数据
+     * @param pagePosition
+     * @param pageSize
+     * @param callback
+     * @param isHave
+     */
+    private void getLocalData(final int pagePosition, final int pageSize, final ILoadCallback callback, final boolean isHave) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String start = String.valueOf((pagePosition-1)*pageSize);
+                String end = String.valueOf(pagePosition*pageSize);
+                List<WorkingBean> workingBeanList = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType+"", start, end).find(WorkingBean.class);
+                List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", userId, viewType+"").find(WorkingBean.class);
+                sum = beanSize == null ? 0 : beanSize.size();
+                // 数据的处理最终还是交给被装饰的adapter来处理
+                if (!isHave) {
+                    if (viewType == 1) {
+                        mAdapter.appendData(workingBeanList);
+                    } else {
+                        toDoAdapter.appendData(workingBeanList);
+                    }
+                }
+
+                callback.onSuccess();
+
+                if (!isHave) {
+                    int sumSize = holder.rvMsg.computeVerticalScrollRange();
+                    int size = viewType == 1 ? mAdapter.getItemCount() * DensityUtil.dip2px(144) : toDoAdapter.getItemCount() * DensityUtil.dip2px(144);
+                    boolean isFull = size >= sumSize ? true : false;
+                    if (workingBeanList == null || workingBeanList.size() == 0 || !isFull) {
+                        callback.onFailure();
                     }
                 } else {
                     callback.onFailure();

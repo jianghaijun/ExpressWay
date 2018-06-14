@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">铜仁市沿印松高速公路</string>
     <string name="app_title">铜仁市沿印松高速公路</string>
-    <string name="not_network">当前无可用网络!</string>
+    <string name="not_network">当前无任何可用网络，请链接网络后重试！</string>
     <string name="person_setting">个人设置</string>
     <string name="contractor">承包商</string>
     <string name="owner">业主</string>
@@ -132,6 +132,7 @@
     <string name="ten">10</string>
     <string name="submit_yun">上传云端</string>
     <string name="reject_photo">驳回原因：</string>
+    <string name="remarks">审核意见：</string>
     <string name="reject">驳回</string>
     <string name="examine">审核</string>
     <string name="elevation">现标高</string>

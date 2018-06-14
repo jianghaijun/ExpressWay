@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
+import android.text.TextUtils;
 
 import com.vinaygaba.rubberstamp.RubberStamp;
 import com.vinaygaba.rubberstamp.RubberStampConfig;
@@ -32,25 +33,25 @@ public class ImageUtil {
      * 设置水印图片在左上角
      *
      * @param mContext
-     * @param baseMap
-     * @param level
-     * @param photosBean
+     * @param baseMap       // 需要添加水印的照片
+     * @param filePath      // 工序位置
+     * @param photosBean    // 照片bean
      * @return
      */
-    public static Bitmap createWaterMaskLeftTop(Context mContext, Bitmap baseMap, String level, PhotosBean photosBean) {
-        return createWaterMaskBitmap(baseMap, mContext, level, photosBean);
+    public static Bitmap createWaterMaskLeftTop(Context mContext, Bitmap baseMap, String filePath, PhotosBean photosBean) {
+        return createWaterMaskBitmap(baseMap, mContext, filePath, photosBean);
     }
 
     /**
      * 给图片添加水印图和文字
      *
-     * @param baseMap
      * @param mContext
-     * @param level
-     * @param photosBean
+     * @param baseMap       // 需要添加水印的照片
+     * @param filePath      // 工序位置
+     * @param photosBean    // 照片bean
      * @return
      */
-    private static Bitmap createWaterMaskBitmap(Bitmap baseMap, Context mContext, String level, PhotosBean photosBean) {
+    private static Bitmap createWaterMaskBitmap(Bitmap baseMap, Context mContext, String filePath, PhotosBean photosBean) {
         if (baseMap == null) {
             return null;
         }
@@ -64,11 +65,11 @@ public class ImageUtil {
         int watermarkWidth = (int) (350 * widthMultiple);
         int watermarkHeight = (int) (145 * heightMultiple);
         // 施工部位所占长度
-        int len = level.length();
-        String qualityUserName = "";
+        int len = TextUtils.isEmpty(filePath) ? 0 : filePath.length();
+        String qualityUserName = "";    // 质检负责人姓名
         if (len > 3) {
             List<UserLevelBean> qualityBeanList;
-            String rootLevel = level.substring(3, 4);
+            String rootLevel = filePath.substring(3, 4);
             switch (rootLevel) {
                 case "一":
                     qualityBeanList = DataSupport.where("rootLevelId=1").find(UserLevelBean.class);
@@ -137,7 +138,7 @@ public class ImageUtil {
         // 抗锯齿
         mPaint.setAntiAlias(true);
         // 水印的区域
-        mPaint.getTextBounds(level, 0, level.length(), textBounds);
+        mPaint.getTextBounds(filePath, 0, filePath.length(), textBounds);
         // 水印的颜色
         mPaint.setColor(Color.BLACK);
 
@@ -146,7 +147,7 @@ public class ImageUtil {
         Canvas can = new Canvas(gcbwBitmap);
         can.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
         can.drawColor(Color.argb(255, 255, 255, 255));
-        StaticLayout gcbwLayout = new StaticLayout(level, 0, level.length(), mPaint, waterTextWith, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.5F, true);
+        StaticLayout gcbwLayout = new StaticLayout(filePath, 0, filePath.length(), mPaint, waterTextWith, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.5F, true);
         // 文字开始的坐标
         float x = width - gcbwBitmap.getWidth() + computeMaxStringWidth(new String[]{"施工部位："}, pFont) + DensityUtil.dip2px(5);
         float y = height - 0;
@@ -181,12 +182,11 @@ public class ImageUtil {
         RubberStamp rubberStamp = new RubberStamp(mContext);
         watermarkBitmap = rubberStamp.addStamp(config);
         // 添加文字
-        //watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "山西路桥集团", p, r, (int) (bitmap.getWidth() + DensityUtil.dip2px(10) + 5 * widthMultiple), DensityUtil.dip2px(2 * heightMultiple));
         watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "中交一公局", p, r, (int) (bitmap.getWidth() + DensityUtil.dip2px(10) + 5 * widthMultiple), DensityUtil.dip2px(2 * heightMultiple));
         // 距离上面的间距
         int marginTopSize = (int) (DensityUtil.dip2px(5 * heightMultiple) + (fm1.descent - fm1.ascent));
         // 添加文字
-        watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "工程名称：铜仁市沿印松高速公路", pFont, rect, DensityUtil.dip2px(5), marginTopSize);
+        watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "工程名称：" + mContext.getString(R.string.app_name), pFont, rect, DensityUtil.dip2px(5), marginTopSize);
         // 距离上面间距
         marginTopSize += oneSizeHeight;
         // 循环向图片上添加文字
@@ -196,9 +196,9 @@ public class ImageUtil {
         String userLevel = (String) SpUtil.get(mContext, ConstantsUtil.USER_LEVEL, "");
         String userName = (String) SpUtil.get(mContext, "UserName", "");
         Calendar mCalendar = Calendar.getInstance();
-        mCalendar.setTimeInMillis(photosBean.getCreateTime());
+        mCalendar.setTimeInMillis(photosBean.getCreate_time());
         int apm = mCalendar.get(Calendar.AM_PM);
-        String am_pm = "";
+        String am_pm;
         if (apm == 0) {
             am_pm = "AM";
         } else {
@@ -208,13 +208,13 @@ public class ImageUtil {
         if (userLevel.equals("0")) {
             watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "现场技术员：" + userName + "    质检负责人：" + qualityUserName, pFont, rect, DensityUtil.dip2px(5), mar);
             mar += oneSizeHeight;
-            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreateTime()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
+            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreate_time()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
         }
 
         if (userLevel.equals("2")) {
             watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "现场监理：" + userName + "    质检负责人：" + qualityUserName, pFont, rect, DensityUtil.dip2px(5), mar);
             mar += oneSizeHeight;
-            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreateTime()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
+            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreate_time()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
         }
 
         // 创建一个新的和SRC长度宽度一样的位图
@@ -226,7 +226,7 @@ public class ImageUtil {
         //在画布上绘制水印图片
         canvas.drawBitmap(watermarkBitmap, width - watermarkBitmap.getWidth(), height - watermarkBitmap.getHeight(), null);
 
-        StaticLayout layout = new StaticLayout(level, 0, level.length(), mPaint, waterTextWith, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.5F, true);
+        StaticLayout layout = new StaticLayout(filePath, 0, filePath.length(), mPaint, waterTextWith, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.5F, true);
         // 文字开始的坐标
         float textX = width - watermarkBitmap.getWidth() + computeMaxStringWidth(new String[]{"施工部位："}, pFont) + DensityUtil.dip2px(5);
         float textY = height - watermarkBitmap.getHeight() + marginTopSize - 5 * heightMultiple;

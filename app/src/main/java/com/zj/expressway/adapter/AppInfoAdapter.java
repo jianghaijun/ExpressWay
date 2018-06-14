@@ -28,6 +28,7 @@ import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
+import com.zj.expressway.view.TouchHighlightImageButton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -89,7 +90,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
         holder.txtTitle.setText(appInfoBeanList.get(position).getTitle());
         if (position == 2) {
             holder.txtSubmitPhoneNum.setVisibility(View.VISIBLE);
-            List<PhotosBean> upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+            List<PhotosBean> upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
             if (upLoadPhotosBeenList != null) {
                 holder.txtSubmitPhoneNum.setText(upLoadPhotosBeenList.size() > 99 ? "99+" : upLoadPhotosBeenList.size() + "");
             } else {
@@ -247,13 +248,13 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
     }
 
     public class AppInfoHold extends RecyclerView.ViewHolder {
-        private ImageView imgView;
+        private TouchHighlightImageButton imgView;
         private TextView txtTitle;
         private TextView txtSubmitPhoneNum;
 
         public AppInfoHold(View itemView) {
             super(itemView);
-            imgView = (ImageView) itemView.findViewById(R.id.imgInfo);
+            imgView = (TouchHighlightImageButton) itemView.findViewById(R.id.imgInfo);
             txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
             txtSubmitPhoneNum = (TextView) itemView.findViewById(R.id.txtSubmitPhoneNum);
         }

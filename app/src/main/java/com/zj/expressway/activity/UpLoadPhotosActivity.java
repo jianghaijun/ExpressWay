@@ -97,7 +97,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
      */
     private void initData() {
         // 获取当前登录人员需要上传的图片
-        upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+        upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
 
         if (Build.VERSION.SDK_INT >= 23) {
             requestAuthority(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, new PermissionListener() {
@@ -217,7 +217,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
         public void returnTrueOrFalse(boolean trueOrFalse) {
             isCanUpload = false;
             if (trueOrFalse) {
-                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc limit 0, 50", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc limit 0, 50", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
                 UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, upLoadPhotosBeenList, choiceListener);
                 upLoadPhotosDialog.setCancelable(false);
                 upLoadPhotosDialog.setCanceledOnTouchOutside(false);
@@ -234,7 +234,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
         public void returnTrueOrFalse(boolean trueOrFalse) {
             isCanUpload = false;
             if (trueOrFalse) {
-                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
                 adapter = new UpLoadPhotosAdapter(mContext, upLoadPhotosBeenList);
                 rvUpLoadPhone.setLayoutManager(new GridLayoutManager(mContext, 4));
                 rvUpLoadPhone.setAdapter(adapter);

@@ -1,7 +1,7 @@
 package com.zj.expressway.model;
 
 
-import com.zj.expressway.base.BaseModel;
+import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.WorkFlowBean;
 
 import java.util.List;
@@ -21,11 +21,36 @@ public class WorkFlowModel {
     private String buttonId;
     private String title;
     private String fileOperationFlag;
+    private String opinionShowFlag;
     private String opinionContent;
     private WorkFlowBean mainTableObject;
     private List<ButtonListModel> buttonList;
-    /*private String opinionContent;
-    private String opinionContent;*/
+    private FileModel subTableObject;
+    private List<HistoryBean> flowHistoryList;
+
+    public String getOpinionShowFlag() {
+        return opinionShowFlag;
+    }
+
+    public void setOpinionShowFlag(String opinionShowFlag) {
+        this.opinionShowFlag = opinionShowFlag;
+    }
+
+    public List<HistoryBean> getFlowHistoryList() {
+        return flowHistoryList;
+    }
+
+    public void setFlowHistoryList(List<HistoryBean> flowHistoryList) {
+        this.flowHistoryList = flowHistoryList;
+    }
+
+    public FileModel getSubTableObject() {
+        return subTableObject;
+    }
+
+    public void setSubTableObject(FileModel subTableObject) {
+        this.subTableObject = subTableObject;
+    }
 
     public List<ButtonListModel> getButtonList() {
         return buttonList;

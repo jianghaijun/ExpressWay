@@ -42,6 +42,8 @@
         android:layout_alignParentRight="true"
         android:background="@drawable/action_bar_bg"
         android:src="@null"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp"
         android:visibility="gone"
         app:layout_widthPercent="100%h" />
 </com.zhy.android.percent.support.PercentRelativeLayout>

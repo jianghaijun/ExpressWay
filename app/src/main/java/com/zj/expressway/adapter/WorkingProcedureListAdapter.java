@@ -21,6 +21,7 @@ import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.dialog.PhotoRequirementsDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.SpUtil;
 
 import org.litepal.crud.DataSupport;
@@ -137,15 +138,10 @@ public class WorkingProcedureListAdapter extends BaseAdapter<List<WorkingBean>> 
      */
     private void takePhotoActivity(WorkingBean bean, boolean isPopTakePhoto) {
         Intent intent = new Intent(mContext, ContractorDetailsActivity.class);
-        intent.putExtra("processId", bean.getProcessId());
-        intent.putExtra("processState", bean.getProcessState());
-        intent.putExtra("processPath", bean.getLevelNameAll());
-        intent.putExtra("taskId", bean.getTaskId());
-        intent.putExtra("canCheck", bean.getCanCheck());
-        intent.putExtra("isPopTakePhoto", isPopTakePhoto);
-        intent.putExtra("flowId", bean.getFlowId());
+        intent.putExtra("flowId", ConstantsUtil.flowId);
         intent.putExtra("workId", bean.getWorkId());
-        intent.putExtra("flowName", bean.getFlowName());
+        intent.putExtra("mainTablePrimaryId", "a");
+        intent.putExtra("isToDo", false);
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);
         mContext.startActivity(intent);
     }

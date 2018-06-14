@@ -116,7 +116,6 @@ public class WorkingProcedureActivity extends BaseActivity {
 
         initViewPageData();
         initSearchRecord();
-        initRecyclerViewData();
 
         searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
             @Override
@@ -151,8 +150,18 @@ public class WorkingProcedureActivity extends BaseActivity {
                 searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
             }
         });
-
         getTodoNum();
+        initRecyclerViewData();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (ConstantsUtil.isLoading) {
+            getTodoNum();
+            initRecyclerViewData();
+            ConstantsUtil.isLoading = false;
+        }
     }
 
     /**
@@ -174,8 +183,8 @@ public class WorkingProcedureActivity extends BaseActivity {
      */
     private void initTabData(String str, String toDoNum, String hasToDoNum) {
         btnTakePicture.setText("待拍照（" + str + "）");
-        btnToBeAudited.setText("已办（" + toDoNum + "）");
-        btnFinish.setText("待办办（" + hasToDoNum + "）");
+        btnToBeAudited.setText("待办（" + toDoNum + "）");
+        btnFinish.setText("已办（" + hasToDoNum + "）");
     }
 
     /**
@@ -209,7 +218,7 @@ public class WorkingProcedureActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        takePictureActivity.setDate(1);
+        //takePictureActivity.setDate(1);
         toBeAuditedActivity.setDate(2);
         finishActivity.setDate(3);
     }
@@ -218,10 +227,10 @@ public class WorkingProcedureActivity extends BaseActivity {
      * 获取数量
      */
     private void getTodoNum() {
-        LoadingUtils.showLoading(mContext);
+        //LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
         try {
-            obj.put("flowId", "sxdehzl");
+            obj.put("flowId", ConstantsUtil.flowId);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -234,7 +243,7 @@ public class WorkingProcedureActivity extends BaseActivity {
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                LoadingUtils.hideLoading();
+                //LoadingUtils.hideLoading();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -270,9 +279,9 @@ public class WorkingProcedureActivity extends BaseActivity {
                         });
                         e.printStackTrace();
                     }
-                    LoadingUtils.hideLoading();
+                    //LoadingUtils.hideLoading();
                 } else {
-                    LoadingUtils.hideLoading();
+                    //LoadingUtils.hideLoading();
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

@@ -9,7 +9,8 @@ import android.widget.TextView;
 
 import com.github.vipulasri.timelineview.TimelineView;
 import com.zj.expressway.R;
-import com.zj.expressway.model.TimeLineModel;
+import com.zj.expressway.bean.HistoryBean;
+import com.zj.expressway.utils.DateUtils;
 import com.zj.expressway.utils.OrderStatusUtil;
 import com.zj.expressway.utils.VectorDrawableUtils;
 
@@ -40,10 +41,10 @@ import java.util.List;
  *       普通时间轴适配器
  */
 public class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLineViewHolder> {
-    private List<TimeLineModel> mDataList;
+    private List<HistoryBean> mDataList;
     private Context mContext;
 
-    public TimeLineAdapter(List<TimeLineModel> mDataList) {
+    public TimeLineAdapter(List<HistoryBean> mDataList) {
         this.mDataList = mDataList;
     }
 
@@ -56,22 +57,21 @@ public class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLi
 
     @Override
     public void onBindViewHolder(TimeLineViewHolder holder, int position) {
-        TimeLineModel timeLineModel = mDataList.get(position);
-        if (timeLineModel.getStatus() == OrderStatusUtil.INACTIVE) {
+        HistoryBean timeLineModel = mDataList.get(position);
+        if (position == 0) {
             holder.mTimelineView.setMarker(VectorDrawableUtils.getDrawable(mContext, R.drawable.marker_inactive_point, android.R.color.darker_gray));
-        } else if (timeLineModel.getStatus() == OrderStatusUtil.ACTIVE) {
-            holder.mTimelineView.setMarker(VectorDrawableUtils.getDrawable(mContext, R.drawable.marker_active_point, R.color.colorAccent));
         } else {
             holder.mTimelineView.setMarker(ContextCompat.getDrawable(mContext, R.drawable.marker_poinit), ContextCompat.getColor(mContext, R.color.main_check_bg));
         }
 
-        holder.mDate.setText(mDataList.get(position).getDate());
-        holder.mMessage.setText(mDataList.get(position).getMessage());
+        holder.txtUserName.setText(timeLineModel.getRealName() + "  " + timeLineModel.getNodeName());
+        holder.mDate.setText("到达时间：" + DateUtils.setDataToStr(timeLineModel.getActionTime()));
+        holder.mMessage.setText("累计时长：" + timeLineModel.getDoTimeShow());
     }
 
     @Override
     public int getItemCount() {
-        return mDataList.size();
+        return mDataList == null ? 0 : mDataList.size();
     }
 
     @Override
@@ -81,12 +81,14 @@ public class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLi
 
     public class TimeLineViewHolder extends RecyclerView.ViewHolder {
         private TimelineView mTimelineView;
+        private TextView txtUserName;
         private TextView mDate;
         private TextView mMessage;
 
         public TimeLineViewHolder(View itemView, int viewType) {
             super(itemView);
             mTimelineView = (TimelineView) itemView.findViewById(R.id.timeMarker);
+            txtUserName = (TextView) itemView.findViewById(R.id.txtUserName);
             mDate = (TextView) itemView.findViewById(R.id.txtTimeLineDate);
             mMessage = (TextView) itemView.findViewById(R.id.txtTimeLineTitle);
             mTimelineView.initLine(viewType);

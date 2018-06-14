@@ -9,7 +9,6 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.vivian.timelineitemdecoration.itemdecoration.DotItemDecoration;
 import com.vivian.timelineitemdecoration.itemdecoration.SpanIndexListener;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.WaterfallFlowTimeLineAdapter;
@@ -32,10 +31,8 @@ import org.xutils.x;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import cn.hutool.core.date.DateUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;

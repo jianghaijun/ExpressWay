@@ -16,8 +16,10 @@ import com.zj.expressway.R;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.LoginModel;
+import com.zj.expressway.model.UploadFileModel;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
+import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
@@ -33,28 +35,28 @@ import okhttp3.Call;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
+ * _ooOoo_
+ * o8888888o
+ * 88" . "88
+ * (| -_- |)
+ * O\  =  /O
+ * ____/`---'\____
+ * .'  \\|     |//  `.
+ * /  \\|||  :  |||//  \
+ * /  _||||| -:- |||||-  \
+ * |   | \\\  -  /// |   |
+ * | \_|  ''\---/''  |   |
+ * \  .-\__  `-`  ___/-. /
+ * ___`. .'  /--.--\  `. . __
+ * ."" '<  `.___\_<|>_/___.'  >'"".
+ * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+ * \  \ `-.   \_ __\ /__ _/   .-` /  /
  * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
+ * `=---='
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 18:02
- *       照片上传Dialog
+ * 佛祖保佑       永无BUG
+ * Created by HaiJun on 2018/6/11 18:02
+ * 照片上传Dialog
  */
 public class UpLoadPhotosDialog extends Dialog {
     private List<PhotosBean> upLoadPhotosBeenList;
@@ -83,16 +85,6 @@ public class UpLoadPhotosDialog extends Dialog {
         upLoadPhotosHandler = new Handler() {
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case 100:
-                        txtNum.setText("已上传：" + msg.what + "%");
-                        // 移除已经上传的照片
-                        for (PhotosBean fileBean : upLoadPhotosBeenList) {
-                            DataSupport.deleteAll(PhotosBean.class, "photoAddress=? AND userId = ?", fileBean.getPhotoAddress(), (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-                        }
-                        UpLoadPhotosDialog.this.dismiss();
-                        choiceListener.returnTrueOrFalse(true);
-                        ToastUtil.showShort(mContext, "文件上传成功！");
-                        break;
                     case -1:
                         UpLoadPhotosDialog.this.dismiss();
                         choiceListener.returnTrueOrFalse(true);
@@ -106,6 +98,19 @@ public class UpLoadPhotosDialog extends Dialog {
                         UpLoadPhotosDialog.this.dismiss();
                         String val = msg.getData().getString("key");
                         ToastUtil.showShort(mContext, val);
+                        break;
+                    case 200:
+                        // 移除已经上传的照片
+                        for (PhotosBean fileBean : upLoadPhotosBeenList) {
+                            DataSupport.deleteAll(PhotosBean.class, "photoAddress=? AND userId = ?", fileBean.getPhoto_address(), (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
+                        }
+                        UpLoadPhotosDialog.this.dismiss();
+                        choiceListener.returnTrueOrFalse(true);
+                        ToastUtil.showShort(mContext, "文件上传成功！");
+                        break;
+                    case 100:
+                        txtNum.setText("已上传：100%");
+                        LoadingUtils.showLoading(mContext);
                         break;
                     default:
                         txtNum.setText("已上传：" + msg.what + "%");
@@ -126,33 +131,31 @@ public class UpLoadPhotosDialog extends Dialog {
     private void UpLoadPhotoLists() {
         Gson gson = new Gson();
         Map<String, File> fileMap = new HashMap<>();
-        List<Map<String, Object>> fileList = new ArrayList<>();
         for (PhotosBean fileBean : upLoadPhotosBeenList) {
-            fileMap.put(fileBean.getPhotoName(), new File(fileBean.getPhotoAddress()));
             Map<String, Object> map = new HashMap<>();
-            map.put("processId", fileBean.getProcessId());
-            map.put("photoDesc", fileBean.getPhotoDesc());
+            map.put("processId", fileBean.getProcess_id());
+            map.put("photoDesc", fileBean.getPhoto_desc());
             map.put("longitude", fileBean.getLongitude());
             map.put("latitude", fileBean.getLatitude());
             map.put("location", fileBean.getLocation() == null ? "" : fileBean.getLocation());
-            map.put("photoName", fileBean.getPhotoName());
-            map.put("photoType", fileBean.getPhotoType());
-            fileList.add(map);
+            map.put("photoName", fileBean.getPhoto_name());
+            map.put("photoType", fileBean.getPhoto_type());
+            fileMap.put(gson.toJson(map), new File(fileBean.getPhoto_address()));
         }
 
         OkHttpUtils.post()
                 .files("filesName", fileMap)
-                .addParams("processParams", gson.toJson(fileList))
                 .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
                 .url(ConstantsUtil.BASE_URL + ConstantsUtil.UP_LOAD_PHOTOS)
                 .build()
                 .execute(new Callback() {
                     @Override
                     public Object parseNetworkResponse(Response response, int id) throws Exception {
+                        LoadingUtils.hideLoading();
                         String jsonData = response.body().string().toString();
                         if (JsonUtils.isGoodJson(jsonData)) {
                             Gson gson = new Gson();
-                            LoginModel loginModel = gson.fromJson(jsonData, LoginModel.class);
+                            UploadFileModel loginModel = gson.fromJson(jsonData, UploadFileModel.class);
                             if (!loginModel.isSuccess()) {
                                 Message jsonErr = new Message();
                                 jsonErr.what = -3;
@@ -160,6 +163,10 @@ public class UpLoadPhotosDialog extends Dialog {
                                 bundle.putString("key", loginModel.getMessage());
                                 jsonErr.setData(bundle);
                                 upLoadPhotosHandler.sendMessage(jsonErr);
+                            } else {
+                                Message success = new Message();
+                                success.what = 200;
+                                upLoadPhotosHandler.sendMessage(success);
                             }
                         } else {
                             Message jsonErr = new Message();
@@ -171,10 +178,10 @@ public class UpLoadPhotosDialog extends Dialog {
 
                     @Override
                     public void onError(final Call call, final Exception e, final int id) {
+                        LoadingUtils.hideLoading();
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                //ToastUtil.showShort(mContext, "文件上传失败！");
                                 choiceListener.returnTrueOrFalse(false);
                                 UpLoadPhotosDialog.this.dismiss();
                             }
@@ -183,6 +190,7 @@ public class UpLoadPhotosDialog extends Dialog {
 
                     @Override
                     public void onResponse(Object response, int id) {
+                        LoadingUtils.hideLoading();
                     }
 
                     @Override

@@ -15,6 +15,18 @@
         app:layout_heightPercent="8%" />
 
     <TextView
+        android:id="@+id/txtSelect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/five_dp"
+        android:background="@drawable/gray_stroke_white_solid_bg"
+        android:drawableRight="@drawable/drop_down"
+        android:gravity="left|center"
+        android:minHeight="@dimen/forty"
+        android:padding="@dimen/five_dp"
+        android:textSize="@dimen/sixteen_sp" />
+
+    <TextView
         android:id="@+id/txtNode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

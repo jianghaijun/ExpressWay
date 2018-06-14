@@ -32,18 +32,28 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
+                android:id="@+id/txtUserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <TextView
                 android:id="@+id/txtTimeLineDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="12sp" />
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
 
-            <android.support.v7.widget.AppCompatTextView
+            <TextView
                 android:id="@+id/txtTimeLineTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:textColor="@android:color/black" />
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>

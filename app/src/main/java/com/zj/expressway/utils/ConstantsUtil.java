@@ -1,6 +1,7 @@
 package com.zj.expressway.utils;
 
 import com.zj.expressway.bean.SameDayBean;
+import com.zj.expressway.model.ButtonListModel;
 
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +48,7 @@ public class ConstantsUtil {
      */
     public static SameDayBean sameDayBean;
     public static boolean isDownloadApk = false;
+    public static ButtonListModel buttonModel;
 
     /**
      * 参数格式
@@ -208,6 +210,18 @@ public class ConstantsUtil {
      * 新流程详情
      */
     public static final String FLOW_DETAILS = prefix + "getSubmitFlow";
+    /**
+     * 新流程详情
+     */
+    public static final String submitFlow = prefix + "submitFlow";
+    /**
+     * 发起流程
+     */
+    public static final String startFlow = prefix + "startFlow";
+    /**
+     * 新流程详情
+     */
+    public static final String openPageFlow = prefix + "openPageFlow";
 
     /**
      * 文件存储路径
@@ -245,6 +259,9 @@ public class ConstantsUtil {
     public static final int EIGHT_HUNDRED = 800;
     public static final int TWO_THOUSAND = 2000;
     public static final int NUMBER_TWO_THOUSAND = 2000;
+    // flowId
+    public static final String flowId = "sxdehzl";
+    public static boolean isLoading = false;
 
     // 下载apk文件名称
     public static final String APK_NAME = "expressway.apk";

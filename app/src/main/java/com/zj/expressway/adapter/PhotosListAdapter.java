@@ -68,7 +68,7 @@ import okhttp3.Response;
  *       Created by HaiJun on 2018/6/11 17:11
  *       工序详情照片列表适配器
  */
-public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<ContractorDetailsPhotoAdapter.ContractorDetailsHolder> {
+public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.ContractorDetailsHolder> {
     private Activity mContext;
     private ShowPhotoListener listener;
     private List<PhotosBean> phoneListBean;
@@ -76,7 +76,7 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
     private String levelId;
     private String status;
 
-    public ContractorDetailsPhotoAdapter(Context mContext, List<PhotosBean> phoneListBean, ShowPhotoListener listener, String levelId, String status) {
+    public PhotosListAdapter(Context mContext, List<PhotosBean> phoneListBean, ShowPhotoListener listener, String levelId, String status) {
         this.mContext = (Activity) mContext;
         this.listener = listener;
         this.levelId = levelId;
@@ -99,23 +99,10 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
         anim.setRepeatCount(ObjectAnimator.INFINITE);
         anim.start();
 
-        String fileUrl = phoneListBean.get(position).getThumbPath();
+        String fileUrl = phoneListBean.get(position).getThumb_path();
         if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
             fileUrl = ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl;
         }
-
-        // 是否可以选择
-        /*if (phoneListBean.get(position).isCanSelect()) {
-            holder.ivIsChoose.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_image_select));
-        } else {
-            holder.ivIsChoose.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.icon_image_un_select));
-        }*/
-
-        /*if (V_2ContractorDetailsActivity.isCanSelect) {
-            holder.ivIsChoose.setVisibility(View.VISIBLE);
-        } else {
-            holder.ivIsChoose.setVisibility(View.GONE);
-        }*/
 
         holder.txtStatus.setVisibility(View.VISIBLE);
         if (phoneListBean.get(position).getIsToBeUpLoad() == 1) {
@@ -132,7 +119,7 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
                     holder.txtStatus.setText("初审驳回");
                     break;
                 case "4":
-                    if (!phoneListBean.get(position).getRoleFlag().equals("2")) {
+                    if (!phoneListBean.get(position).getRole_flag().equals("2")) {
                         holder.txtStatus.setText("自检完成");
                     } else {
                         holder.txtStatus.setText("已上传");
@@ -148,7 +135,7 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
                     holder.txtStatus.setText("终审驳回");
                     break;
                 case "8":
-                    if (!phoneListBean.get(position).getRoleFlag().equals("2")) {
+                    if (!phoneListBean.get(position).getRole_flag().equals("2")) {
                         holder.txtStatus.setText("自检完成");
                     } else {
                         holder.txtStatus.setText("抽检完成");
@@ -184,9 +171,9 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
                         if (trueOrFalse) {
                             // 删除照片
                             if (1 == phoneListBean.get(position).getIsToBeUpLoad()) {
-                                DataSupport.deleteAll(PhotosBean.class, "photoAddress=?", phoneListBean.get(position).getPhotoAddress());
+                                DataSupport.deleteAll(PhotosBean.class, "photoAddress=?", phoneListBean.get(position).getPhoto_address());
                                 phoneListBean.remove(position);
-                                ContractorDetailsPhotoAdapter.this.notifyDataSetChanged();
+                                PhotosListAdapter.this.notifyDataSetChanged();
                             } else {
                                 deletePhoto(phoneListBean.get(position), position);
                             }
@@ -210,10 +197,10 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
         PictureModel model = new PictureModel();
         model.setSelectUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
         model.setRootLevelId(levelId);
-        model.setProcessId(bean.getProcessId());
+        model.setProcessId(bean.getProcess_id());
         List<PictureBean> beanList = new ArrayList<>();
         PictureBean picBean = new PictureBean();
-        picBean.setPhotoId(bean.getPhotoId());
+        picBean.setPhotoId(bean.getPhoto_id());
         beanList.add(picBean);
         model.setSxZlPhotoList(beanList);
 
@@ -254,8 +241,8 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
                                     LoadingUtils.hideLoading();
                                     ToastUtil.showShort(mContext, "删除成功！");
                                     phoneListBean.remove(point);
-                                    DataSupport.deleteAll(PhotosBean.class, "photoId=?", bean.getPhotoId());
-                                    ContractorDetailsPhotoAdapter.this.notifyDataSetChanged();
+                                    DataSupport.deleteAll(PhotosBean.class, "photoId=?", bean.getPhoto_id());
+                                    PhotosListAdapter.this.notifyDataSetChanged();
                                 }
                             });
                         } else {
@@ -305,13 +292,11 @@ public class ContractorDetailsPhotoAdapter extends RecyclerView.Adapter<Contract
 
     public class ContractorDetailsHolder extends RecyclerView.ViewHolder {
         private ImageView ivUpLoadPhone;
-        private ImageView ivIsChoose;
         private TextView txtStatus;
 
         public ContractorDetailsHolder(View itemView) {
             super(itemView);
             ivUpLoadPhone = (ImageView) itemView.findViewById(R.id.ivUpLoadPhone);
-            ivIsChoose = (ImageView) itemView.findViewById(R.id.ivIsChoose);
             txtStatus = (TextView) itemView.findViewById(R.id.txtStatus);
         }
     }

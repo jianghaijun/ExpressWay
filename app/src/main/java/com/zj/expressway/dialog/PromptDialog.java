@@ -37,24 +37,24 @@ import com.zj.expressway.listener.PromptListener;
  *       常用提示dialog
  */
 public class PromptDialog extends Dialog implements View.OnClickListener {
-    private PromptListener choiceListener;
+    private PromptListener promptListener;
     private String sTitle, sContext, sLeftText, sRightText;
 
     /**
      * @param context
-     * @param choiceListener
+     * @param promptListener
      * @param sTitle         提示框标题
      * @param sContext       提示内容
      * @param sLeftText      左侧白色按钮文本
      * @param sRightText     右侧黄色按钮文本
      */
-    public PromptDialog(@NonNull Context context, PromptListener choiceListener, String sTitle, String sContext, String sLeftText, String sRightText) {
+    public PromptDialog(@NonNull Context context, PromptListener promptListener, String sTitle, String sContext, String sLeftText, String sRightText) {
         super(context);
         this.sTitle = sTitle;
         this.sContext = sContext;
         this.sLeftText = sLeftText;
         this.sRightText = sRightText;
-        this.choiceListener = choiceListener;
+        this.promptListener = promptListener;
     }
 
     @Override
@@ -85,12 +85,12 @@ public class PromptDialog extends Dialog implements View.OnClickListener {
             // 右侧
             case R.id.query_setting_btn:
                 dismiss();
-                choiceListener.returnTrueOrFalse(true);
+                promptListener.returnTrueOrFalse(true);
                 break;
             // 左侧
             case R.id.close_setting_btn:
                 dismiss();
-                choiceListener.returnTrueOrFalse(false);
+                promptListener.returnTrueOrFalse(false);
                 break;
         }
     }

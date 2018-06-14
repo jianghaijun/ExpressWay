@@ -72,6 +72,33 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String flowId;
     private String workId;
     private String flowName;
+    private String mainTablePrimaryId;
+    private String type;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getMainTablePrimaryId() {
+        return mainTablePrimaryId;
+    }
+
+    public void setMainTablePrimaryId(String mainTablePrimaryId) {
+        this.mainTablePrimaryId = mainTablePrimaryId;
+    }
 
     public String getFlowId() {
         return flowId;

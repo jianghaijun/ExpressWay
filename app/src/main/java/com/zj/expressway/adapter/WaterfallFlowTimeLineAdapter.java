@@ -47,7 +47,13 @@ public class WaterfallFlowTimeLineAdapter extends RecyclerView.Adapter<Waterfall
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.item_dot_time_line, parent, false);
+        int resource;
+        if (mList.size() == 1) {
+            resource = R.layout.item_one_dot_time_line;
+        } else {
+            resource = R.layout.item_dot_time_line;
+        }
+        View view = LayoutInflater.from(mContext).inflate(resource, parent, false);
         return new ViewHolder(view);
     }
 
