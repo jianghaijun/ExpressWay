@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -17,26 +18,25 @@ import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.listener.ILoadCallback;
 import com.zj.expressway.listener.OnLoad;
 import com.zj.expressway.model.WorkingListModel;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.SpUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.xutils.common.util.DensityUtil;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -69,10 +69,17 @@ public class WorkingProcedureListActivity extends BaseActivity {
     private ToDoWorkingAdapter toDoAdapter;
     private BaseAdapter baseAdapter;
     private Activity mContext;
+    private Button btnProcessNum;
     private int viewType;
     private int sum = 0;
     private String userId;
+    private boolean isLoad = false;
 
+    /**
+     * 重载
+     * @param mContext
+     * @param layoutWorkingProcedure
+     */
     public WorkingProcedureListActivity(Activity mContext, View layoutWorkingProcedure) {
         this.mContext = mContext;
         holder = new WorkingProcedureHolder();
@@ -80,37 +87,44 @@ public class WorkingProcedureListActivity extends BaseActivity {
         userId = (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "");
     }
 
-    public void setDate(int viewType) {
+    /**
+     *初始化
+     * @param viewType
+     */
+    public void initData(int viewType, Button btnProcessNum, final String levelId) {
+        isLoad = false;
         this.viewType = viewType;
-        /*if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-            holder.rvMsg.setVisibility(View.GONE);
-            holder.txtMsg.setVisibility(View.VISIBLE);
-        } else {*/
-            holder.rvMsg.setVisibility(View.VISIBLE);
-            holder.txtMsg.setVisibility(View.GONE);
-            // 创建被装饰者类实例
-            if (viewType == 1) {
+        this.btnProcessNum = btnProcessNum;
+        holder.rvMsg.setVisibility(View.VISIBLE);
+        holder.txtMsg.setVisibility(View.GONE);
+        // 创建被装饰者类实例
+        switch (viewType) {
+            case 1:
                 mAdapter = new WorkingProcedureListAdapter(mContext);
                 mAdapter.updateData();
-            } else {
+                break;
+            case 2:
+            case 3:
+            case 4:
+            case 5:
                 toDoAdapter = new ToDoWorkingAdapter(mContext);
                 toDoAdapter.updateData();
-            }
-            // 创建装饰者实例，并传入被装饰者和回调接口
-            baseAdapter = new LoadMoreAdapter(viewType == 1 ? mAdapter : toDoAdapter, new OnLoad() {
-                @Override
-                public void load(int pagePosition, int pageSize, ILoadCallback callback) {
-                    boolean isHave = pagePosition != 1 && (pagePosition-1) * pageSize > sum;
-                    if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                        getLocalData(pagePosition, pageSize, callback, isHave);
-                    } else {
-                        getData(pagePosition, pageSize, callback, isHave);
-                    }
+                break;
+        }
+        // 创建装饰者实例，并传入被装饰者和回调接口
+        baseAdapter = new LoadMoreAdapter(viewType == 1 ? mAdapter : toDoAdapter, new OnLoad() {
+            @Override
+            public void load(int pagePosition, int pageSize, ILoadCallback callback) {
+                boolean isHave = pagePosition != 1 && (pagePosition-1) * pageSize > sum;
+                if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    getLocalData(pagePosition, pageSize, callback, isHave);
+                } else {
+                    getData(pagePosition, pageSize, callback, isHave, levelId);
                 }
-            });
-            holder.rvMsg.setAdapter(baseAdapter);
-            holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
-        /*}*/
+            }
+        });
+        holder.rvMsg.setAdapter(baseAdapter);
+        holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
     }
 
     /**
@@ -118,107 +132,108 @@ public class WorkingProcedureListActivity extends BaseActivity {
      * @param pagePosition
      * @param callback
      */
-    private void getData(int pagePosition, int pageSize, final ILoadCallback callback, final boolean isHave) {
+    private void getData(final int pagePosition, int pageSize, final ILoadCallback callback, final boolean isHave, final String levelId) {
         String url = "";
         JSONObject obj = new JSONObject();
-        try {
-            obj.put("page", pagePosition);
-            obj.put("limit", pageSize);
-            switch (viewType) {
-                case 1:
-                    url = ConstantsUtil.BASE_URL + ConstantsUtil.TO_DO_LIST;
-                    obj.put("limit", pageSize);
-                    break;
-                case 2:
-                    // 待办
-                    url = ConstantsUtil.BASE_URL + ConstantsUtil.TO_DO_LIST;
-                    break;
-                case 3:
-                    // 已办
-                    url = ConstantsUtil.BASE_URL + ConstantsUtil.HAS_TO_DO_LIST;
-                    break;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        obj.put("page", pagePosition);
+        obj.put("limit", pageSize);
+        switch (viewType) {
+            case 1:
+                url = ConstantsUtil.getZxHwGxProcessList;
+                if (levelId != null) {
+                    obj.put("levelId", levelId);
+                    obj.put("flowStatus", "0");
+                }
+                break;
+            case 4:
+                // 待办
+                url = ConstantsUtil.TO_DO_LIST;
+                if (levelId != null) {
+                    obj.put("levelId", levelId);
+                    obj.put("flowStatus", "1");
+                }
+                break;
+            case 5:
+                // 已办
+                url = ConstantsUtil.HAS_TO_DO_LIST;
+                if (levelId != null) {
+                    obj.put("levelId", levelId);
+                    obj.put("flowStatus", "2");
+                }
+                break;
         }
-
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        callback.onFailure();
-                    }
-                });
+                ChildThreadUtil.closeLoading(mContext, callback);
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
-                    try {
-                        JSONObject obj = new JSONObject(jsonData);
-                        boolean resultFlag = obj.getBoolean("success");
-                        if (resultFlag) {
-                            Gson gson = new Gson();
-                            final WorkingListModel model = gson.fromJson(jsonData, WorkingListModel.class);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    sum = model.getTotalNumber();
-                                    // 数据的处理最终还是交给被装饰的adapter来处理
-                                    if (!isHave) {
-                                        if (viewType == 1) {
-                                            List<WorkingBean> bList = new ArrayList<WorkingBean>();
-                                            bList.add(new WorkingBean());
-                                            mAdapter.appendData(bList);
-                                            //mAdapter.appendData(model.getData());
-                                        } else {
-                                            toDoAdapter.appendData(model.getData());
-                                        }
+                    Gson gson = new Gson();
+                    final WorkingListModel model = gson.fromJson(jsonData, WorkingListModel.class);
+                    if (model.isSuccess()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                sum = model.getTotalNumber();
 
-                                        if (model.getData() != null) {
-                                            for (WorkingBean bean : model.getData()) {
-                                                bean.setType(viewType+"");
-                                                bean.setUserId(userId);
-                                                if (viewType == 1) {
-                                                    bean.saveOrUpdate("processId=?", bean.getMainTablePrimaryId());
-                                                } else {
-                                                    bean.saveOrUpdate("processId=?", bean.getWorkId());
-                                                }
-                                            }
-                                        }
-                                    }
+                                // 显示无数据
+                                if (levelId != null && pagePosition == 1 && sum == 0) {
+                                    holder.rvMsg.setVisibility(View.GONE);
+                                    holder.txtMsg.setVisibility(View.VISIBLE);
+                                }
 
-                                    callback.onSuccess();
-
-                                    if (!isHave) {
-                                        int sumSize = holder.rvMsg.computeVerticalScrollRange();
-                                        int size = viewType == 1 ? mAdapter.getItemCount() * DensityUtil.dip2px(144) : toDoAdapter.getItemCount() * DensityUtil.dip2px(144);
-                                        boolean isFull = size >= sumSize ? true : false;
-                                        if (model == null || model.getData() == null || model.getData().size() == 0 || !isFull) {
-                                            callback.onFailure();
-                                        }
+                                if (!isLoad) {
+                                    isLoad = true;
+                                    String str = btnProcessNum.getText().toString();
+                                    if (str.length() <= 3) {
+                                        btnProcessNum.setText(str + "（" + sum + "）");
                                     } else {
-                                        callback.onFailure();
+                                        btnProcessNum.setText(str.substring(0, 3) + "（" + sum + "）");
                                     }
                                 }
-                            });
-                        } else {
-                            callback.onFailure();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+
+                                // 数据的处理最终还是交给被装饰的adapter来处理
+                                if (!isHave) {
+                                    if (viewType == 1) {
+                                        mAdapter.appendData(model.getData());
+                                    } else {
+                                        toDoAdapter.appendData(model.getData());
+                                    }
+
+                                    if (model.getData() != null) {
+                                        for (WorkingBean bean : model.getData()) {
+                                            bean.setType(viewType+"");
+                                            bean.setUserId(userId);
+                                            bean.saveOrUpdate("processId=?", StrUtil.isEmpty(bean.getProcessId()) ? bean.getWorkId() : bean.getProcessId());
+                                        }
+                                    }
+                                }
+
+                                callback.onSuccess();
+
+                                if (!isHave) {
+                                    int sumSize = holder.rvMsg.computeVerticalScrollRange();
+                                    int size = viewType == 1 ? mAdapter.getItemCount() * DensityUtil.dip2px(144) : toDoAdapter.getItemCount() * DensityUtil.dip2px(144);
+                                    boolean isFull = size >= sumSize ? true : false;
+                                    if (model == null || model.getData() == null || model.getData().size() == 0 || !isFull) {
+                                        callback.onFailure();
+                                    }
+                                } else {
+                                    callback.onFailure();
+                                }
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                        ChildThreadUtil.closeLoading(mContext, callback);
                     }
                 } else {
-                    callback.onFailure();
+                    ChildThreadUtil.closeLoading(mContext, callback);
                 }
             }
         });
@@ -240,6 +255,16 @@ public class WorkingProcedureListActivity extends BaseActivity {
                 List<WorkingBean> workingBeanList = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType+"", start, end).find(WorkingBean.class);
                 List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", userId, viewType+"").find(WorkingBean.class);
                 sum = beanSize == null ? 0 : beanSize.size();
+                if (!isLoad) {
+                    isLoad = true;
+                    String str = btnProcessNum.getText().toString();
+                    if (str.length() <= 3) {
+                        btnProcessNum.setText(str + "（" + sum + "）");
+                    } else {
+                        btnProcessNum.setText(str.substring(0, 3) + "（" + sum + "）");
+                    }
+                }
+
                 // 数据的处理最终还是交给被装饰的adapter来处理
                 if (!isHave) {
                     if (viewType == 1) {

@@ -2,6 +2,7 @@ package com.zj.expressway.model;
 
 import com.zj.expressway.bean.PhotosBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,24 +10,42 @@ import java.util.List;
  */
 
 public class FileModel {
-    private FileModel sx_zl_photo;
-    private List<PhotosBean> subTableObject;
+    private FileModel zxHwGxAttachment;
+    private FileModel zxHwZlAttachment;
+    private FileModel zxHwAqAttachment;
+    private List<PhotosBean> subTableDataObject;
     private String subTableType;
 
-    public FileModel getSx_zl_photo() {
-        return sx_zl_photo;
+    public FileModel getZxHwZlAttachment() {
+        return zxHwZlAttachment == null ? new FileModel() : zxHwZlAttachment;
     }
 
-    public void setSx_zl_photo(FileModel sx_zl_photo) {
-        this.sx_zl_photo = sx_zl_photo;
+    public void setZxHwZlAttachment(FileModel zxHwZlAttachment) {
+        this.zxHwZlAttachment = zxHwZlAttachment;
+    }
+
+    public FileModel getZxHwAqAttachment() {
+        return zxHwAqAttachment == null ? new FileModel() : zxHwAqAttachment;
+    }
+
+    public void setZxHwAqAttachment(FileModel zxHwAqAttachment) {
+        this.zxHwAqAttachment = zxHwAqAttachment;
+    }
+
+    public FileModel getZxHwGxAttachment() {
+        return zxHwGxAttachment == null ? new FileModel() : zxHwGxAttachment;
+    }
+
+    public void setZxHwGxAttachment(FileModel zxHwGxAttachment) {
+        this.zxHwGxAttachment = zxHwGxAttachment;
     }
 
     public List<PhotosBean> getSubTableObject() {
-        return subTableObject;
+        return subTableDataObject == null ? new ArrayList<PhotosBean>() : subTableDataObject;
     }
 
-    public void setSubTableObject(List<PhotosBean> subTableObject) {
-        this.subTableObject = subTableObject;
+    public void setSubTableObject(List<PhotosBean> subTableDataObject) {
+        this.subTableDataObject = subTableDataObject;
     }
 
     public String getSubTableType() {

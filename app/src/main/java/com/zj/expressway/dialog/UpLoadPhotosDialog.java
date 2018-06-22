@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.Callback;
 import com.zj.expressway.R;
+import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.LoginModel;
@@ -31,43 +32,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.hutool.json.JSONObject;
 import okhttp3.Call;
 import okhttp3.Response;
 
 /**
- * _ooOoo_
- * o8888888o
- * 88" . "88
- * (| -_- |)
- * O\  =  /O
- * ____/`---'\____
- * .'  \\|     |//  `.
- * /  \\|||  :  |||//  \
- * /  _||||| -:- |||||-  \
- * |   | \\\  -  /// |   |
- * | \_|  ''\---/''  |   |
- * \  .-\__  `-`  ___/-. /
- * ___`. .'  /--.--\  `. . __
- * ."" '<  `.___\_<|>_/___.'  >'"".
- * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- * \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- * `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 佛祖保佑       永无BUG
  * Created by HaiJun on 2018/6/11 18:02
  * 照片上传Dialog
  */
 public class UpLoadPhotosDialog extends Dialog {
     private List<PhotosBean> upLoadPhotosBeenList;
+    private int type;
     private Context mContext;
     private Handler upLoadPhotosHandler;
     private TextView txtNum;
     private ProgressBar proBarUpLoadPhotos;
     private PromptListener choiceListener;
 
-    public UpLoadPhotosDialog(Context context, List<PhotosBean> upLoadPhotosBeenList, PromptListener choiceListener) {
+    public UpLoadPhotosDialog(Context context, int type, List<PhotosBean> upLoadPhotosBeenList, PromptListener choiceListener) {
         super(context);
+        this.type = type;
         this.mContext = context;
         this.choiceListener = choiceListener;
         this.upLoadPhotosBeenList = upLoadPhotosBeenList;
@@ -102,7 +86,7 @@ public class UpLoadPhotosDialog extends Dialog {
                     case 200:
                         // 移除已经上传的照片
                         for (PhotosBean fileBean : upLoadPhotosBeenList) {
-                            DataSupport.deleteAll(PhotosBean.class, "photoAddress=? AND userId = ?", fileBean.getPhoto_address(), (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
+                            fileBean.delete();
                         }
                         UpLoadPhotosDialog.this.dismiss();
                         choiceListener.returnTrueOrFalse(true);
@@ -133,20 +117,39 @@ public class UpLoadPhotosDialog extends Dialog {
         Map<String, File> fileMap = new HashMap<>();
         for (PhotosBean fileBean : upLoadPhotosBeenList) {
             Map<String, Object> map = new HashMap<>();
-            map.put("processId", fileBean.getProcess_id());
-            map.put("photoDesc", fileBean.getPhoto_desc());
+            map.put("processId", fileBean.getProcessId());
+            map.put("troubleId", fileBean.getProcessId());
+            map.put("dangerId", fileBean.getProcessId());
+            map.put("fileDesc", fileBean.getPhotoDesc());
+            map.put("otherId", fileBean.getProcessId());
             map.put("longitude", fileBean.getLongitude());
             map.put("latitude", fileBean.getLatitude());
             map.put("location", fileBean.getLocation() == null ? "" : fileBean.getLocation());
-            map.put("photoName", fileBean.getPhoto_name());
-            map.put("photoType", fileBean.getPhoto_type());
-            fileMap.put(gson.toJson(map), new File(fileBean.getPhoto_address()));
+            map.put("fileName", fileBean.getPhotoName());
+            map.put("fileType", fileBean.getPhotoType());
+            if (type == 3 || type == 4) {
+                fileMap.put(fileBean.getPhotoName(), new File(fileBean.getUrl()));
+            } else {
+                fileMap.put(gson.toJson(map), new File(fileBean.getUrl()));
+            }
+        }
+
+        String url = ConstantsUtil.BASE_URL;
+        switch (type) {
+            case 1:
+                url += ConstantsUtil.UP_LOAD_PHOTOS;
+                break;
+            case 3:
+            case 4:
+                url += ConstantsUtil.upload;
+                break;
         }
 
         OkHttpUtils.post()
                 .files("filesName", fileMap)
+                .addParams("projectId", "zz")
                 .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.UP_LOAD_PHOTOS)
+                .url(url)
                 .build()
                 .execute(new Callback() {
                     @Override
@@ -155,7 +158,7 @@ public class UpLoadPhotosDialog extends Dialog {
                         String jsonData = response.body().string().toString();
                         if (JsonUtils.isGoodJson(jsonData)) {
                             Gson gson = new Gson();
-                            UploadFileModel loginModel = gson.fromJson(jsonData, UploadFileModel.class);
+                            BaseModel loginModel = gson.fromJson(jsonData, BaseModel.class);
                             if (!loginModel.isSuccess()) {
                                 Message jsonErr = new Message();
                                 jsonErr.what = -3;
@@ -164,6 +167,9 @@ public class UpLoadPhotosDialog extends Dialog {
                                 jsonErr.setData(bundle);
                                 upLoadPhotosHandler.sendMessage(jsonErr);
                             } else {
+                                JSONObject obj = new JSONObject(jsonData);
+                                String data = String.valueOf(obj.getJSONArray("data"));
+                                SpUtil.put(mContext, "uploadImgData", data);
                                 Message success = new Message();
                                 success.what = 200;
                                 upLoadPhotosHandler.sendMessage(success);

@@ -14,8 +14,10 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.zj.expressway.R;
+import com.zj.expressway.activity.AuditManagementActivity;
 import com.zj.expressway.activity.LoginActivity;
 import com.zj.expressway.activity.ProcessReportActivity;
+import com.zj.expressway.activity.QualityInspectionActivity;
 import com.zj.expressway.activity.UpLoadPhotosActivity;
 import com.zj.expressway.activity.WorkingProcedureActivity;
 import com.zj.expressway.bean.AppInfoBean;
@@ -88,9 +90,9 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
         top.setBounds(0, 0, top.getMinimumWidth(), top.getMinimumHeight());
         holder.imgView.setImageDrawable(ContextCompat.getDrawable(mContext, appInfoBeanList.get(position).getImgUrl()));
         holder.txtTitle.setText(appInfoBeanList.get(position).getTitle());
-        if (position == 2) {
+        if (position == 3) {
             holder.txtSubmitPhoneNum.setVisibility(View.VISIBLE);
-            List<PhotosBean> upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+            List<PhotosBean> upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
             if (upLoadPhotosBeenList != null) {
                 holder.txtSubmitPhoneNum.setText(upLoadPhotosBeenList.size() > 99 ? "99+" : upLoadPhotosBeenList.size() + "");
             } else {
@@ -107,28 +109,39 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                 switch (position) {
                     // 工序检查
                     case 0:
-                        intent = new Intent(mContext, WorkingProcedureActivity.class);
-                        SpUtil.put(mContext, ConstantsUtil.USER_TYPE, "0");
+                        intent = new Intent(mContext, AuditManagementActivity.class);
                         mContext.startActivity(intent);
                         break;
-                    // 安全隐患
+                    // 质量巡查
                     case 1:
-                        intent = new Intent(mContext, WorkingProcedureActivity.class);
-                        SpUtil.put(mContext, ConstantsUtil.USER_TYPE, "1");
+                        intent = new Intent(mContext, QualityInspectionActivity.class);
+                        intent.putExtra("type", "1");
+                        mContext.startActivity(intent);
+                        break;
+                    // 安全巡查
+                    case 2:
+                        intent = new Intent(mContext, QualityInspectionActivity.class);
+                        intent.putExtra("type", "2");
                         mContext.startActivity(intent);
                         break;
                     // 待上传照片
-                    case 2:
+                    case 3:
                         intent = new Intent(mContext, UpLoadPhotosActivity.class);
                         mContext.startActivity(intent);
                         break;
                     // 工序报表
-                    case 4:
+                    case 5:
                         if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                             getSameDayData();
                         } else {
                             ToastUtil.showShort(mContext, mContext.getString(R.string.not_network));
                         }
+                        break;
+                    // 审核管理
+                    case 6:
+                        intent = new Intent(mContext, WorkingProcedureActivity.class);
+                        SpUtil.put(mContext, ConstantsUtil.USER_TYPE, "0");
+                        mContext.startActivity(intent);
                         break;
                     default:
                         ToastUtil.showShort(mContext, "该功能正在开发中，敬请期待!");

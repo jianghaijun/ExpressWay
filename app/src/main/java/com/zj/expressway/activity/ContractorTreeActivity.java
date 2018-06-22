@@ -1,22 +1,28 @@
 package com.zj.expressway.activity;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.TreeNodeAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.ContractorBean;
+import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.listener.ContractorListener;
 import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.tree.Node;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
@@ -26,8 +32,6 @@ import com.zj.expressway.utils.SetListHeight;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
@@ -37,10 +41,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -70,13 +75,17 @@ import okhttp3.Response;
 public class ContractorTreeActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
+    @ViewInject(R.id.imgBtnRight)
+    private ImageButton imgBtnRight;
+    @ViewInject(R.id.btnRight)
+    private Button btnRight;
+    @ViewInject(R.id.searchBar)
+    private MaterialSearchBar searchBar;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
-
     @ViewInject(R.id.lvContractorList)
     private ListView lvContractorList;
-
-    private Context mContext;
+    private Activity mContext;
     private List<Node> allCache;
     private List<Node> all;
     private TreeNodeAdapter ta;
@@ -91,22 +100,85 @@ public class ContractorTreeActivity extends BaseActivity {
         ScreenManagerUtil.pushActivity(this);
 
         imgBtnLeft.setVisibility(View.VISIBLE);
-        imgBtnLeft.setImageDrawable(getResources().getDrawable(R.drawable.back_btn));
+        imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
+        imgBtnRight.setVisibility(View.VISIBLE);
+        imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
+        btnRight.setVisibility(View.VISIBLE);
+        btnRight.setText("确认");
         txtTitle.setText(R.string.app_title);
 
         lvContractorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ((TreeNodeAdapter) parent.getAdapter()).CheckIsHave(position);
+                ((TreeNodeAdapter) parent.getAdapter()).ExpandOrCollapse(position);
             }
         });
 
-        //String alreadyLoadNode = (String) SpUtil.get(mContext, ConstantsUtil.LEVEL_ID, "");
-        if (JudgeNetworkIsAvailable.isNetworkAvailable(this)/* && !alreadyLoadNode.contains("&")*/) {
+        initSearchRecord();
+
+        searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+            @Override
+            public void onSearchStateChanged(boolean enabled) {
+                if (!enabled) {
+                    searchBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSearchConfirmed(CharSequence text) {
+                if (StrUtil.isEmpty(text)) {
+                    ToastUtil.showShort(mContext, "请输入搜索关键字");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, "请连接您的网络！");
+                } else {
+                    searchProcess(String.valueOf(text));
+                }
+            }
+
+            @Override
+            public void onButtonClicked(int buttonCode) {}
+        });
+
+        searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
+            @Override
+            public void OnItemClickListener(int position, View v) {
+                searchBar.setVisibility(View.GONE);
+                if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
+                    ToastUtil.showShort(mContext, "请输入搜索关键字");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, "请连接您的网络！");
+                } else {
+                    searchProcess(String.valueOf(v.getTag()));
+                }
+            }
+
+            @Override
+            public void OnItemDeleteListener(int position, View v) {
+                DataSupport.deleteAll(SearchRecordBean.class, "searchTitle=? and searchType=2", String.valueOf(searchBar.getLastSuggestions().get(position)));
+                searchBar.getLastSuggestions().remove(position);
+                searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
+            }
+        });
+
+        if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
             getData();
         } else {
-            List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", "", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""))).find(ContractorBean.class);
+            List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", "0", getIntent().getStringExtra("type")).find(ContractorBean.class);
             setContractorNode(listBean);
+        }
+    }
+
+    /**
+     * 设置搜索历史列表
+     */
+    private void initSearchRecord() {
+        List<SearchRecordBean> searchList = DataSupport.where("searchType=2").find(SearchRecordBean.class);
+        if (searchList != null) {
+            List<String> stringList = new ArrayList<>();
+            for (SearchRecordBean bean : searchList) {
+                stringList.add(bean.getSearchTitle());
+            }
+            searchBar.setLastSuggestions(stringList);
         }
     }
 
@@ -124,18 +196,17 @@ public class ContractorTreeActivity extends BaseActivity {
     private void getData() {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
-        try {
-            obj.put("parentId", "");
-            obj.put("levelType", SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
-        } catch (JSONException e) {
-            e.printStackTrace();
+        obj.put("parentId", "0");
+        String url;
+        if (getIntent().getStringExtra("type").equals("1")) {
+            url = ConstantsUtil.NEW_CONTRACTOR_LIST;
+        } else if (getIntent().getStringExtra("type").equals("2")) {
+            url = ConstantsUtil.getZxHwZlProjectLevelList;
+        } else {
+            url = ConstantsUtil.getZxHwAqProjectLevelList;
         }
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.NEW_CONTRACTOR_LIST)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
+
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(callback);
     }
 
@@ -145,77 +216,35 @@ public class ContractorTreeActivity extends BaseActivity {
     private Callback callback = new Callback() {
         @Override
         public void onFailure(Call call, IOException e) {
-            LoadingUtils.hideLoading();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ToastUtil.showLong(mContext, getString(R.string.server_exception));
-                }
-            });
+            ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
         }
 
         @Override
         public void onResponse(Call call, Response response) throws IOException {
             String jsonData = response.body().string().toString();
             if (JsonUtils.isGoodJson(jsonData)) {
-                try {
-                    JSONObject obj = new JSONObject(jsonData);
-                    boolean resultFlag = obj.getBoolean("success");
-                    final String msg = obj.getString("message");
-                    final String code = obj.getString("code");
-                    if (resultFlag) {
-                        Gson gson = new Gson();
-                        final ContractorModel model = gson.fromJson(jsonData, ContractorModel.class);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                // 将数据存储到LitePal数据库（根据LevelId添加或更新）
-                                List<ContractorBean> listBeen = model.getData();
-                                for (ContractorBean bean : listBeen) {
-                                    bean.setLevelType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
-                                    bean.saveOrUpdate("levelId=?", bean.getLevelId());
-                                }
-                                // 添加已加载的LevelId
-                                //SpUtil.put(mContext, ConstantsUtil.LEVEL_ID, SpUtil.get(mContext, ConstantsUtil.LEVEL_ID, "") + "&");
-                                // 设置节点
-                                setContractorNode(model.getData());
-                                LoadingUtils.hideLoading();
+                Gson gson = new Gson();
+                final ContractorModel model = gson.fromJson(jsonData, ContractorModel.class);
+                if (model.isSuccess()) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // 将数据存储到LitePal数据库（根据LevelId添加或更新）
+                            List<ContractorBean> listBeen = model.getData();
+                            for (ContractorBean bean : listBeen) {
+                                bean.setLevelType(getIntent().getStringExtra("type"));
+                                bean.saveOrUpdate("levelId=?", bean.getLevelId());
                             }
-                        });
-                    } else {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LoadingUtils.hideLoading();
-                                switch (code) {
-                                    case "3003":
-                                    case "3004":
-                                        // Token异常重新登录
-                                        ToastUtil.showLong(mContext, "Token过期请重新登录！");
-                                        SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                                        ScreenManagerUtil.popAllActivityExceptOne();
-                                        startActivity(new Intent(mContext, LoginActivity.class));
-                                        break;
-                                    default:
-                                        ToastUtil.showLong(mContext, msg);
-                                        break;
-                                }
-                            }
-                        });
-                    }
-                } catch (JSONException e) {
-                    LoadingUtils.hideLoading();
-                    ToastUtil.showLong(mContext, mContext.getString(R.string.data_error));
-                    e.printStackTrace();
+                            // 设置节点
+                            setContractorNode(model.getData());
+                            LoadingUtils.hideLoading();
+                        }
+                    });
+                } else {
+                    ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                 }
             } else {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LoadingUtils.hideLoading();
-                        ToastUtil.showLong(mContext, getString(R.string.json_error));
-                    }
-                });
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
             }
         }
     };
@@ -225,28 +254,24 @@ public class ContractorTreeActivity extends BaseActivity {
      * @param contractorBean
      */
     private void setContractorNode(List<ContractorBean> contractorBean) {
-        try {
-            // 添加节点
-            if (contractorBean != null && contractorBean.size() > 0) {
-                int listSize = contractorBean.size();
-                // 创建根节点
-                Node root = new Node();
-                root.setFolderFlag("1");
+        // 添加节点
+        if (contractorBean != null && contractorBean.size() > 0) {
+            int listSize = contractorBean.size();
+            // 创建根节点
+            Node root = new Node();
+            root.setFolderFlag("1");
 
-                for (int i = 0; i < listSize; i++) {
-                    getNode(contractorBean.get(i), root);
-                }
-
-                ta = new TreeNodeAdapter(this, root, listener);
-                /* 设置展开和折叠时图标 */
-                ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
-				/* 设置默认展开级别 */
-                ta.setExpandLevel(1);
-                lvContractorList.setAdapter(ta);
-                SetListHeight.setListViewHeight(lvContractorList);
+            for (int i = 0; i < listSize; i++) {
+                getNode(contractorBean.get(i), root);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            ta = new TreeNodeAdapter(this, root, listener);
+                /* 设置展开和折叠时图标 */
+            ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
+				/* 设置默认展开级别 */
+            ta.setExpandLevel(1);
+            lvContractorList.setAdapter(ta);
+            SetListHeight.setListViewHeight(lvContractorList);
         }
     }
 
@@ -257,31 +282,22 @@ public class ContractorTreeActivity extends BaseActivity {
      * @return
      */
     private Node getNode(ContractorBean contractorListBean, Node root) {
-        try {
-            String levelId = contractorListBean.getLevelId();
-            String type = (String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, "");
-            String levelName;
-            if (type.equals("1")) {
-                levelName = contractorListBean.getLevelName() + " (共" + contractorListBean.getProcessNum() + "道隐患/已完成" + contractorListBean.getFinishedNum() + "道)";
-            } else {
-                levelName = contractorListBean.getLevelName() + " (共" + contractorListBean.getProcessNum() + "道工序/已完成" + contractorListBean.getFinishedNum() + "道)";
-            }
-            // 创建子节点
-            Node n = new Node();
-            n.setParent(root);
-            n.setLevelId(levelId);
-            n.setLevelName(levelName);
-            n.setParentId(contractorListBean.getParentId());
-            n.setFolderFlag(contractorListBean.getFolderFlag());
-            n.setExpanded(false);
-            n.setLoading(false);
-            n.setCanClick(contractorListBean.getHaveProcess().equals("1"));
-            n.setIsFinish(contractorListBean.getIsFinish());
-            root.add(n);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+        String levelId = contractorListBean.getLevelId();
+        String levelName = contractorListBean.getLevelName();
+        // 创建子节点
+        Node n = new Node();
+        n.setParent(root);
+        n.setLevelId(levelId);
+        n.setLevelName(levelName);
+        n.setParentId(contractorListBean.getParentId());
+        n.setFolderFlag(contractorListBean.getCanExpand());
+        n.setExpanded(false);
+        n.setLoading(false);
+        n.setChoice(false);
+        //n.setCanClick(contractorListBean.getCanExpand().equals("1"));
+        //n.setIsFinish(contractorListBean.getIsFinish());
+        root.add(n);
+        return n;
     }
 
     /**
@@ -292,12 +308,11 @@ public class ContractorTreeActivity extends BaseActivity {
         public void returnData(List<Node> allCaches, List<Node> allNode, int point, String levelId) {
             allCache = allCaches;
             all = allNode;
-            //String alreadyLoadNode = (String) SpUtil.get(mContext, ConstantsUtil.LEVEL_ID, "");
             // 没有网络并且没有加载过
-            if (JudgeNetworkIsAvailable.isNetworkAvailable(ContractorTreeActivity.this)/* && !alreadyLoadNode.contains("," + levelId + ",")*/) {
+            if (JudgeNetworkIsAvailable.isNetworkAvailable(ContractorTreeActivity.this)) {
                 loadProcedureByNodeId(point, levelId);
             } else {
-                List<ContractorBean> listBean = DataSupport.where("parentId = ?", levelId).find(ContractorBean.class);
+                List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", levelId, getIntent().getStringExtra("type")).find(ContractorBean.class);
                 setNodeInChildren(listBean, point);
             }
         }
@@ -311,93 +326,42 @@ public class ContractorTreeActivity extends BaseActivity {
     private void loadProcedureByNodeId(final int position, final String parentId) {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
-        try {
-            obj.put("parentId", parentId);
-            obj.put("levelType", SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.NEW_CONTRACTOR_LIST)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
+        obj.put("parentId", parentId);
+        obj.put("levelType", SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.NEW_CONTRACTOR_LIST, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                LoadingUtils.hideLoading();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastUtil.showLong(mContext, getString(R.string.server_exception));
-                    }
-                });
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
-                    try {
-                        JSONObject obj = new JSONObject(jsonData);
-                        boolean resultFlag = obj.getBoolean("success");
-                        final String msg = obj.getString("message");
-                        final String code = obj.getString("code");
-                        if (resultFlag) {
-                            Gson gson = new Gson();
-                            final ContractorModel model = gson.fromJson(jsonData, ContractorModel.class);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    // 将数据存储到LitePal数据库（根据nodeId添加或更新）
-                                    List<ContractorBean> listBeen = model.getData();
-                                    for (ContractorBean bean : listBeen) {
-                                        bean.setLevelType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
-                                        bean.saveOrUpdate("levelId=?", bean.getLevelId());
-                                    }
-
-                                    SpUtil.put(mContext, ConstantsUtil.LEVEL_ID, SpUtil.get(mContext, ConstantsUtil.LEVEL_ID, "") + "" + parentId + ",");
-
-                                    // 将数据添加到Node的子节点中
-                                    setNodeInChildren(model.getData(), position);
-                                    LoadingUtils.hideLoading();
+                    Gson gson = new Gson();
+                    final ContractorModel model = gson.fromJson(jsonData, ContractorModel.class);
+                    if (model.isSuccess()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // 将数据存储到LitePal数据库（根据nodeId添加或更新）
+                                List<ContractorBean> listBeen = model.getData();
+                                for (ContractorBean bean : listBeen) {
+                                    bean.setLevelType(getIntent().getStringExtra("type"));
+                                    bean.saveOrUpdate("levelId=?", bean.getLevelId());
                                 }
-                            });
-                        } else {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    LoadingUtils.hideLoading();
-                                    switch (code) {
-                                        case "3003":
-                                        case "3004":
-                                            // Token异常重新登录
-                                            ToastUtil.showLong(mContext, "Token过期请重新登录！");
-                                            SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                                            ScreenManagerUtil.popAllActivityExceptOne();
-                                            startActivity(new Intent(mContext, LoginActivity.class));
-                                            break;
-                                        default:
-                                            ToastUtil.showLong(mContext, msg);
-                                            break;
-                                    }
-                                }
-                            });
-                        }
-                    } catch (JSONException e) {
-                        LoadingUtils.hideLoading();
-                        ToastUtil.showLong(mContext, mContext.getString(R.string.data_error));
-                        e.printStackTrace();
+                                SpUtil.put(mContext, ConstantsUtil.LEVEL_ID, SpUtil.get(mContext, ConstantsUtil.LEVEL_ID, "") + "" + parentId + ",");
+                                // 将数据添加到Node的子节点中
+                                setNodeInChildren(model.getData(), position);
+                                LoadingUtils.hideLoading();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                     }
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            LoadingUtils.hideLoading();
-                            ToastUtil.showLong(mContext, mContext.getString(R.string.json_error));
-                        }
-                    });
+                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
                 }
             }
         });
@@ -413,24 +377,17 @@ public class ContractorTreeActivity extends BaseActivity {
         List<Node> nodes = new ArrayList<>();
         for (ContractorBean contractor : data) {
             String levelId = contractor.getLevelId();
-            String type = (String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, "");
-            String levelName;
-            if (type.equals("1")) {
-                levelName = contractor.getLevelName() + " (共" + contractor.getProcessNum() + "道隐患/已完成" + contractor.getFinishedNum() + "道)";
-            } else {
-                levelName = contractor.getLevelName() + " (共" + contractor.getProcessNum() + "道工序/已完成" + contractor.getFinishedNum() + "道)";
-            }
+            String levelName = contractor.getLevelName();
             // 创建子节点
             Node n = new Node();
             n.setParent(all.get(position));
             n.setLevelId(levelId);
             n.setLevelName(levelName);
             n.setParentId(contractor.getParentId());
-            n.setFolderFlag(contractor.getFolderFlag());
+            n.setFolderFlag(contractor.getCanExpand());
             n.setExpanded(false);
             n.setLoading(false);
-            n.setCanClick(contractor.getHaveProcess().equals("1"));
-            n.setIsFinish(contractor.getIsFinish());
+            n.setChoice(false);
             nodes.add(n);
         }
 
@@ -449,18 +406,65 @@ public class ContractorTreeActivity extends BaseActivity {
         ta.notifyDataSetChanged();
     }
 
-    @Event({R.id.imgBtnLeft})
+    /**
+     * 搜索
+     * @param searchTitle
+     */
+    private void searchProcess(String searchTitle) {
+        Intent intent = new Intent(mContext, SearchProcedureActivity.class);
+        intent.putExtra("searchType", getIntent().getStringExtra("type"));
+        intent.putExtra("searchTitle", searchTitle);
+        startActivityForResult(intent, 1001);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == 1001) {
+                Intent intent = new Intent();
+                intent.putExtra("procedureName", data.getStringExtra("procedureName"));
+                intent.putExtra("levelId", data.getStringExtra("levelId"));
+                setResult(Activity.RESULT_OK, intent);
+                finish();
+            }
+        }
+    }
+
+    @Event({R.id.imgBtnLeft, R.id.btnRight, R.id.imgBtnRight})
     private void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBtnLeft:
                 this.finish();
+                break;
+            case R.id.btnRight:
+                if (ta != null) {
+                    ta.selectProcess((Integer) SpUtil.get(mContext, "selectProcess", -1));
+                } else {
+                    ToastUtil.showShort(mContext, "数据有误！");
+                }
+                break;
+            case R.id.imgBtnRight:
+                searchBar.setVisibility(View.VISIBLE);
+                searchBar.enableSearch();
                 break;
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         ScreenManagerUtil.popActivity(this);
+        SpUtil.remove(mContext, "selectProcess");
+        List<String> stringList = searchBar.getLastSuggestions();
+        if (stringList != null) {
+            DataSupport.deleteAll(SearchRecordBean.class, "searchType=2");
+            for (String str : stringList) {
+                SearchRecordBean bean = new SearchRecordBean();
+                bean.setSearchTitle(str);
+                bean.setSearchType("2");
+                bean.save();
+            }
+        }
+        super.onDestroy();
     }
 }

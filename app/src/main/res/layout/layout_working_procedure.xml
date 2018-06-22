@@ -28,6 +28,7 @@
             android:orientation="horizontal">
 
             <RelativeLayout
+                android:id="@+id/rlPhoto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginRight="@dimen/one_px"
@@ -141,15 +142,4 @@
         </LinearLayout>
 
     </RelativeLayout>
-
-    <com.mancj.materialsearchbar.MaterialSearchBar
-        android:id="@+id/searchBar"
-        style="@style/MaterialSearchBarLight"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:mt_hint="@string/input_working_name"
-        app:mt_maxSuggestionsCount="10"
-        app:mt_speechMode="false" />
-
 </com.zhy.android.percent.support.PercentRelativeLayout>

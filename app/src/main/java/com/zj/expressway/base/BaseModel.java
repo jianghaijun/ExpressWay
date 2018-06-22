@@ -27,7 +27,16 @@ package com.zj.expressway.base;
 public class BaseModel {
     private boolean success;
     private String message;
+    private String fileUrl;
     private int code;
+
+    public String getFileUrl() {
+        return fileUrl == null ? "" : fileUrl;
+    }
+
+    public void setFileUrl(String fileUrl) {
+        this.fileUrl = fileUrl;
+    }
 
     public boolean isSuccess() {
         return success;

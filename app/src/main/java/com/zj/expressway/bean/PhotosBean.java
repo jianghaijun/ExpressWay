@@ -8,27 +8,27 @@ public class PhotosBean extends DataSupport implements Serializable {
     private int isToBeUpLoad = -1;
     private int isNewAdd = -1;
     private String userId;
-    private String modify_user_name;
-    private String create_user_name;
-    private String process_id;
-    private String thumb_path;
-    private String del_flag;
-    private String work_id;
-    private String photo_id;
-    private String photo_name;
-    private long create_time;
-    private String photo_address;
+    private String modifyUserName;
+    private String createUserName;
+    private String processId;
+    private String thumbUrl;
+    private String delFlag;
+    private String workId;
+    private String photoId;
+    private String photoName;
+    private long createTime;
+    private String url;
     private String longitude;
     private String latitude;
     private String location;
-    private String modify_user;
-    private long modify_time;
-    private String photo_desc;
-    private String role_flag;
-    private String check_flag;
-    private String photo_type;
-    private String create_user;
-    private String other_id;
+    private String modifyUser;
+    private long modifyTime;
+    private String photoDesc;
+    private String roleFlag;
+    private String checkFlag;
+    private String photoType;
+    private String createUser;
+    private String otherId;
 
     public int getIsToBeUpLoad() {
         return isToBeUpLoad;
@@ -54,84 +54,84 @@ public class PhotosBean extends DataSupport implements Serializable {
         this.userId = userId;
     }
 
-    public String getModify_user_name() {
-        return modify_user_name;
+    public String getModifyUserName() {
+        return modifyUserName;
     }
 
-    public void setModify_user_name(String modify_user_name) {
-        this.modify_user_name = modify_user_name;
+    public void setModifyUserName(String modifyUserName) {
+        this.modifyUserName = modifyUserName;
     }
 
-    public String getCreate_user_name() {
-        return create_user_name;
+    public String getCreateUserName() {
+        return createUserName;
     }
 
-    public void setCreate_user_name(String create_user_name) {
-        this.create_user_name = create_user_name;
+    public void setCreateUserName(String createUserName) {
+        this.createUserName = createUserName;
     }
 
-    public String getProcess_id() {
-        return process_id;
+    public String getProcessId() {
+        return processId;
     }
 
-    public void setProcess_id(String process_id) {
-        this.process_id = process_id;
+    public void setProcessId(String processId) {
+        this.processId = processId;
     }
 
-    public String getThumb_path() {
-        return thumb_path;
+    public String getThumbUrl() {
+        return thumbUrl;
     }
 
-    public void setThumb_path(String thumb_path) {
-        this.thumb_path = thumb_path;
+    public void setThumbUrl(String thumbUrl) {
+        this.thumbUrl = thumbUrl;
     }
 
-    public String getDel_flag() {
-        return del_flag;
+    public String getDelFlag() {
+        return delFlag;
     }
 
-    public void setDel_flag(String del_flag) {
-        this.del_flag = del_flag;
+    public void setDelFlag(String delFlag) {
+        this.delFlag = delFlag;
     }
 
-    public String getWork_id() {
-        return work_id;
+    public String getWorkId() {
+        return workId;
     }
 
-    public void setWork_id(String work_id) {
-        this.work_id = work_id;
+    public void setWorkId(String workId) {
+        this.workId = workId;
     }
 
-    public String getPhoto_id() {
-        return photo_id;
+    public String getPhotoId() {
+        return photoId;
     }
 
-    public void setPhoto_id(String photo_id) {
-        this.photo_id = photo_id;
+    public void setPhotoId(String photoId) {
+        this.photoId = photoId;
     }
 
-    public String getPhoto_name() {
-        return photo_name;
+    public String getPhotoName() {
+        return photoName;
     }
 
-    public void setPhoto_name(String photo_name) {
-        this.photo_name = photo_name;
+    public void setPhotoName(String photoName) {
+        this.photoName = photoName;
     }
 
-    public long getCreate_time() {
-        return create_time;
+    public long getCreateTime() {
+        return createTime;
     }
 
-    public void setCreate_time(long create_time) {
-        this.create_time = create_time;
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 
-    public String getPhoto_address() {
-        return photo_address;
+    public String getUrl() {
+        return url;
     }
 
-    public void setPhoto_address(String photo_address) {
-        this.photo_address = photo_address;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getLongitude() {
@@ -158,67 +158,67 @@ public class PhotosBean extends DataSupport implements Serializable {
         this.location = location;
     }
 
-    public String getModify_user() {
-        return modify_user;
+    public String getModifyUser() {
+        return modifyUser;
     }
 
-    public void setModify_user(String modify_user) {
-        this.modify_user = modify_user;
+    public void setModifyUser(String modifyUser) {
+        this.modifyUser = modifyUser;
     }
 
-    public long getModify_time() {
-        return modify_time;
+    public long getModifyTime() {
+        return modifyTime;
     }
 
-    public void setModify_time(long modify_time) {
-        this.modify_time = modify_time;
+    public void setModifyTime(long modifyTime) {
+        this.modifyTime = modifyTime;
     }
 
-    public String getPhoto_desc() {
-        return photo_desc;
+    public String getPhotoDesc() {
+        return photoDesc;
     }
 
-    public void setPhoto_desc(String photo_desc) {
-        this.photo_desc = photo_desc;
+    public void setPhotoDesc(String photoDesc) {
+        this.photoDesc = photoDesc;
     }
 
-    public String getRole_flag() {
-        return role_flag;
+    public String getRoleFlag() {
+        return roleFlag;
     }
 
-    public void setRole_flag(String role_flag) {
-        this.role_flag = role_flag;
+    public void setRoleFlag(String roleFlag) {
+        this.roleFlag = roleFlag;
     }
 
-    public String getCheck_flag() {
-        return check_flag;
+    public String getCheckFlag() {
+        return checkFlag;
     }
 
-    public void setCheck_flag(String check_flag) {
-        this.check_flag = check_flag;
+    public void setCheckFlag(String checkFlag) {
+        this.checkFlag = checkFlag;
     }
 
-    public String getPhoto_type() {
-        return photo_type;
+    public String getPhotoType() {
+        return photoType;
     }
 
-    public void setPhoto_type(String photo_type) {
-        this.photo_type = photo_type;
+    public void setPhotoType(String photoType) {
+        this.photoType = photoType;
     }
 
-    public String getCreate_user() {
-        return create_user;
+    public String getCreateUser() {
+        return createUser;
     }
 
-    public void setCreate_user(String create_user) {
-        this.create_user = create_user;
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
     }
 
-    public String getOther_id() {
-        return other_id;
+    public String getOtherId() {
+        return otherId;
     }
 
-    public void setOther_id(String other_id) {
-        this.other_id = other_id;
+    public void setOtherId(String otherId) {
+        this.otherId = otherId;
     }
 }

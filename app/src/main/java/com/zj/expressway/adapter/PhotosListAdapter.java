@@ -99,10 +99,10 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
         anim.setRepeatCount(ObjectAnimator.INFINITE);
         anim.start();
 
-        String fileUrl = phoneListBean.get(position).getThumb_path();
-        if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
+        String fileUrl = phoneListBean.get(position).getThumbUrl();
+        /*if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
             fileUrl = ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl;
-        }
+        }*/
 
         holder.txtStatus.setVisibility(View.VISIBLE);
         if (phoneListBean.get(position).getIsToBeUpLoad() == 1) {
@@ -119,7 +119,7 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
                     holder.txtStatus.setText("初审驳回");
                     break;
                 case "4":
-                    if (!phoneListBean.get(position).getRole_flag().equals("2")) {
+                    if (!phoneListBean.get(position).getRoleFlag().equals("2")) {
                         holder.txtStatus.setText("自检完成");
                     } else {
                         holder.txtStatus.setText("已上传");
@@ -135,7 +135,7 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
                     holder.txtStatus.setText("终审驳回");
                     break;
                 case "8":
-                    if (!phoneListBean.get(position).getRole_flag().equals("2")) {
+                    if (!phoneListBean.get(position).getRoleFlag().equals("2")) {
                         holder.txtStatus.setText("自检完成");
                     } else {
                         holder.txtStatus.setText("抽检完成");
@@ -171,7 +171,7 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
                         if (trueOrFalse) {
                             // 删除照片
                             if (1 == phoneListBean.get(position).getIsToBeUpLoad()) {
-                                DataSupport.deleteAll(PhotosBean.class, "photoAddress=?", phoneListBean.get(position).getPhoto_address());
+                                DataSupport.deleteAll(PhotosBean.class, "url=?", phoneListBean.get(position).getUrl());
                                 phoneListBean.remove(position);
                                 PhotosListAdapter.this.notifyDataSetChanged();
                             } else {
@@ -197,10 +197,10 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
         PictureModel model = new PictureModel();
         model.setSelectUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
         model.setRootLevelId(levelId);
-        model.setProcessId(bean.getProcess_id());
+        model.setProcessId(bean.getProcessId());
         List<PictureBean> beanList = new ArrayList<>();
         PictureBean picBean = new PictureBean();
-        picBean.setPhotoId(bean.getPhoto_id());
+        picBean.setPhotoId(bean.getPhotoId());
         beanList.add(picBean);
         model.setSxZlPhotoList(beanList);
 
@@ -241,7 +241,7 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
                                     LoadingUtils.hideLoading();
                                     ToastUtil.showShort(mContext, "删除成功！");
                                     phoneListBean.remove(point);
-                                    DataSupport.deleteAll(PhotosBean.class, "photoId=?", bean.getPhoto_id());
+                                    DataSupport.deleteAll(PhotosBean.class, "photoId=?", bean.getPhotoId());
                                     PhotosListAdapter.this.notifyDataSetChanged();
                                 }
                             });
@@ -287,7 +287,7 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
 
     @Override
     public int getItemCount() {
-        return phoneListBean.size();
+        return phoneListBean == null ? 0 : phoneListBean.size();
     }
 
     public class ContractorDetailsHolder extends RecyclerView.ViewHolder {

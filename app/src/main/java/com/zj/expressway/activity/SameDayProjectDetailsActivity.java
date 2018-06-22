@@ -493,10 +493,10 @@ public class SameDayProjectDetailsActivity extends BaseActivity {
                             ArrayList<String> urls = new ArrayList<>();
                             int len = photoList.size();
                             for (int i = 0; i < len; i++) {
-                                String fileUrl = photoList.get(i).getPhoto_address();
-                                if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
+                                String fileUrl = photoList.get(i).getUrl();
+                                /*if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
                                     fileUrl = ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl;
-                                }
+                                }*/
                                 urls.add(fileUrl);
                             }
                             Intent intent = new Intent(mContext, ShowPhotosActivity.class);

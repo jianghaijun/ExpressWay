@@ -62,14 +62,15 @@ public class AppActivity extends BaseActivity {
         x.view().inject(hold, layoutApp);
     }
 
-    public void setDate(List<Integer> objList, final WorkingBean data) {
+    public void setDate(List<String> objList, final WorkingBean data) {
         //设置banner样式
         hold.banner.setBannerStyle(BannerConfig.CIRCLE_INDICATOR_TITLE_INSIDE);
         //设置图片加载器
         hold.banner.setImageLoader(new GlideImageLoader());
         List<String> strings = new ArrayList<>();
-        strings.add("");
-        strings.add("");
+        for (String str : objList) {
+            strings.add("");
+        }
         hold.banner.setBannerTitles(strings);
 
         //设置banner动画效果
@@ -89,7 +90,15 @@ public class AppActivity extends BaseActivity {
             hold.mMarqueeView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, ContractorDetailsActivity.class);
+                    Intent intent;
+                    if (data.getFlowId().equals("zxHwZlHiddenDanger")) {
+                        intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    } else if (data.getFlowId().equals("zxHwAqHiddenDanger")) {
+                        intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    } else {
+                        intent = new Intent(mContext, ContractorDetailsActivity.class);
+                    }
+                    intent.putExtra("flowId", data.getFlowId());
                     intent.putExtra("processId", data.getProcessId());
                     intent.putExtra("processState", data.getProcessState());
                     intent.putExtra("processPath", data.getLevelNameAll());
@@ -108,7 +117,11 @@ public class AppActivity extends BaseActivity {
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.hidden_danger);
-        bean.setTitle(mContext.getString(R.string.hidden_danger));
+        bean.setTitle(mContext.getString(R.string.qualityPatrol));
+        appInfoList.add(bean);
+        bean = new AppInfoBean();
+        bean.setImgUrl(R.drawable.group_management);
+        bean.setTitle(mContext.getString(R.string.securityPatrol));
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.submit_photo);
@@ -124,7 +137,7 @@ public class AppActivity extends BaseActivity {
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.bim_platform);
-        bean.setTitle(mContext.getString(R.string.bim_platform));
+        bean.setTitle(mContext.getString(R.string.audit_management));
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.qr_code);

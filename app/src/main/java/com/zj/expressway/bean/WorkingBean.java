@@ -5,32 +5,12 @@ import org.litepal.crud.DataSupport;
 import java.io.Serializable;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:53
- *       工序bean
+ * Created by HaiJun on 2018/6/11 17:53
+ * 工序bean
  */
 public class WorkingBean extends DataSupport implements Serializable {
     private String processId;        // 工序ID
-    private String processName;      // 工序名称
+    private String processName;      // 工序名称createTime
     private String processCode;      // 编码
     private String photoContent;     // 拍照内容
     private String photoDistance;    // 距离及角度
@@ -75,6 +55,117 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String mainTablePrimaryId;
     private String type;
     private String userId;
+    private String submitter;
+    private String lastSubmitter;
+    private String delFlag;
+    private String nextSubmitter;
+    private String modifyUserName;
+    private String modifyUser;
+    private String secondLevelId;
+    private long modifyTime;
+    private String firstLevelId;
+    private long createTime;
+    private String levelIdAll;
+    private String remarks;
+    private String fileOperationFlag;
+    private String opinionShowFlag;
+    private String opinionContent;
+    private String flowType;
+    private String troubleTitle; // 标题
+    private String dangerTitle;
+    private String troubleLevel; // 隐患级别
+    private String dangerLevel;
+    private long deadline; // 整改期限
+    private String troubleRequire; // 整改内容
+    private String dangerRequire;
+
+    public String getTroubleTitle() {
+        return troubleTitle;
+    }
+
+    public void setTroubleTitle(String troubleTitle) {
+        this.troubleTitle = troubleTitle;
+    }
+
+    public String getDangerTitle() {
+        return dangerTitle;
+    }
+
+    public void setDangerTitle(String dangerTitle) {
+        this.dangerTitle = dangerTitle;
+    }
+
+    public String getTroubleLevel() {
+        return troubleLevel;
+    }
+
+    public void setTroubleLevel(String troubleLevel) {
+        this.troubleLevel = troubleLevel;
+    }
+
+    public String getDangerLevel() {
+        return dangerLevel;
+    }
+
+    public void setDangerLevel(String dangerLevel) {
+        this.dangerLevel = dangerLevel;
+    }
+
+    public long getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(long deadline) {
+        this.deadline = deadline;
+    }
+
+    public String getTroubleRequire() {
+        return troubleRequire;
+    }
+
+    public void setTroubleRequire(String troubleRequire) {
+        this.troubleRequire = troubleRequire;
+    }
+
+    public String getDangerRequire() {
+        return dangerRequire;
+    }
+
+    public void setDangerRequire(String dangerRequire) {
+        this.dangerRequire = dangerRequire;
+    }
+
+    public String getFlowType() {
+        return flowType;
+    }
+
+    public void setFlowType(String flowType) {
+        this.flowType = flowType;
+    }
+
+    public String getFileOperationFlag() {
+        return fileOperationFlag;
+    }
+
+    public void setFileOperationFlag(String fileOperationFlag) {
+        this.fileOperationFlag = fileOperationFlag;
+    }
+
+    public String getOpinionShowFlag() {
+        return opinionShowFlag;
+    }
+
+    public void setOpinionShowFlag(String opinionShowFlag) {
+        this.opinionShowFlag = opinionShowFlag;
+    }
+
+    public String getOpinionContent() {
+        return opinionContent;
+    }
+
+    public void setOpinionContent(String opinionContent) {
+        this.opinionContent = opinionContent;
+    }
 
     public String getUserId() {
         return userId;
@@ -442,5 +533,101 @@ public class WorkingBean extends DataSupport implements Serializable {
 
     public void setProcessState(String processState) {
         this.processState = processState;
+    }
+
+    public String getSubmitter() {
+        return submitter;
+    }
+
+    public void setSubmitter(String submitter) {
+        this.submitter = submitter;
+    }
+
+    public String getLastSubmitter() {
+        return lastSubmitter;
+    }
+
+    public void setLastSubmitter(String lastSubmitter) {
+        this.lastSubmitter = lastSubmitter;
+    }
+
+    public String getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(String delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public String getNextSubmitter() {
+        return nextSubmitter;
+    }
+
+    public void setNextSubmitter(String nextSubmitter) {
+        this.nextSubmitter = nextSubmitter;
+    }
+
+    public String getModifyUserName() {
+        return modifyUserName;
+    }
+
+    public void setModifyUserName(String modifyUserName) {
+        this.modifyUserName = modifyUserName;
+    }
+
+    public String getModifyUser() {
+        return modifyUser;
+    }
+
+    public void setModifyUser(String modifyUser) {
+        this.modifyUser = modifyUser;
+    }
+
+    public String getSecondLevelId() {
+        return secondLevelId;
+    }
+
+    public void setSecondLevelId(String secondLevelId) {
+        this.secondLevelId = secondLevelId;
+    }
+
+    public long getModifyTime() {
+        return modifyTime;
+    }
+
+    public void setModifyTime(long modifyTime) {
+        this.modifyTime = modifyTime;
+    }
+
+    public String getFirstLevelId() {
+        return firstLevelId;
+    }
+
+    public void setFirstLevelId(String firstLevelId) {
+        this.firstLevelId = firstLevelId;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getLevelIdAll() {
+        return levelIdAll;
+    }
+
+    public void setLevelIdAll(String levelIdAll) {
+        this.levelIdAll = levelIdAll;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 }

@@ -8,7 +8,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.zj.expressway.R;
+import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.utils.DateUtils;
 
 import java.util.List;
 
@@ -38,9 +40,9 @@ import java.util.List;
  */
 public class WaterfallFlowTimeLineAdapter extends RecyclerView.Adapter<WaterfallFlowTimeLineAdapter.ViewHolder> {
     private Context mContext;
-    private List<WorkingBean> mList;
+    private List<HistoryBean> mList;
 
-    public WaterfallFlowTimeLineAdapter(Context context, List<WorkingBean> list) {
+    public WaterfallFlowTimeLineAdapter(Context context, List<HistoryBean> list) {
         this.mContext = context;
         this.mList = list;
     }
@@ -59,9 +61,10 @@ public class WaterfallFlowTimeLineAdapter extends RecyclerView.Adapter<Waterfall
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.txtUser.setText(mList.get(position).getProcessName() + "   " + mList.get(position).getFlowName());
-        holder.txtArriveDate.setText("到达时间：" + mList.get(position).getContent());
-        holder.txtUseTime.setText("累计时长：" + mList.get(position).getProcessState());
+        HistoryBean historyBean = mList.get(position);
+        holder.txtUser.setText(historyBean.getRealName() + "   " + historyBean.getNodeName());
+        holder.txtArriveDate.setText("到达时间：" + DateUtils.setDataToStr(historyBean.getActionTime()) + "");
+        holder.txtUseTime.setText("累计时长：" + historyBean.getDoTimeShow() + "");
     }
 
     @Override

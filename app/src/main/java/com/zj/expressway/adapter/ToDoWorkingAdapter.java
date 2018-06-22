@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.zj.expressway.R;
 import com.zj.expressway.activity.ContractorDetailsActivity;
 import com.zj.expressway.activity.ReviewProgressActivity;
+import com.zj.expressway.activity.ToDoDetailsActivity;
 import com.zj.expressway.base.BaseAdapter;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
@@ -21,6 +22,7 @@ import com.zj.expressway.dialog.PhotoRequirementsDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.SpUtil;
+import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
 
@@ -131,8 +133,15 @@ public class ToDoWorkingAdapter extends BaseAdapter<List<WorkingBean>> {
      * 跳转到详情
      */
     private void takePhotoActivity(WorkingBean bean, boolean isPopTakePhoto) {
-        Intent intent = new Intent(mContext, ContractorDetailsActivity.class);
-        intent.putExtra("flowId", ConstantsUtil.flowId);
+        Intent intent;
+        if (bean.getFlowId().equals("zxHwZlHiddenDanger")) {
+            intent = new Intent(mContext, ToDoDetailsActivity.class);
+        } else if (bean.getFlowId().equals("zxHwAqHiddenDanger")) {
+            intent = new Intent(mContext, ToDoDetailsActivity.class);
+        } else {
+            intent = new Intent(mContext, ContractorDetailsActivity.class);
+        }
+        intent.putExtra("flowId", bean.getFlowId());
         intent.putExtra("workId", bean.getWorkId());
         intent.putExtra("mainTablePrimaryId", bean.getMainTablePrimaryId());
         intent.putExtra("isToDo", true);

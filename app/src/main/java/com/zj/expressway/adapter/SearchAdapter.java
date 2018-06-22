@@ -10,7 +10,9 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.zj.expressway.R;
+import com.zj.expressway.bean.ContractorBean;
 import com.zj.expressway.bean.SelectAuditorsBean;
+import com.zj.expressway.bean.WorkingBean;
 
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -39,23 +41,22 @@ import java.util.List;
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
  * 			   佛祖保佑       永无BUG
  *       Created by HaiJun on 2017/11/9 17:22
- *       上报人员适配器
  */
 
-public class SelectAuditorsAdapter extends BaseAdapter {
+public class SearchAdapter extends BaseAdapter {
     private Context mContext;
-    private List<SelectAuditorsBean> selectAuditorsList;
+    private List<ContractorBean> contractorBeenList;
     private LayoutInflater inflater;
 
-    public SelectAuditorsAdapter(Context mContext, List<SelectAuditorsBean> selectAuditorsList) {
+    public SearchAdapter(Context mContext, List<ContractorBean> contractorBeenList) {
         this.mContext = mContext;
-        this.selectAuditorsList = selectAuditorsList;
+        this.contractorBeenList = contractorBeenList;
         inflater = LayoutInflater.from(mContext);
     }
 
     @Override
     public int getCount() {
-        return selectAuditorsList == null ? 0 : selectAuditorsList.size();
+        return contractorBeenList == null ? 0 : contractorBeenList.size();
     }
 
     @Override
@@ -81,19 +82,17 @@ public class SelectAuditorsAdapter extends BaseAdapter {
             selectAuditorsHandler = (SelectAuditorsHandler) view.getTag();
         }
 
-        boolean isSelect = selectAuditorsList.get(position).isSelect();
+        boolean isSelect = contractorBeenList.get(position).isSelect();
         Drawable drawable;
         if (isSelect) {
             drawable = ContextCompat.getDrawable(mContext, R.drawable.btn_check);
-            drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
-            selectAuditorsHandler.txtAuditors.setCompoundDrawables(null, null, drawable, null);
         } else {
             drawable = ContextCompat.getDrawable(mContext, R.drawable.btn_un_check);
-            drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
-            selectAuditorsHandler.txtAuditors.setCompoundDrawables(null, null, drawable, null);
         }
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+        selectAuditorsHandler.txtAuditors.setCompoundDrawables(null, null, drawable, null);
 
-        selectAuditorsHandler.txtAuditors.setText(selectAuditorsList.get(position).getRealName());
+        selectAuditorsHandler.txtAuditors.setText(contractorBeenList.get(position).getLevelName());
 
         return view;
     }

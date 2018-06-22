@@ -31,20 +31,37 @@ import java.io.Serializable;
 public class ContractorBean extends DataSupport implements Serializable {
     private String levelId;         // 层级ID
     private String levelName;       // 层级名称
+    private String parentNameAll;   // 名称
     private String parentId;        // 父ID
     private String folderFlag;      // 是否是文件夹flag 0:不是文件夹 1：是文件夹
     private int processNum;         // 工序数量
     private int finishedNum;        // 已完成工序数量
+    private boolean isSelect;
     private String isFinish;        // 是否已审核完
     private String levelType;       // 质量或安全
-    private String haveProcess;     // 是否有子工序 0:有 1：无
+    private String canExpand;     // 是否有子工序 1:有 0：无
 
-    public String getHaveProcess() {
-        return haveProcess;
+    public String getParentNameAll() {
+        return parentNameAll;
     }
 
-    public void setHaveProcess(String haveProcess) {
-        this.haveProcess = haveProcess;
+    public void setParentNameAll(String parentNameAll) {
+        this.parentNameAll = parentNameAll;
+    }
+
+    public boolean isSelect() {
+        return isSelect;
+    }
+
+    public void setSelect(boolean select) {
+        isSelect = select;
+    }
+    public String getCanExpand() {
+        return canExpand;
+    }
+
+    public void setCanExpand(String canExpand) {
+        this.canExpand = canExpand;
     }
 
     public String getLevelType() {

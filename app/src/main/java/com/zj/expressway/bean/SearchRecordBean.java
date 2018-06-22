@@ -30,6 +30,15 @@ import java.io.Serializable;
  */
 public class SearchRecordBean extends DataSupport implements Serializable {
     private String searchTitle;
+    private String searchType;
+
+    public String getSearchType() {
+        return searchType;
+    }
+
+    public void setSearchType(String searchType) {
+        this.searchType = searchType;
+    }
 
     public String getSearchTitle() {
         return searchTitle;

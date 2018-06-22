@@ -2,7 +2,7 @@ package com.zj.expressway.model;
 
 
 import com.zj.expressway.bean.HistoryBean;
-import com.zj.expressway.bean.WorkFlowBean;
+import com.zj.expressway.bean.WorkingBean;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class WorkFlowModel {
     private String fileOperationFlag;
     private String opinionShowFlag;
     private String opinionContent;
-    private WorkFlowBean mainTableObject;
+    private WorkingBean mainTableDataObject;
     private List<ButtonListModel> buttonList;
     private FileModel subTableObject;
     private List<HistoryBean> flowHistoryList;
@@ -45,7 +45,7 @@ public class WorkFlowModel {
     }
 
     public FileModel getSubTableObject() {
-        return subTableObject;
+        return subTableObject == null ? new FileModel() : subTableObject;
     }
 
     public void setSubTableObject(FileModel subTableObject) {
@@ -148,11 +148,11 @@ public class WorkFlowModel {
         this.opinionContent = opinionContent;
     }
 
-    public WorkFlowBean getMainTableObject() {
-        return mainTableObject;
+    public WorkingBean getMainTableObject() {
+        return mainTableDataObject;
     }
 
-    public void setMainTableObject(WorkFlowBean mainTableObject) {
-        this.mainTableObject = mainTableObject;
+    public void setMainTableObject(WorkingBean mainTableDataObject) {
+        this.mainTableDataObject = mainTableDataObject;
     }
 }

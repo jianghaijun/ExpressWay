@@ -75,7 +75,7 @@ public class UpLoadPhotosAdapter extends RecyclerView.Adapter<UpLoadPhotosAdapte
         anim.start();
 
         Glide.with(mContext)
-                .load(upLoadPhoneList.get(position).getThumb_path())
+                .load(upLoadPhoneList.get(position).getThumbUrl())
                 .apply(options)
                 .thumbnail(0.1f)
                 .into(holder.ivUpLoadPhone);
@@ -87,10 +87,10 @@ public class UpLoadPhotosAdapter extends RecyclerView.Adapter<UpLoadPhotosAdapte
                 ArrayList<String> urls = new ArrayList<>();
                 int len = upLoadPhoneList.size();
                 for (int i = 0; i < len; i++) {
-                    String fileUrl = upLoadPhoneList.get(i).getPhoto_address();
-                    if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
+                    String fileUrl = upLoadPhoneList.get(i).getUrl();
+                    /*if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
                         fileUrl = ConstantsUtil.BASE_URL + fileUrl;
-                    }
+                    }*/
                     urls.add(fileUrl);
                 }
                 Intent intent = new Intent(mContext, ShowPhotosActivity.class);
@@ -112,7 +112,7 @@ public class UpLoadPhotosAdapter extends RecyclerView.Adapter<UpLoadPhotosAdapte
                     public void returnTrueOrFalse(boolean trueOrFalse) {
                         if (trueOrFalse) {
                             // 删除照片
-                            DataSupport.deleteAll(PhotosBean.class, "photoAddress=?", upLoadPhoneList.get(position).getPhoto_address());
+                            DataSupport.deleteAll(PhotosBean.class, "url=?", upLoadPhoneList.get(position).getUrl());
                             upLoadPhoneList.remove(position);
                             UpLoadPhotosAdapter.this.notifyDataSetChanged();
                         }

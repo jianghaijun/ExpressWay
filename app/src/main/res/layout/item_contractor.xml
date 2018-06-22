@@ -40,9 +40,28 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginRight="10dp"
+            android:layout_toLeftOf="@+id/rlRight"
             android:layout_toRightOf="@+id/rlNodeState"
             android:gravity="left|center"
             android:textColor="@color/black"
             android:textSize="@dimen/fourteen_sp" />
+
+        <RelativeLayout
+            android:id="@+id/rlRight"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/ten_dp"
+            android:background="@null">
+
+            <ImageView
+                android:id="@+id/imgViewSelect"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_centerInParent="true"
+                android:background="@null"
+                android:contentDescription="@null" />
+        </RelativeLayout>
     </RelativeLayout>
 </LinearLayout>

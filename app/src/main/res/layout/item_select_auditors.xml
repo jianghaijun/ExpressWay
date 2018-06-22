@@ -14,5 +14,5 @@
         android:paddingLeft="@dimen/twenty_dp"
         android:paddingRight="@dimen/twenty_dp"
         android:textColor="@color/black"
-        android:textSize="@dimen/twenty_sp" />
+        android:textSize="@dimen/fourteen_sp" />
 </RelativeLayout>

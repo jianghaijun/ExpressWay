@@ -1,7 +1,7 @@
 package com.zj.expressway.activity;
 
 import android.annotation.TargetApi;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -22,20 +22,20 @@ import com.google.gson.Gson;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.UserInfo;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.listener.PermissionListener;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.WorkingModel;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
-import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
@@ -49,7 +49,6 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -96,8 +95,8 @@ public class MainActivity extends BaseActivity {
     @ViewInject(R.id.txtMe)
     private TextView txtMe;
     private ImageView imgViewUserAvatar;
-    private Context mContext;
-    private List<Integer> objList;
+    private Activity mContext;
+    private List<String> urlList;
 
     // 子布局
     private View layoutMsg, layoutApp, layoutFriends, layoutMe;
@@ -155,9 +154,10 @@ public class MainActivity extends BaseActivity {
         // 我的
         mySettingActivity = new MySettingActivity(mContext, layoutMe, choiceListener);
 
-        objList = new ArrayList<>();
-        objList.add(R.drawable.sowing_map_one);
-        objList.add(R.drawable.sowing_map_two);
+        urlList = new ArrayList<>();
+        urlList.add("http://p0.qhimgs4.com/t018167bfb74ac52291.jpg");
+        urlList.add("http://www.dfgg.cn/imageRepository/f239c0aa-d4e7-46c1-9fa8-fc772189c6ae.jpg");
+        urlList.add("http://imgsrc.baidu.com/imgad/pic/item/9f2f070828381f30da0865a0a3014c086e06f0a2.jpg");
 
         //每个页面的view数据
         views = new ArrayList<>();
@@ -169,8 +169,6 @@ public class MainActivity extends BaseActivity {
         vpMain.setOnPageChangeListener(new MyOnPageChangeListener());
         vpMain.setAdapter(mPagerAdapter);
         vpMain.setCurrentItem(1);
-
-        appActivity.setDate(objList, new WorkingBean());
     }
 
     /**
@@ -178,55 +176,40 @@ public class MainActivity extends BaseActivity {
      */
     private void getData() {
         LoadingUtils.showLoading(mContext);
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, "");
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.GET_SCROLL_INFO)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.GET_SCROLL_INFO, "");
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        runChildrenThread(getString(R.string.server_exception));
-                    }
-                });
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
-                    try {
-                        JSONObject obj = new JSONObject(jsonData);
-                        boolean resultFlag = obj.getBoolean("success");
-                        final String msg = obj.getString("message");
-                        final String code = obj.getString("code");
-                        if (resultFlag) {
-                            Gson gson = new Gson();
-                            final WorkingModel model = gson.fromJson(jsonData, WorkingModel.class);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    LoadingUtils.hideLoading();
-                                    appActivity.setDate(objList, model.getData());
-                                    mySettingActivity.checkVersion();
-                                    data = model.getData();
-                                    msgMainActivity.setDate(model.getData());
-                                }
-                            });
-                        } else {
-                            LoadingUtils.hideLoading();
-                            tokenErr(code, msg);
-                        }
-                    } catch (JSONException e) {
-                        runChildrenThread(getString(R.string.data_error));
-                        e.printStackTrace();
+                    Gson gson = new Gson();
+                    final WorkingModel model = gson.fromJson(jsonData, WorkingModel.class);
+                    if (model.isSuccess()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LoadingUtils.hideLoading();
+                                // 保存最新上传照片工序位置
+                                WorkingBean workingBean = model.getData() == null ? new WorkingBean() : model.getData();
+                                workingBean.setFlowType("1");
+                                workingBean.setCreateTime(System.currentTimeMillis());
+                                appActivity.setDate(urlList, workingBean);
+                                mySettingActivity.checkVersion();
+                                data = workingBean;
+                                msgMainActivity.setDate(workingBean);
+                                workingBean.saveOrUpdate();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                     }
                 } else {
-                    runChildrenThread(getString(R.string.json_error));
+                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
                 }
             }
         });
@@ -246,19 +229,22 @@ public class MainActivity extends BaseActivity {
         appActivity.stopBanner();
     }
 
-    /*@Override
+    @Override
     protected void onResume() {
         super.onResume();
         if (!ConstantsUtil.isDownloadApk) {
             if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
                 if (!isUploadHead) {
-                    getData();
+                    //getData();
+                    appActivity.setDate(urlList, new WorkingBean());
+                    msgMainActivity.setDate(null);
                 }
             } else {
-                appActivity.setDate(objList, null);
+                List<WorkingBean> beanList = DataSupport.where("flowType=1 order by createTime").find(WorkingBean.class);
+                appActivity.setDate(urlList, beanList != null && beanList.size() > 0 ? beanList.get(0) : null);
             }
         }
-    }*/
+    }
 
     /**
      * 填充ViewPager的数据适配器
@@ -430,45 +416,38 @@ public class MainActivity extends BaseActivity {
                     public Object parseNetworkResponse(Response response, int id) throws Exception {
                         String jsonData = response.body().string().toString();
                         if (JsonUtils.isGoodJson(jsonData)) {
-                            final JSONObject obj = new JSONObject(jsonData);
-                            boolean resultFlag = obj.getBoolean("success");
-                            String msg = obj.getString("message");
-                            if (resultFlag) {
+                            Gson gson = new Gson();
+                            final BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                            if (model.isSuccess()) {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        String fileUrl = null;
-                                        try {
-                                            fileUrl = obj.getString("fileUrl");
-                                            List<UserInfo> userList = DataSupport.where("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(UserInfo.class);
-                                            if (userList != null && userList.size() > 0) {
-                                                UserInfo user = userList.get(0);
-                                                user.setImageUrl(ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl);
-                                                user.saveOrUpdate("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")));
-                                            }
-                                            RequestOptions options = new RequestOptions().circleCrop();
-                                            Glide.with(mContext).load(ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl).apply(options).into(imgViewUserAvatar);
-                                            ToastUtil.showShort(mContext, "头像上传成功");
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
+                                        String fileUrl = model.getFileUrl();
+                                        List<UserInfo> userList = DataSupport.where("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(UserInfo.class);
+                                        if (userList != null && userList.size() > 0) {
+                                            UserInfo user = userList.get(0);
+                                            user.setImageUrl(ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl);
+                                            user.saveOrUpdate("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")));
                                         }
+                                        RequestOptions options = new RequestOptions().circleCrop();
+                                        Glide.with(mContext).load(ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl).apply(options).into(imgViewUserAvatar);
+                                        ToastUtil.showShort(mContext, "头像上传成功");
                                     }
                                 });
                             } else {
-                                runChildrenThread(msg);
+                                ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                             }
                         } else {
-                            runChildrenThread("返回参数有误！");
+                            ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
                         }
                         isUploadHead = false;
-                        LoadingUtils.hideLoading();
                         return "";
                     }
 
                     @Override
                     public void onError(final Call call, final Exception e, final int id) {
                         isUploadHead = false;
-                        runChildrenThread("头像上传失败！");
+                        ChildThreadUtil.toastMsgHidden(mContext, "头像上传失败！");
                     }
 
                     @Override
@@ -480,47 +459,6 @@ public class MainActivity extends BaseActivity {
                         super.inProgress(progress, total, id);
                     }
                 });
-    }
-
-    /**
-     * 子线程运行
-     */
-    private void runChildrenThread(final String msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LoadingUtils.hideLoading();
-                ToastUtil.showLong(mContext, msg);
-            }
-        });
-    }
-
-    /**
-     * Token过期
-     *
-     * @param code
-     * @param msg
-     */
-    private void tokenErr(final String code, final String msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LoadingUtils.hideLoading();
-                switch (code) {
-                    case "3003":
-                    case "3004":
-                        // Token异常重新登录
-                        ToastUtil.showLong(mContext, "Token过期请重新登录！");
-                        SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                        ScreenManagerUtil.popAllActivityExceptOne();
-                        startActivity(new Intent(mContext, LoginActivity.class));
-                        break;
-                    default:
-                        ToastUtil.showLong(mContext, msg);
-                        break;
-                }
-            }
-        });
     }
 
     /**

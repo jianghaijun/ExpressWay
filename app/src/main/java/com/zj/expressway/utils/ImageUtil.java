@@ -196,7 +196,7 @@ public class ImageUtil {
         String userLevel = (String) SpUtil.get(mContext, ConstantsUtil.USER_LEVEL, "");
         String userName = (String) SpUtil.get(mContext, "UserName", "");
         Calendar mCalendar = Calendar.getInstance();
-        mCalendar.setTimeInMillis(photosBean.getCreate_time());
+        mCalendar.setTimeInMillis(photosBean.getCreateTime());
         int apm = mCalendar.get(Calendar.AM_PM);
         String am_pm;
         if (apm == 0) {
@@ -208,13 +208,13 @@ public class ImageUtil {
         if (userLevel.equals("0")) {
             watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "现场技术员：" + userName + "    质检负责人：" + qualityUserName, pFont, rect, DensityUtil.dip2px(5), mar);
             mar += oneSizeHeight;
-            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreate_time()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
+            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreateTime()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
         }
 
         if (userLevel.equals("2")) {
             watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "现场监理：" + userName + "    质检负责人：" + qualityUserName, pFont, rect, DensityUtil.dip2px(5), mar);
             mar += oneSizeHeight;
-            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreate_time()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
+            watermarkBitmap = drawTextToLeftTop(watermarkBitmap, "拍照时间：" + DateUtil.formatDateTime(DateUtil.date(DateUtil.date(photosBean.getCreateTime()))) + "  " + am_pm, pFont, rect, DensityUtil.dip2px(5), mar);
         }
 
         // 创建一个新的和SRC长度宽度一样的位图

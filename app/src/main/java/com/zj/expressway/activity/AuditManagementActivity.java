@@ -1,7 +1,9 @@
 package com.zj.expressway.activity;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
@@ -11,20 +13,25 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
+import com.zj.expressway.view.SonnyJackDragView;
 
+import org.litepal.crud.DataSupport;
+import org.xutils.common.util.DensityUtil;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *                     _ooOoo_
@@ -50,19 +57,17 @@ import java.util.ArrayList;
  *       Created by HaiJun on 2018/6/11 17:00
  *       工序列表主界面
  */
-public class WorkingProcedureActivity extends BaseActivity {
+public class AuditManagementActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
-    @ViewInject(R.id.imgBtnRight)
-    private ImageButton imgBtnRight;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
+    @ViewInject(R.id.btnTakePicture)
+    private Button btnTakePicture;
+    @ViewInject(R.id.vTakePicture)
+    private View vTakePicture;
     @ViewInject(R.id.btnToBeAudited)
     private Button btnToBeAudited;
-    @ViewInject(R.id.rlPhoto)
-    private RelativeLayout rlPhoto;
-    @ViewInject(R.id.llButtons)
-    private LinearLayout llButtons;
     @ViewInject(R.id.vToBeAudited)
     private View vToBeAudited;
     @ViewInject(R.id.btnFinish)
@@ -71,8 +76,11 @@ public class WorkingProcedureActivity extends BaseActivity {
     private View vFinish;
     @ViewInject(R.id.vpWorkingProcedure)
     private ViewPager vpWorkingProcedure;
+    @ViewInject(R.id.llButtons)
+    private LinearLayout llButtons;
     // viewPage
-    private View layToBeAudited, layFinish;
+    private View layTakePicture, layToBeAudited, layFinish;
+    private WorkingProcedureListActivity takePictureActivity;
     private WorkingProcedureListActivity toBeAuditedActivity;
     private WorkingProcedureListActivity finishActivity;
     private ArrayList<View> views;
@@ -89,29 +97,57 @@ public class WorkingProcedureActivity extends BaseActivity {
         txtTitle.setText(R.string.app_name);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
-        imgBtnRight.setVisibility(View.VISIBLE);
-        imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
-
-        llButtons.setVisibility(View.GONE);
-        rlPhoto.setVisibility(View.GONE);
-        btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
 
         initViewPageData();
 
-        btnToBeAudited.setText("待办");
-        btnFinish.setText("已办");
+        llButtons.setVisibility(View.GONE);
 
+        initFabBtn();
         initRecyclerViewData();
+
+        btnTakePicture.setText("待拍照");
+        btnToBeAudited.setText("未提交");
+        List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")), "5").find(WorkingBean.class);
+        int sum = beanSize == null ? 0 : beanSize.size();
+        btnFinish.setText("已提交（" + sum + "）");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (ConstantsUtil.isLoading) {
-            ConstantsUtil.isLoading = false;
             initRecyclerViewData();
+            ConstantsUtil.isLoading = false;
         }
+    }
+
+    /**
+     * 添加悬浮按钮
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void initFabBtn() {
+        Button imgBtn = new Button(this);
+        imgBtn.setTextColor(ContextCompat.getColor(this, R.color.white));
+        imgBtn.setTextSize(10);
+        imgBtn.setElevation(50f);
+        imgBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.all_tree));
+        imgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, ContractorTreeActivity.class);
+                intent.putExtra("type", "1");
+                startActivityForResult(intent, 10002);
+            }
+        });
+
+        new SonnyJackDragView.Builder()
+                .setActivity(this)
+                .setDefaultLeft(DensityUtil.getScreenWidth() - DensityUtil.dip2px(75))
+                .setDefaultTop(DensityUtil.getScreenHeight() - DensityUtil.dip2px(100))
+                .setNeedNearEdge(false)
+                .setSize(DensityUtil.dip2px(50))
+                .setView(imgBtn)
+                .build();
     }
 
     /**
@@ -120,8 +156,11 @@ public class WorkingProcedureActivity extends BaseActivity {
     private void initViewPageData() {
         // 将要分页显示的View装入数组中
         LayoutInflater viewLI = LayoutInflater.from(this);
+        layTakePicture = viewLI.inflate(R.layout.layout_msg, null);
         layToBeAudited = viewLI.inflate(R.layout.layout_msg, null);
         layFinish = viewLI.inflate(R.layout.layout_msg, null);
+        // 待拍照
+        takePictureActivity = new WorkingProcedureListActivity(mContext, layTakePicture);
         // 待审核
         toBeAuditedActivity = new WorkingProcedureListActivity(mContext, layToBeAudited);
         // 已完成
@@ -129,6 +168,7 @@ public class WorkingProcedureActivity extends BaseActivity {
 
         //每个页面的view数据
         views = new ArrayList<>();
+        views.add(layTakePicture);
         views.add(layToBeAudited);
         views.add(layFinish);
 
@@ -141,6 +181,7 @@ public class WorkingProcedureActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
+        takePictureActivity.initData(1, btnTakePicture, null);
         toBeAuditedActivity.initData(4, btnToBeAudited, null);
         finishActivity.initData(5, btnFinish, null);
     }
@@ -151,6 +192,9 @@ public class WorkingProcedureActivity extends BaseActivity {
      */
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
+            case 0:
+                takePictureActivity.initData(1, btnTakePicture, levelId);
+                break;
             case 1:
                 toBeAuditedActivity.initData(4, btnToBeAudited, levelId);
                 break;
@@ -210,6 +254,9 @@ public class WorkingProcedureActivity extends BaseActivity {
      * @param option
      */
     private void setStates(int option) {
+        // 待拍照
+        btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
         // 待审核
         btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
         vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
@@ -219,10 +266,14 @@ public class WorkingProcedureActivity extends BaseActivity {
 
         switch (option) {
             case 0:
+                btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                break;
+            case 1:
                 btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 break;
-            case 1:
+            case 2:
                 btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 break;
@@ -244,22 +295,20 @@ public class WorkingProcedureActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.imgBtnRight, R.id.btnToBeAudited, R.id.btnFinish })
+    @Event({R.id.imgBtnLeft, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish })
     private void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgBtnLeft:
                 this.finish();
                 break;
-            case R.id.imgBtnRight:
-                Intent intent = new Intent(mContext, ContractorTreeActivity.class);
-                intent.putExtra("type", "1");
-                startActivityForResult(intent, 10002);
-                break;
-            case R.id.btnToBeAudited:
+            case R.id.btnTakePicture:
                 vpWorkingProcedure.setCurrentItem(0);
                 break;
-            case R.id.btnFinish:
+            case R.id.btnToBeAudited:
                 vpWorkingProcedure.setCurrentItem(1);
+                break;
+            case R.id.btnFinish:
+                vpWorkingProcedure.setCurrentItem(2);
                 break;
         }
     }

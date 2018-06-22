@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.zj.expressway.R;
 import com.zj.expressway.activity.ContractorDetailsActivity;
+import com.zj.expressway.activity.ToDoDetailsActivity;
 import com.zj.expressway.base.BaseAdapter;
 import com.zj.expressway.bean.WorkingBean;
 
@@ -79,7 +80,15 @@ public class MsgAdapter extends BaseAdapter<List<WorkingBean>> {
             txtContext.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, ContractorDetailsActivity.class);
+                    Intent intent;
+                    if (data.getFlowId().equals("zxHwZlHiddenDanger")) {
+                        intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    } else if (data.getFlowId().equals("zxHwAqHiddenDanger")) {
+                        intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    } else {
+                        intent = new Intent(mContext, ContractorDetailsActivity.class);
+                    }
+                    intent.putExtra("flowId", data.getFlowId());
                     intent.putExtra("processId", data.getProcessId());
                     intent.putExtra("processState", data.getProcessState());
                     intent.putExtra("processPath", data.getLevelNameAll());

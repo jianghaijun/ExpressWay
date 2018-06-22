@@ -195,6 +195,7 @@ public class MySettingActivity extends BaseActivity {
                 /*清除工序下的图片*/
                 //DataSupport.deleteAll(PhotosBean.class);
                 DataSupport.deleteAll(WorkingBean.class);
+
                 //DataSupport.deleteAll(UserInfo.class);
                 boolean isClean = GlideCatchUtil.cleanCatchDisk();
                 myHolder.txtCachingSize.setText(GlideCatchUtil.getCacheSize());

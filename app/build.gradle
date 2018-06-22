@@ -41,7 +41,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
     defaultConfig {
-        applicationId "com.zj.expressway.activity"
+        applicationId "com.zj.expressway"
 
         ndk {
             // 选择要添加的对应cpu类型的.so库。
@@ -55,7 +55,7 @@ android {
                 JPUSH_CHANNEL: "developer-default", // 暂时填写默认值即可.
         ]
 
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 25
         versionCode 1
         versionName "1.0.0"
@@ -152,5 +152,8 @@ dependencies {
     // 时间轴---瀑布流
     compile 'com.github.vipulasri:timelineview:1.0.6'
     compile 'com.vivian.widgets:TimeLineItemDecoration:1.3'
+    // 图标编辑
+    compile 'com.hzw.graffiti:graffiti:4.3.1'
+    compile 'com.forward.androids:androids:1.1.8'
     testCompile 'junit:junit:4.12'
 }

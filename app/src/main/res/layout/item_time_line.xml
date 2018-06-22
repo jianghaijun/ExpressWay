@@ -36,7 +36,6 @@
                 android:id="@+id/txtUserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
                 android:textColor="@color/black"
                 android:textSize="@dimen/fourteen_sp" />
 
@@ -51,7 +50,6 @@
                 android:id="@+id/txtTimeLineTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
                 android:textColor="@color/black"
                 android:textSize="@dimen/fourteen_sp" />
         </LinearLayout>

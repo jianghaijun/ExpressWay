@@ -70,11 +70,14 @@
     <string name="friends">联系人</string>
     <string name="me">个人中心</string>
     <string name="bim_platform">BIM平台</string>
+    <string name="audit_management">审核管理</string>
     <string name="mail_list">通讯录</string>
     <string name="qr_code">二维码扫描</string>
     <string name="qr_code_generate">二维码生成</string>
     <string name="process_inspection">工序检查</string>
     <string name="hidden_danger">安全隐患</string>
+    <string name="qualityPatrol">质量巡查</string>
+    <string name="securityPatrol">安全巡查</string>
     <string name="video_surveillance">视频监控</string>
     <string name="group_management">班组管理</string>
     <string name="drawing_inquiry">图纸查询</string>
@@ -87,6 +90,7 @@
     <string name="attendance_card">考勤打卡</string>
     <string name="process_report">工序报表</string>
     <string name="no">NO.</string>
+    <string name="choice">选择</string>
     <string name="working_name">工序名称：</string>
     <string name="photos_num">照片数量</string>
     <string name="photosNum">照片数量：</string>
@@ -103,6 +107,7 @@
     <string name="distance_angle">距离角度：</string>
     <string name="distanceAngle">距离及角度：</string>
     <string name="location">拍照位置：</string>
+    <string name="local">位置：</string>
     <string name="locationPosition">参考位置</string>
     <string name="take_photo_num">拍照数量：</string>
     <string name="take_photo_requirement">拍照要求</string>
@@ -133,12 +138,14 @@
     <string name="submit_yun">上传云端</string>
     <string name="reject_photo">驳回原因：</string>
     <string name="remarks">审核意见：</string>
+    <string name="hiddenTroubleHeadline">隐患标题：</string>
+    <string name="hiddenTroubleLevel">隐患级别：</string>
     <string name="reject">驳回</string>
     <string name="examine">审核</string>
     <string name="elevation">现标高</string>
     <string name="PositionOfPileNumber">桩号位置</string>
     <string name="please_input_remark">请输入</string>
-    <string name="no_msg">暂无消息！</string>
+    <string name="no_msg">暂无数据！</string>
     <string name="local_msg">系统消息</string>
     <string name="personal_msg">个人消息</string>
     <string name="same_day">各分部历史完成工序查询</string>
@@ -151,4 +158,10 @@
     <string name="all">全部工序</string>
     <string name="already_select">已选择人员</string>
     <string name="no_data">未选中任何人员！</string>
+    <string name="commonly">一般</string>
+    <string name="serious">严重</string>
+    <string name="critical">紧要</string>
+    <string name="rectificationPeriod">整改期限：</string>
+    <string name="rectificationRequirements">整改要求：</string>
+    <string name="noSearchContext">无搜索内容！</string>
 </resources>

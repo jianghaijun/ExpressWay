@@ -1,5 +1,6 @@
 package com.zj.expressway.model;
 
+import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.ContractorBean;
 
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.List;
  *       Created by HaiJun on 2018/6/11 17:33
  *       工序model
  */
-public class ContractorModel {
+public class ContractorModel extends BaseModel {
     private List<ContractorBean> data;
 
     public List<ContractorBean> getData() {

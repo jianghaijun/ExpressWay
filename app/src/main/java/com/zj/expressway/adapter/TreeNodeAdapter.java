@@ -15,6 +15,8 @@ import android.widget.TextView;
 import com.zj.expressway.R;
 import com.zj.expressway.listener.ContractorListener;
 import com.zj.expressway.tree.Node;
+import com.zj.expressway.utils.SpUtil;
+import com.zj.expressway.utils.ToastUtil;
 
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -53,7 +55,6 @@ public class TreeNodeAdapter extends BaseAdapter {
     private int expandedIcon = -1;
     private int collapsedIcon = -1;
     private Activity mContext;
-
     private Node rootNode;
     private List<String> nodeName = new ArrayList<>();
     private ContractorListener listener;
@@ -162,7 +163,7 @@ public class TreeNodeAdapter extends BaseAdapter {
         Node n = all.get(position);
         if (n != null) {
             // 是否是文件夹（文件夹继续展开---工序进入上传照片界面）0:不是文件夹 1：是文件夹
-            if (n.getFolderFlag().equals("1")) {
+            if (n.getFolderFlag().equals("0")) {
                 // 是否处于展开状态
                 if (n.isExpanded()) {
                     n.setExpanded(!n.isExpanded());
@@ -201,46 +202,42 @@ public class TreeNodeAdapter extends BaseAdapter {
                 intent.putExtra("procedureName", n.getLevelName());
                 mContext.setResult(Activity.RESULT_OK, intent);
                 mContext.finish();
-
-                /*WorkingPopupWindow workingPop = new WorkingPopupWindow(mContext, sb.toString(), n.getLevelId());
-                workingPop.showAtDropDownRight(viewMain);*/
             }
         }
     }
 
     /**
-     * 是否有工序
-     *
+     * 选中工序--->确认
      * @param position
      */
-    public void CheckIsHave(int position) {
-        Node n = all.get(position);
-        if (!n.isCanClick()) {
-            ExpandOrCollapse(position);
-        } else {
-            nodeName.clear();
-            nodeName.add(n.getLevelName());
-            getNodeRootNode(n);
-            StringBuffer sb = new StringBuffer();
-            int len = nodeName.size() - 1;
-            for (int i = len; i >= 0; i--) {
-                String name = nodeName.get(i);
-                if (name.contains("(")) {
-                    name = name.substring(0, name.lastIndexOf("("));
-                }
-                if (i != 0) {
-                    sb.append(name.trim() + "→");
-                } else {
-                    sb.append(name.trim());
-                }
-            }
-            Intent intent = new Intent();
-            intent.putExtra("procedureName", n.getLevelName());
-            mContext.setResult(Activity.RESULT_OK, intent);
-            mContext.finish();
-            /*WorkingPopupWindow workingPop = new WorkingPopupWindow(mContext, sb.toString(), n.getLevelId());
-            workingPop.showAtDropDownRight(viewMain);*/
+    public void selectProcess(int position) {
+        if (position == -1) {
+            ToastUtil.showShort(mContext, "请先选择工序！");
+            return;
         }
+
+        Node n = all.get(position);
+        nodeName.clear();
+        nodeName.add(n.getLevelName());
+        getNodeRootNode(n);
+        StringBuffer sb = new StringBuffer();
+        int len = nodeName.size() - 1;
+        for (int i = len; i >= 0; i--) {
+            String name = nodeName.get(i);
+            if (name.contains("(")) {
+                name = name.substring(0, name.lastIndexOf("("));
+            }
+            if (i != 0) {
+                sb.append(name.trim() + "→");
+            } else {
+                sb.append(name.trim());
+            }
+        }
+        Intent intent = new Intent();
+        intent.putExtra("procedureName", sb.toString());
+        intent.putExtra("levelId", n.getLevelId());
+        mContext.setResult(Activity.RESULT_OK, intent);
+        mContext.finish();
     }
 
     @Override
@@ -278,7 +275,7 @@ public class TreeNodeAdapter extends BaseAdapter {
             String roleName = n.getLevelName();
             // 去掉节点上该节点下有多少工序，是否已完成
             holder.txtTitle.setText(roleName == null || "null".equals(roleName) ? "" : roleName);
-            if (!n.getFolderFlag().equals("1")) {
+            if (!n.getFolderFlag().equals("0")) {
                 // 是叶节点 不显示展开和折叠状态图标
                 holder.imgViewState.setVisibility(View.GONE);
                 holder.imgViewNode.setVisibility(View.VISIBLE);
@@ -298,12 +295,30 @@ public class TreeNodeAdapter extends BaseAdapter {
                 }
             }
 
-            holder.rlNodeState.setOnClickListener(new View.OnClickListener() {
+            if (n.isChoice()) {
+                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.btn_check));
+            } else {
+                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.btn_un_check));
+            }
+
+            holder.rlRight.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    for (Node node : all) {
+                        node.setChoice(false);
+                    }
+                    n.setChoice(true);
+                    SpUtil.put(mContext, "selectProcess", position);
+                    TreeNodeAdapter.this.notifyDataSetChanged();
+                }
+            });
+
+            /*holder.rlNodeState.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     ExpandOrCollapse(position);
                 }
-            });
+            });*/
 
             /*holder.txtTitle.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -331,6 +346,8 @@ public class TreeNodeAdapter extends BaseAdapter {
         private ImageView imgViewState;
         @ViewInject(R.id.imgViewNode)
         private ImageView imgViewNode;
+        @ViewInject(R.id.imgViewSelect)
+        private ImageView imgViewSelect;
 
         // 标题
         @ViewInject(R.id.txtTitle)
@@ -339,6 +356,8 @@ public class TreeNodeAdapter extends BaseAdapter {
         private RelativeLayout rlItemTree;
         @ViewInject(R.id.rlNodeState)
         private RelativeLayout rlNodeState;
+        @ViewInject(R.id.rlRight)
+        private RelativeLayout rlRight;
     }
 
 }

@@ -1,7 +1,6 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -32,17 +31,15 @@ import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.SameDayBean;
 import com.zj.expressway.model.SameDayModel;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.DateUtils;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.ScreenManagerUtil;
-import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.xutils.common.util.DensityUtil;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
@@ -54,12 +51,12 @@ import java.util.Date;
 import java.util.List;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.json.JSONObject;
 import cn.qqtheme.framework.picker.DatePicker;
 import cn.qqtheme.framework.util.ConvertUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -103,7 +100,7 @@ public class ProcessReportActivity extends BaseActivity {
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.tbSameDay)
     private TableLayout tbSameDay;
-    private Context mContext;
+    private Activity mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -557,97 +554,34 @@ public class ProcessReportActivity extends BaseActivity {
     private void getSameDayData() {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
-        try {
-            obj.put("startDate", DateUtil.parse(txtBeganDate.getText().toString()).getTime());
-            obj.put("endDate", DateUtil.parse(txtEndDate.getText().toString()).getTime());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.PROCESS_REPORT_TODAY)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
+        obj.put("startDate", DateUtil.parse(txtBeganDate.getText().toString()).getTime());
+        obj.put("endDate", DateUtil.parse(txtEndDate.getText().toString()).getTime());
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.PROCESS_REPORT_TODAY, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                LoadingUtils.hideLoading();
-                runChildrenThread(mContext.getString(R.string.server_exception));
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
-                    try {
-                        JSONObject obj = new JSONObject(jsonData);
-                        boolean resultFlag = obj.getBoolean("success");
-                        final String msg = obj.getString("message");
-                        final String code = obj.getString("code");
-                        if (resultFlag) {
-                            Gson gson = new Gson();
-                            final SameDayModel model = gson.fromJson(jsonData, SameDayModel.class);
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    initSameDay(model.getData().getSearchTotalList());
-                                    LoadingUtils.hideLoading();
-                                }
-                            });
-                        } else {
-                            LoadingUtils.hideLoading();
-                            tokenErr(code, msg);
-                        }
-                    } catch (JSONException e) {
-                        LoadingUtils.hideLoading();
-                        runChildrenThread(mContext.getString(R.string.data_error));
-                        e.printStackTrace();
+                    Gson gson = new Gson();
+                    final SameDayModel model = gson.fromJson(jsonData, SameDayModel.class);
+                    if (model.isSuccess()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                initSameDay(model.getData().getSearchTotalList());
+                                LoadingUtils.hideLoading();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                     }
                 } else {
-                    LoadingUtils.hideLoading();
-                    runChildrenThread(mContext.getString(R.string.json_error));
-                }
-            }
-        });
-    }
-
-    /**
-     * 子线程运行
-     */
-    private void runChildrenThread(final String msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ToastUtil.showLong(mContext, msg);
-            }
-        });
-    }
-
-    /**
-     * Token过期
-     *
-     * @param code
-     * @param msg
-     */
-    private void tokenErr(final String code, final String msg) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                LoadingUtils.hideLoading();
-                switch (code) {
-                    case "3003":
-                    case "3004":
-                        // Token异常重新登录
-                        ToastUtil.showLong(mContext, "Token过期请重新登录！");
-                        SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                        ScreenManagerUtil.popAllActivityExceptOne();
-                        mContext.startActivity(new Intent(mContext, LoginActivity.class));
-                        break;
-                    default:
-                        ToastUtil.showLong(mContext, msg);
-                        break;
+                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
                 }
             }
         });

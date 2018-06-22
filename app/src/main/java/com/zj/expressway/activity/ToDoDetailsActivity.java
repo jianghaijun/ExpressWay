@@ -24,6 +24,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -75,12 +77,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.hzw.graffiti.GraffitiActivity;
+import cn.hzw.graffiti.GraffitiParams;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -89,43 +97,46 @@ import okhttp3.Response;
 /**
  * 详情
  */
-public class ContractorDetailsActivity extends BaseActivity {
+public class ToDoDetailsActivity extends BaseActivity {
+    @ViewInject(R.id.actionBar)
+    private View actionBar;
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
-    @ViewInject(R.id.btnRight)
-    private Button btnRight;
     /*数据信息*/
-    @ViewInject(R.id.txtWorkingNo)
-    private TextView txtWorkingNo;
-    @ViewInject(R.id.txtWorkingName)
-    private TextView txtWorkingName;
+    @ViewInject(R.id.btnChoice)
+    private Button btnChoice;
+    @ViewInject(R.id.txtPressLocal)
+    private TextView txtPressLocal;
     @ViewInject(R.id.txtEntryTime)
     private TextView txtEntryTime;
-    @ViewInject(R.id.txtLocation)
-    private TextView txtLocation;
-    @ViewInject(R.id.txtDistanceAngle)
-    private TextView txtDistanceAngle;
-    @ViewInject(R.id.txtTakePhotoNum)
-    private TextView txtTakePhotoNum;
-    @ViewInject(R.id.txtTakePhotoRequirement)
-    private TextView txtTakePhotoRequirement;
-    @ViewInject(R.id.txtRejectPhoto)
-    private TextView txtRejectPhoto;
-    @ViewInject(R.id.llButtons)
-    private LinearLayout llButtons;
-    @ViewInject(R.id.edtRemarks)
-    private EditText edtRemarks;
+    @ViewInject(R.id.edtHiddenTroubleHeadline)
+    private EditText edtHiddenTroubleHeadline;
+    @ViewInject(R.id.rgLevel)
+    private RadioGroup rgLevel;
+    @ViewInject(R.id.rBtn1)
+    private RadioButton rBtn1;
+    @ViewInject(R.id.rBtn2)
+    private RadioButton rBtn2;
+    @ViewInject(R.id.rBtn3)
+    private RadioButton rBtn3;
+
+
+
+
+    @ViewInject(R.id.btnChangeDate)
+    private Button btnChangeDate;
     @ViewInject(R.id.imgBtnAdd)
     private ImageButton imgBtnAdd;
+    @ViewInject(R.id.edtRectificationRequirements)
+    private EditText edtRectificationRequirements;
     @ViewInject(R.id.rvContractorDetails)
     private RecyclerView rvContractorDetails;
-    @ViewInject(R.id.rlRemarks)
-    private RelativeLayout rlRemarks;
-    // 时间轴
     @ViewInject(R.id.rvTimeMarker)
     private RecyclerView rvTimeMarker;
+    @ViewInject(R.id.llButtons)
+    private LinearLayout llButtons;
     private TimeLineAdapter timeLineAdapter;
     // 屏幕方向监听
     private AlbumOrientationEventListener mAlbumOrientationEventListener;
@@ -134,62 +145,52 @@ public class ContractorDetailsActivity extends BaseActivity {
     // 图片列表
     private PhotosListAdapter photosAdapter;
     private List<PhotosBean> photosList = new ArrayList<>();
-    // 定位信息
-    private LocationService locationService;
-    private final int SDK_PERMISSION_REQUEST = 127;
-    private GPSLocationManager gpsLocationManager;
     // 拍照
     private Uri uri = null;
     private String fileUrlName, strFilePath;
     private PhotosBean addPhotoBean;
     private File imgFile;
     private Activity mContext;
-    private String workId, flowId, processId, mainTablePrimaryId, sLocation, processPath, jsonData, buttonId;
-    private double longitude, latitude;
+    private String workId, flowId, processId, jsonData, buttonId;
     private Gson gson = new Gson();
     private WorkModel model;
-    private boolean isToDo;
-    private int leastTakePhotoNum; // 最少拍照数量
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_contractor_details);
+        setContentView(R.layout.layout_quality_safety_details);
 
         mContext = this;
         x.view().inject(this);
         ScreenManagerUtil.pushActivity(this);
-
+        // actionBar
+        txtTitle.setText(R.string.app_name);
+        actionBar.setVisibility(View.VISIBLE);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
-        txtTitle.setText(R.string.app_name);
-
         // 任务id
         workId = getIntent().getStringExtra("workId");
         flowId = getIntent().getStringExtra("flowId");
         processId = getIntent().getStringExtra("processId");
-        mainTablePrimaryId = getIntent().getStringExtra("mainTablePrimaryId");
-        isToDo = getIntent().getBooleanExtra("isToDo", false);
 
         initFilePath();
-        getPermissions();
 
         if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
-            getData(isToDo);
+            getData();
         } else {
-            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc",  isToDo ? workId : processId).find(WorkingBean.class);
-            WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? new WorkingBean() : workingBeanList.get(0);
+            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc",  workId).find(WorkingBean.class);
+            WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
             setTableData(workingBean);
             setImgData(new ArrayList<PhotosBean>());
             List<ButtonListModel> buttons = new ArrayList<>();
-            if (StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && workingBean.getFileOperationFlag().equals("1")) {
+            if (workingBean != null && StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && workingBean.getFileOperationFlag().equals("1")) {
                 ButtonListModel btnModel = new ButtonListModel();
                 btnModel.setButtonId("saveInLocation");
                 btnModel.setButtonName("保存至本地");
                 buttons.add(btnModel);
             }
             setShowButton(buttons);
-            List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", isToDo ? workId : processId).find(HistoryBean.class);
+            List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", workId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
         }
 
@@ -206,14 +207,6 @@ public class ContractorDetailsActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onStop() {
-        if (locationService != null) {
-            locationService.unregisterListener(mListener); //注销掉监听
-            locationService.stop(); //停止定位服务
-        }
-        super.onStop();
-    }
 
     /**
      * 设置列表方向
@@ -233,8 +226,8 @@ public class ContractorDetailsActivity extends BaseActivity {
         }
 
         for (HistoryBean history : flowHistoryList) {
-            history.setProcessId(isToDo ? workId : processId);
-            history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime()+"", isToDo ? workId : processId);
+            history.setProcessId(workId);
+            history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime()+"", workId);
         }
 
         rvTimeMarker.setLayoutManager(getLinearLayoutManager());
@@ -257,21 +250,12 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 获取表单数据
-     * @param isToDo    待办已办？
      */
-    private void getData(boolean isToDo) {
+    private void getData() {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
-        String url = "";
-        if (isToDo) {
-            obj.put("workId", workId);
-            url+=ConstantsUtil.FLOW_DETAILS;
-        } else {
-            obj.put("flowId", flowId);
-            obj.put("mainTablePrimaryId", mainTablePrimaryId);
-            url+=ConstantsUtil.openPageFlow;
-        }
-        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
+        obj.put("workId", workId);
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.FLOW_DETAILS, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -292,7 +276,11 @@ public class ContractorDetailsActivity extends BaseActivity {
                                 flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                 flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
                                 setTableData(flowBean);
-                                setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
+                                if (flowId.equals("zxHwZlHiddenDanger")) {
+                                    setImgData(model.getData().getSubTableObject().getZxHwZlAttachment().getSubTableObject());
+                                } else {
+                                    setImgData(model.getData().getSubTableObject().getZxHwAqAttachment().getSubTableObject());
+                                }
                                 setShowButton(model.getData().getButtonList());
                                 initTimeLineView(model.getData().getFlowHistoryList());
                                 LoadingUtils.hideLoading();
@@ -313,26 +301,44 @@ public class ContractorDetailsActivity extends BaseActivity {
      * @param flowBean
      */
     private void setTableData(WorkingBean flowBean) {
+        if (flowBean == null) {
+            return;
+        }
         // 保存
-        flowBean.setProcessId(isToDo ? workId : processId);
-        flowBean.saveOrUpdate("processId=?", isToDo ? workId : processId);
-        txtWorkingName.setText(flowBean.getProcessName());   // 工序名称
-        txtWorkingNo.setText(flowBean.getProcessCode());     // 工序编号
-        txtTakePhotoRequirement.setText(flowBean.getPhotoContent());     // 拍照要求
-        txtDistanceAngle.setText(flowBean.getPhotoDistance());   // 距离角度
-        txtTakePhotoNum.setText("最少拍照" + flowBean.getPhotoNumber() + "张");  // 拍照张三
-        leastTakePhotoNum = Integer.valueOf(StrUtil.isEmpty(flowBean.getPhotoNumber()) ? "3" : flowBean.getPhotoNumber());
-        txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getEnterTime()));    // 检查时间
-        txtLocation.setText(flowBean.getLocation());    // 拍照位置
-        txtRejectPhoto.setText(flowBean.getDismissal()); // 驳回原因
-        processPath = flowBean.getLevelNameAll().replace(",", "→") + "→" + flowBean.getProcessName();
+        flowBean.setProcessId(workId);
+        flowBean.saveOrUpdate("processId=?", workId);
+        btnChoice.setVisibility(View.GONE);
+        txtPressLocal.setText(flowBean.getLevelNameAll());   // 工序位置
+        txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getCreateTime()));     // 检查时间
+        edtHiddenTroubleHeadline.setFocusable(false);
+        if (flowId.equals("zxHwZlAttachment")) {
+            edtHiddenTroubleHeadline.setText(flowBean.getTroubleTitle());     // 隐患标题
+            if (flowBean.getTroubleLevel().equals("1")) {
+                rBtn1.setChecked(true);
+            } else if(flowBean.getTroubleLevel().equals("2")) {
+                rBtn2.setChecked(true);
+            } else {
+                rBtn3.setChecked(true);
+            }
+            edtRectificationRequirements.setText(flowBean.getTroubleRequire());
+        } else {
+            edtHiddenTroubleHeadline.setText(flowBean.getDangerTitle());     // 隐患标题
+            if (flowBean.getDangerLevel().equals("1")) {
+                rBtn1.setChecked(true);
+            } else if(flowBean.getDangerLevel().equals("2")) {
+                rBtn2.setChecked(true);
+            } else {
+                rBtn3.setChecked(true);
+            }
+            edtRectificationRequirements.setText(flowBean.getDangerRequire());
+        }
+        rgLevel.setFocusable(false);
+        btnChangeDate.setText(DateUtils.setDataToStr(flowBean.getDeadline()));
+        edtRectificationRequirements.setFocusable(false);
+
         // 控制拍照按钮是否显示
         if (!StrUtil.equals("1",flowBean.getFileOperationFlag())) {
             imgBtnAdd.setVisibility(View.GONE);
-        }
-        // 控制意见栏是否显示
-        if (!StrUtil.equals("1",flowBean.getOpinionShowFlag())) {
-            rlRemarks.setVisibility(View.GONE);
         }
     }
 
@@ -342,7 +348,7 @@ public class ContractorDetailsActivity extends BaseActivity {
      */
     private void setImgData(List<PhotosBean> subTableObject) {
         // 查询本地保存照片
-        List<PhotosBean> localPhoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), isToDo ? workId : processId).find(PhotosBean.class);
+        List<PhotosBean> localPhoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workId).find(PhotosBean.class);
 
         // 添加本地照片
         if (localPhoneList != null && localPhoneList.size() > 0) {
@@ -366,11 +372,6 @@ public class ContractorDetailsActivity extends BaseActivity {
      * @param buttons
      */
     private void setShowButton(List<ButtonListModel> buttons) {
-        if (!isToDo) {
-            btnRight.setText("提交");
-            btnRight.setVisibility(View.VISIBLE);
-        }
-
         if (buttons == null || buttons.size() == 0) {
             llButtons.setVisibility(View.GONE);
             return;
@@ -411,7 +412,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                 } else {
                     ConstantsUtil.buttonModel = buttonModel;
                     buttonId = buttonModel.getButtonId();
-                    toExaminePhoto(true);
+                    toExaminePhoto();
                 }
             } else {
                 Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
@@ -423,19 +424,66 @@ public class ContractorDetailsActivity extends BaseActivity {
     }
 
     /**
+     * 上传照片--->提交审核
+     */
+    private void toExaminePhoto() {
+        final List<PhotosBean> submitPictureList = new ArrayList<>();
+        // 检查是否有新拍摄的照片
+        for (PhotosBean photo : photosList) {
+            if (photo.getIsToBeUpLoad() == 1) {
+                submitPictureList.add(photo);
+            }
+        }
+
+        if (submitPictureList.size() > 0) {
+            // 上传
+            UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, 3, submitPictureList, new PromptListener() {
+                @Override
+                public void returnTrueOrFalse(boolean trueOrFalse) {
+                    if (trueOrFalse) {
+                        // 修改已上传照片状态
+                        for (PhotosBean phone : photosList) {
+                            phone.setIsToBeUpLoad(-1); // 已上传
+                        }
+                        // 更新适配器
+                        if (null != photosAdapter) {
+                            photosAdapter.notifyDataSetChanged();
+                        }
+
+                        Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                        startActivityForResult(intent, 201);
+                    }
+                }
+            });
+            upLoadPhotosDialog.setCanceledOnTouchOutside(false);
+            upLoadPhotosDialog.show();
+        } else {
+            Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+            startActivityForResult(intent, 201);
+        }
+    }
+
+    /**
      * 提交、驳回
      */
-    private void submitData(final boolean isToDoType) {
+    private void submitData() {
         LoadingUtils.showLoading(mContext);
         JSONObject object = new JSONObject(jsonData);
         String newJsonData, url;
-        if (isToDoType) {
-            url = ConstantsUtil.submitFlow;
-            newJsonData = String.valueOf(object.getJSONObject("data").put("subTableObject", ""));
+        url = ConstantsUtil.submitFlow;
+        String type;
+        if (flowId.equals("zxHwZlAttachment")) {
+            type = "zxHwZlAttachment";
         } else {
-            url = ConstantsUtil.startFlow;
-            newJsonData = String.valueOf(object.getJSONObject("data").put("title", processPath));
+            type = "zxHwAqAttachment";
         }
+        JSONArray jsonArr = new JSONArray(SpUtil.get(mContext, "uploadImgData", "[]"));
+        JSONArray arr = new JSONArray(object.getJSONObject("data").getJSONObject("subTableObject").getJSONObject(type).getJSONArray("subTableDataObject"));
+        jsonArr.addAll(arr);
+
+        object.getJSONObject("data").getJSONObject("subTableObject").getJSONObject(type).put("subTableDataObject", jsonArr);
+        newJsonData = String.valueOf(object.getJSONObject("data"));
+
         Request request = ChildThreadUtil.getRequest(mContext, url, newJsonData);
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -445,48 +493,19 @@ public class ContractorDetailsActivity extends BaseActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                if (isToDoType) {
-                    String jsonData = response.body().string().toString();
-                    LoadingUtils.hideLoading();
-                    if (JsonUtils.isGoodJson(jsonData)) {
-                        BaseModel model = gson.fromJson(jsonData, BaseModel.class);
-                        if (model.isSuccess()) {
-                            ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
-                            ConstantsUtil.isLoading = true;
-                            ContractorDetailsActivity.this.finish();
-                        } else {
-                            ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
-                        }
-                    } else {
-                        ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
-                    }
-                } else {
-                    jsonData = response.body().string().toString();
-                    if (JsonUtils.isGoodJson(jsonData)) {
-                        // 解析
-                        model = gson.fromJson(jsonData, WorkModel.class);
-                        if (model.isSuccess()) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    WorkingBean flowBean = model.getData().getMainTableObject();
-                                    flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
-                                    flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
-                                    setTableData(flowBean);
-                                    setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
-                                    setShowButton(model.getData().getButtonList());
-                                    initTimeLineView(model.getData().getFlowHistoryList());
-
-                                    Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                                    ConstantsUtil.buttonModel = model.getData().getButtonList().get(0);
-                                    buttonId = ConstantsUtil.buttonModel.getButtonId();
-                                    startActivityForResult(intent, 201);
-                                    LoadingUtils.hideLoading();
-                                }
-                            });
-                        } else {
-                            ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
-                        }
+                jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    // 解析
+                    final BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
+                                ConstantsUtil.isLoading = true;
+                                finish();
+                            }
+                        });
                     } else {
                         ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
                     }
@@ -557,191 +576,6 @@ public class ContractorDetailsActivity extends BaseActivity {
     }
 
     /**
-     * 获取定位权限
-     */
-    @TargetApi(23)
-    private void getPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            ArrayList<String> permissions = new ArrayList<>();
-            // 定位精确位置
-            if (checkSelfPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
-            }
-            if (checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                permissions.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
-            }
-            // 读写权限
-            if (addPermission(permissions, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {}
-            // 读取电话状态权限
-            if (addPermission(permissions, android.Manifest.permission.READ_PHONE_STATE)) {}
-
-            if (permissions.size() > 0) {
-                requestPermissions(permissions.toArray(new String[permissions.size()]), SDK_PERMISSION_REQUEST);
-            } else {
-                if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
-                    locationService = ((MyApplication) getApplication()).locationService;
-                    locationService.registerListener(mListener);
-                    //注册监听
-                    int type = getIntent().getIntExtra("from", 0);
-                    if (type == 0) {
-                        locationService.setLocationOption(locationService.getDefaultLocationClientOption());
-                    } else if (type == 1) {
-                        locationService.setLocationOption(locationService.getOption());
-                    }
-                    locationService.start();// 定位SDK
-                } else {
-                    //开启GPS定位
-                    gpsLocationManager = GPSLocationManager.getInstances(this);
-                    gpsLocationManager.start(new GpsListener());
-                }
-            }
-        } else {
-            if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
-                locationService = ((MyApplication) getApplication()).locationService;
-                locationService.registerListener(mListener);
-                //注册监听
-                int type = getIntent().getIntExtra("from", 0);
-                if (type == 0) {
-                    locationService.setLocationOption(locationService.getDefaultLocationClientOption());
-                } else if (type == 1) {
-                    locationService.setLocationOption(locationService.getOption());
-                }
-                locationService.start();// 定位SDK
-            } else {
-                //开启GPS定位
-                gpsLocationManager = GPSLocationManager.getInstances(this);
-                gpsLocationManager.start(new GpsListener());
-            }
-        }
-    }
-
-    @TargetApi(23)
-    private boolean addPermission(ArrayList<String> permissionsList, String permission) {
-        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-            if (shouldShowRequestPermissionRationale(permission)) {
-                return true;
-            } else {
-                permissionsList.add(permission);
-                return false;
-            }
-        } else {
-            return true;
-        }
-    }
-
-    @TargetApi(23)
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
-            locationService = ((MyApplication) getApplication()).locationService;
-            locationService.registerListener(mListener);
-            //注册监听
-            int type = getIntent().getIntExtra("from", 0);
-            if (type == 0) {
-                locationService.setLocationOption(locationService.getDefaultLocationClientOption());
-            } else if (type == 1) {
-                locationService.setLocationOption(locationService.getOption());
-            }
-            locationService.start();// 定位SDK
-        } else {
-            //开启GPS定位
-            gpsLocationManager = GPSLocationManager.getInstances(this);
-            gpsLocationManager.start(new GpsListener());
-        }
-    }
-
-    /**
-     * GPS定位监听
-     */
-    private class GpsListener implements GPSLocationListener {
-        @Override
-        public void UpdateLocation(Location location) {
-            if (location != null) {
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-                sLocation = "";
-            }
-        }
-
-        @Override
-        public void UpdateStatus(String provider, int status, Bundle extras) {}
-
-        @Override
-        public void UpdateGPSProviderStatus(int gpsStatus) {}
-    }
-
-    /**
-     * 定位结果回调
-     */
-    private BDAbstractLocationListener mListener = new BDAbstractLocationListener() {
-        @Override
-        public void onReceiveLocation(BDLocation location) {
-            if (null != location && location.getLocType() != BDLocation.TypeServerError) {
-                StringBuffer sb = new StringBuffer(256);
-                sb.append(location.getAddrStr());
-                longitude = location.getLongitude();
-                latitude = location.getLatitude();
-                sLocation = sb.toString() == null || TextUtils.isEmpty(sb.toString()) || sb.toString().equals("null") ? "" : sb.toString();
-            }
-        }
-
-    };
-
-    /**
-     * 上传照片--->提交审核
-     */
-    private void toExaminePhoto(final boolean isToDoType) {
-        if (photosList.size() < leastTakePhotoNum) {
-            ToastUtil.showShort(mContext, "拍照数量不能小于最少张数！");
-            return;
-        }
-
-        final List<PhotosBean> submitPictureList = new ArrayList<>();
-        // 检查是否有新拍摄的照片
-        for (PhotosBean photo : photosList) {
-            if (photo.getIsToBeUpLoad() == 1) {
-                submitPictureList.add(photo);
-            }
-        }
-
-        if (submitPictureList.size() > 0) {
-            // 上传
-            UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, 1, submitPictureList, new PromptListener() {
-                @Override
-                public void returnTrueOrFalse(boolean trueOrFalse) {
-                    if (trueOrFalse) {
-                        // 修改已上传照片状态
-                        for (PhotosBean phone : photosList) {
-                            phone.setIsToBeUpLoad(-1); // 已上传
-                        }
-                        // 更新适配器
-                        if (null != photosAdapter) {
-                            photosAdapter.notifyDataSetChanged();
-                        }
-
-                        if (isToDoType) {
-                            Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                            startActivityForResult(intent, 201);
-                        } else {
-                            submitData(isToDoType);
-                        }
-                    }
-                }
-            });
-            upLoadPhotosDialog.setCanceledOnTouchOutside(false);
-            upLoadPhotosDialog.show();
-        } else {
-            if (isToDoType) {
-                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                startActivityForResult(intent, 201);
-            } else {
-                submitData(isToDoType);
-            }
-        }
-    }
-
-    /**
      * 检查拍照权限
      */
     private void checkPhotosPermission() {
@@ -773,89 +607,6 @@ public class ContractorDetailsActivity extends BaseActivity {
             Intent intent = new Intent();
             intent.setClass(mContext, PhotographActivity.class);
             startActivityForResult(intent, 1);
-        }
-    }
-
-    /**
-     * 保存本地文件
-     */
-    private void saveLocalFile() {
-        LoadingUtils.showLoading(mContext);
-        // 向LitePal数据库中添加一条数据
-        addPhotoBean = new PhotosBean();
-        addPhotoBean.setIsToBeUpLoad(1);
-        addPhotoBean.setUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
-        addPhotoBean.setProcessId(isToDo ? workId : processId);
-        addPhotoBean.setWorkId(workId);
-        addPhotoBean.setThumbUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
-        addPhotoBean.setPhotoDesc(processPath); //描述换成rootNodeName
-        addPhotoBean.setPhotoName(fileUrlName);
-        addPhotoBean.setCheckFlag("-1");
-        addPhotoBean.setIsNewAdd(1);
-        addPhotoBean.setRoleFlag("1");
-        addPhotoBean.setLatitude(String.valueOf(latitude));
-        addPhotoBean.setLongitude(String.valueOf(longitude));
-        addPhotoBean.setLocation(sLocation);
-        addPhotoBean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-        addPhotoBean.setPhotoType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
-        addPhotoBean.setCreateTime(System.currentTimeMillis());
-        String[] strings = new String[]{processPath};
-        addPhotoBean.save();
-        // 添加图片按钮
-        photosList.add(0, addPhotoBean);
-        // 异步将图片存储到SD卡指定文件夹下
-        new StorageTask().execute(strings);
-    }
-
-    /**
-     * 将照片存储到SD卡
-     */
-    private class StorageTask extends AsyncTask<String, Void, Void> {
-        @Override
-        protected Void doInBackground(String... params) {
-            Bitmap bitmap = BitmapFactory.decodeFile(FileUtil.getRealFilePath(mContext, uri));
-            // 压缩图片
-            bitmap = FileUtil.compressBitmap(bitmap);
-            // 在图片上添加水印
-            bitmap = ImageUtil.createWaterMaskLeftTop(mContext, bitmap, params[0], addPhotoBean);
-            // 保存到SD卡指定文件夹下
-            saveBitmapFile(bitmap, fileUrlName);
-            // 删除拍摄的照片
-            FileUtil.deleteFile(FileUtil.getRealFilePath(mContext, uri));
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            LoadingUtils.hideLoading();
-            if (null != photosAdapter) {
-                photosAdapter.notifyDataSetChanged();
-            }
-        }
-    }
-
-    /**
-     * 保存图片到SD卡指定目录下
-     *
-     * @param bitmap
-     * @param fileName
-     */
-    public void saveBitmapFile(Bitmap bitmap, String fileName) {
-        // 将要保存图片的路径
-        File imgFile = new File(ConstantsUtil.SAVE_PATH);
-        if (!imgFile.exists()) {
-            imgFile.mkdirs();
-        }
-
-        File file = new File(ConstantsUtil.SAVE_PATH + fileName);
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-            bos.flush();
-            bos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -956,13 +707,21 @@ public class ContractorDetailsActivity extends BaseActivity {
                     }
 
                     fileUrlName = String.valueOf(System.currentTimeMillis()) + ".png";
-                    saveLocalFile();
+                    // 涂鸦参数
+                    GraffitiParams params = new GraffitiParams();
+                    // 图片路径
+                    params.mImagePath = uri.toString();
+
+                    params.mSavePath = ConstantsUtil.SAVE_PATH + fileUrlName;
+                    // 初始画笔大小
+                    params.mPaintSize = 20;
+                    // 启动涂鸦页面
+                    GraffitiActivity.startActivityForResult(mContext, params, 202);
                     break;
                 case 201:
                     JSONObject object = new JSONObject(jsonData);
                     object.getJSONObject("data").put("buttonId", buttonId);
                     object.getJSONObject("data").put("reviewNodeId", data.getStringExtra("reviewNodeId"));
-                    object.getJSONObject("data").put("opinionContent", edtRemarks.getText().toString().trim());
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("value",  data.getStringExtra("userId"));
                     jsonObject.put("label",  data.getStringExtra("userName"));
@@ -971,7 +730,24 @@ public class ContractorDetailsActivity extends BaseActivity {
                     jsonArray.add(jsonObject);
                     object.getJSONObject("data").put("reviewUserObjectList", jsonArray);
                     jsonData = object.toString();
-                    submitData(true);
+                    submitData();
+                    break;
+                case 202:
+                    addPhotoBean = new PhotosBean();
+                    addPhotoBean.setIsToBeUpLoad(1);
+                    addPhotoBean.setUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
+                    addPhotoBean.setProcessId(workId);
+                    addPhotoBean.setThumbUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
+                    addPhotoBean.setPhotoName(fileUrlName);
+                    addPhotoBean.setCheckFlag("-1");
+                    addPhotoBean.setIsNewAdd(1);
+                    addPhotoBean.setRoleFlag("1");
+                    addPhotoBean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
+                    addPhotoBean.setPhotoType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
+                    addPhotoBean.setCreateTime(System.currentTimeMillis());
+                    addPhotoBean.save();
+                    photosList.add(addPhotoBean);
+                    photosAdapter.notifyDataSetChanged();
                     break;
                 default:
                     break;
@@ -990,47 +766,13 @@ public class ContractorDetailsActivity extends BaseActivity {
             case R.id.imgBtnLeft:
                 this.finish();
                 break;
-            // 提交审核
-            case R.id.btnRight:
-                if (photosList.size() < leastTakePhotoNum) {
-                    ToastUtil.showShort(mContext, "拍照数量不能小于最少拍照张数！");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
-                    ToastUtil.showShort(mContext, getString(R.string.not_network));
-                } else if (!JudgeNetworkIsAvailable.GetNetworkType(this).equals("WIFI")) {
-                    PromptDialog promptDialog = new PromptDialog(mContext, new PromptListener() {
-                        @Override
-                        public void returnTrueOrFalse(boolean trueOrFalse) {
-                            if (trueOrFalse) {
-                                toExaminePhoto(false);
-                            }
-                        }
-                    }, "提示", "当前网络为移动网络,是否继续上传?", "否", "是");
-                    promptDialog.setCancelable(false);
-                    promptDialog.setCanceledOnTouchOutside(false);
-                    promptDialog.show();
-                } else {
-                    toExaminePhoto(false);
-                }
-                break;
             // 拍照
             case R.id.imgBtnAdd:
                 String sdCardSize = AppInfoUtil.getSDAvailableSize();
                 if (Integer.valueOf(sdCardSize) < 10) {
                     ToastUtil.showShort(mContext, "当前手机内存卡已无可用空间，请清理后再进行拍照！");
                 } else {
-                    if (sLocation.length() < 7 || sLocation.contains("正在定位")) {
-                        PromptDialog promptDialog = new PromptDialog(mContext, new PromptListener() {
-                            @Override
-                            public void returnTrueOrFalse(boolean trueOrFalse) {
-                                if (trueOrFalse) {
-                                    checkPhotosPermission();
-                                }
-                            }
-                        }, "提示", "未定位到当前位置，拍照后会导致拍摄照片无地理位置信息。是否继续拍照？", "否", "是");
-                        promptDialog.show();
-                    } else {
-                        checkPhotosPermission();
-                    }
+                    checkPhotosPermission();
                 }
                 break;
         }
@@ -1043,13 +785,6 @@ public class ContractorDetailsActivity extends BaseActivity {
         // 取消屏幕旋转监听
         if (mAlbumOrientationEventListener != null) {
             mAlbumOrientationEventListener.disable();
-        }
-        // 终止定位
-        if (gpsLocationManager != null) {
-            gpsLocationManager.stop();
-        }
-        if (locationService != null) {
-            locationService.stop();
         }
     }
 }

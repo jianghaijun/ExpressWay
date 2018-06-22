@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -61,8 +62,8 @@ public class UpLoadPhotosActivity extends BaseActivity {
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
-    @ViewInject(R.id.imgBtnRight)
-    private ImageButton imgBtnRight;
+    @ViewInject(R.id.btnRight)
+    private Button btnRight;
 
     @ViewInject(R.id.rvUpLoadPhone)
     private RecyclerView rvUpLoadPhone;
@@ -86,8 +87,8 @@ public class UpLoadPhotosActivity extends BaseActivity {
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(getResources().getDrawable(R.drawable.back_btn));
         txtTitle.setText(R.string.show_photo);
-        //imgBtnRight.setText("上传");
-        imgBtnRight.setVisibility(View.VISIBLE);
+        btnRight.setText("上传");
+        btnRight.setVisibility(View.VISIBLE);
 
         initData();
     }
@@ -97,7 +98,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
      */
     private void initData() {
         // 获取当前登录人员需要上传的图片
-        upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+        upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
 
         if (Build.VERSION.SDK_INT >= 23) {
             requestAuthority(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, new PermissionListener() {
@@ -122,11 +123,11 @@ public class UpLoadPhotosActivity extends BaseActivity {
         }
     }
 
-    @Event({R.id.imgBtnRight, R.id.imgBtnLeft})
+    @Event({R.id.imgBtnLeft, R.id.btnRight})
     private void onClick(View view) {
         switch (view.getId()) {
             // 上传图片
-            case R.id.imgBtnRight:
+            case R.id.btnRight:
                 if (!isCanUpload) {
                     isCanUpload = true;
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
@@ -181,7 +182,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
                         PromptDialog promptDialog = new PromptDialog(mContext, listener, "提示", "当前照片数量过多，是否先上传前50张？", "否", "是");
                         promptDialog.show();
                     } else {
-                        UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, upLoadPhotosBeenList, choiceListener);
+                        UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, 1, upLoadPhotosBeenList, choiceListener);
                         upLoadPhotosDialog.setCancelable(false);
                         upLoadPhotosDialog.setCanceledOnTouchOutside(false);
                         upLoadPhotosDialog.show();
@@ -201,7 +202,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
                 PromptDialog promptDialog = new PromptDialog(mContext, listener, "提示", "当前照片数量过多，是否先上传前50张？", "否", "是");
                 promptDialog.show();
             } else {
-                UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, upLoadPhotosBeenList, choiceListener);
+                UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, 1, upLoadPhotosBeenList, choiceListener);
                 upLoadPhotosDialog.setCancelable(false);
                 upLoadPhotosDialog.setCanceledOnTouchOutside(false);
                 upLoadPhotosDialog.show();
@@ -217,8 +218,8 @@ public class UpLoadPhotosActivity extends BaseActivity {
         public void returnTrueOrFalse(boolean trueOrFalse) {
             isCanUpload = false;
             if (trueOrFalse) {
-                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc limit 0, 50", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
-                UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, upLoadPhotosBeenList, choiceListener);
+                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc limit 0, 50", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+                UpLoadPhotosDialog upLoadPhotosDialog = new UpLoadPhotosDialog(mContext, 1, upLoadPhotosBeenList, choiceListener);
                 upLoadPhotosDialog.setCancelable(false);
                 upLoadPhotosDialog.setCanceledOnTouchOutside(false);
                 upLoadPhotosDialog.show();
@@ -234,7 +235,7 @@ public class UpLoadPhotosActivity extends BaseActivity {
         public void returnTrueOrFalse(boolean trueOrFalse) {
             isCanUpload = false;
             if (trueOrFalse) {
-                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by create_time desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
+                upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
                 adapter = new UpLoadPhotosAdapter(mContext, upLoadPhotosBeenList);
                 rvUpLoadPhone.setLayoutManager(new GridLayoutManager(mContext, 4));
                 rvUpLoadPhone.setAdapter(adapter);

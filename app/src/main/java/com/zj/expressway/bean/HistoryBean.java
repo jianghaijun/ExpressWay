@@ -1,22 +1,28 @@
 package com.zj.expressway.bean;
 
+import org.litepal.crud.DataSupport;
+
+import java.io.Serializable;
+
 /**
  * Create dell By 2018/6/14 14:46
  */
 
-public class HistoryBean {
-    /**
-     * title : 路基第一分部→路基工程→路基→填方→K0-260-K0-241→1层→填方
-     * realName : 邵军
-     * nodeName : 开始
-     * actionTime : 1528958369000
-     * doTimeShow : 0 天 0 时 0 分
-     */
+public class HistoryBean extends DataSupport implements Serializable {
     private String title;
     private String realName;
     private String nodeName;
     private long actionTime;
     private String doTimeShow;
+    private String processId;
+
+    public String getProcessId() {
+        return processId;
+    }
+
+    public void setProcessId(String processId) {
+        this.processId = processId;
+    }
 
     public String getTitle() {
         return title;

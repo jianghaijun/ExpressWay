@@ -19,6 +19,15 @@ public class Node {
     private boolean isCanClick;                         // 是否有子工序
     private boolean isLoading = false;                  // 是否已经加载
     private boolean isExpanded = true;                  // 是否处于展开状态
+    private boolean isChoice = false;                   // 是否选中
+
+    public boolean isChoice() {
+        return isChoice;
+    }
+
+    public void setChoice(boolean choice) {
+        isChoice = choice;
+    }
 
     public boolean isCanClick() {
         return isCanClick;

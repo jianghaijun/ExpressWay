@@ -14,9 +14,19 @@
         android:layout_alignParentTop="true"
         app:layout_heightPercent="8%" />
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvCommonWorkingProcedure"
+    <ListView
+        android:id="@+id/lvSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none" />
+
+    <TextView
+        android:id="@+id/txtNoSearch"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none" />
+        android:gravity="center"
+        android:text="@string/noSearchContext"
+        android:textColor="@color/black"
+        android:textSize="@dimen/twenty_sp"
+        android:visibility="gone" />
 </com.zhy.android.percent.support.PercentLinearLayout>

@@ -75,9 +75,9 @@ public class WorkingProcedureListAdapter extends BaseAdapter<List<WorkingBean>> 
         }
 
         public void bind(WorkingBean data) {
-            txtReviewProgress.setText(data.getTrackStatus());
-            txtProcedureName.setText(data.getNodeName());
-            txtProcedurePath.setText(data.getTitle());
+            txtReviewProgress.setText("未提交");
+            txtProcedureName.setText(data.getProcessName());
+            txtProcedurePath.setText(data.getLevelNameAll());
             txtProcedureState.setText("待拍照");
             txtPersonals.setText(StrUtil.isEmpty(data.getCheckNameAll()) ? "未审核" : data.getCheckNameAll());
             txtCheckTime.setText(DateUtil.format(DateUtil.date(data.getEnterTime() == 0 ? System.currentTimeMillis() : data.getEnterTime()), "yyyy-MM-dd HH:mm:ss"));
@@ -105,7 +105,8 @@ public class WorkingProcedureListAdapter extends BaseAdapter<List<WorkingBean>> 
                 case R.id.imgViewTakePhoto:
                     List<PhotosBean> phoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ?", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workingBean.getProcessId()).find(PhotosBean.class);
                     boolean isHave = phoneList == null || phoneList.size() == 0 ? false : true;
-                    if (!workingBean.getTrackStatus().equals("0") || isHave) {
+                    String state = StrUtil.isEmpty(workingBean.getTrackStatus()) ? "" : workingBean.getTrackStatus();
+                    if (!state.equals("0") || isHave) {
                         // 直接拍照--->详情
                         takePhotoActivity(workingBean, true);
                     } else {
@@ -140,7 +141,8 @@ public class WorkingProcedureListAdapter extends BaseAdapter<List<WorkingBean>> 
         Intent intent = new Intent(mContext, ContractorDetailsActivity.class);
         intent.putExtra("flowId", ConstantsUtil.flowId);
         intent.putExtra("workId", bean.getWorkId());
-        intent.putExtra("mainTablePrimaryId", "a");
+        intent.putExtra("mainTablePrimaryId", bean.getProcessId());
+        intent.putExtra("processId", bean.getProcessId());
         intent.putExtra("isToDo", false);
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);
         mContext.startActivity(intent);
@@ -152,6 +154,7 @@ public class WorkingProcedureListAdapter extends BaseAdapter<List<WorkingBean>> 
     private void reviewProgressActivity(String processId) {
         Intent intent = new Intent(mContext, ReviewProgressActivity.class);
         intent.putExtra("processId", processId);
+        intent.putExtra("workId", "");
         mContext.startActivity(intent);
     }
 }

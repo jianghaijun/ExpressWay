@@ -1,5 +1,6 @@
 package com.zj.expressway.activity;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -9,11 +10,18 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.vivian.timelineitemdecoration.itemdecoration.SpanIndexListener;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.WaterfallFlowTimeLineAdapter;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.model.Model;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.DateUtils;
 import com.zj.expressway.utils.JsonUtils;
@@ -22,9 +30,6 @@ import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -33,6 +38,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -72,26 +80,26 @@ public class ReviewProgressActivity extends BaseActivity {
     @ViewInject(R.id.rvTimeLineWaterfallFlow)
     private RecyclerView rvTimeLineWaterfallFlow;
 
-    private List<WorkingBean> mList = new ArrayList<>();
     private WaterfallFlowTimeLineAdapter mAdapter;
     private DotItemDecoration mItemDecoration;
 
-    private Context mContext;
+    private Activity mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_review_progress);
         x.view().inject(this);
+        mContext = this;
         ScreenManagerUtil.pushActivity(this);
 
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         txtTitle.setText("工序审核进度");
 
-        mContext = this;
-
-        getData();
+        if (!StrUtil.isEmpty(getIntent().getStringExtra("workId"))) {
+            getData();
+        }
     }
 
     /**
@@ -100,11 +108,7 @@ public class ReviewProgressActivity extends BaseActivity {
     private void getData() {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
-        try {
-            obj.put("workId", getIntent().getStringExtra("workId"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        obj.put("workId", getIntent().getStringExtra("workId"));
         RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, obj.toString());
         Request request = new Request.Builder()
                 .url(ConstantsUtil.BASE_URL + ConstantsUtil.getHistory)
@@ -114,78 +118,43 @@ public class ReviewProgressActivity extends BaseActivity {
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                LoadingUtils.hideLoading();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastUtil.showShort(mContext, getString(R.string.server_exception));
-                    }
-                });
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
-                    try {
-                        JSONObject obj = new JSONObject(jsonData);
-                        boolean resultFlag = obj.getBoolean("success");
-                        if (resultFlag) {
-                            final JSONArray jsonArray = new JSONArray(obj.getString("data"));
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    setData(jsonArray);
-                                }
-                            });
-                        }
-                    } catch (JSONException e) {
+                    final Gson gson = new Gson();
+                    final Model<List<HistoryBean>> model = gson.fromJson(jsonData, Model.class);
+                    if (model.isSuccess()) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                ToastUtil.showShort(mContext, getString(R.string.json_error));
+                                JsonArray array = new JsonParser().parse(gson.toJson(model.getData())).getAsJsonArray();
+                                List<HistoryBean> mList = new ArrayList<>();
+                                for(final JsonElement elem : array){
+                                    mList.add(gson.fromJson(elem, HistoryBean.class));
+                                }
+                                initView(mList);
+                                LoadingUtils.hideLoading();
                             }
                         });
-                        e.printStackTrace();
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                     }
-                    LoadingUtils.hideLoading();
                 } else {
-                    LoadingUtils.hideLoading();
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ToastUtil.showShort(mContext, getString(R.string.json_error));
-                        }
-                    });
+                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
                 }
             }
         });
     }
 
     /**
-     * 设置数据
-     */
-    private void setData(JSONArray array) {
-        for (int i = 0; i < array.length(); i++) {
-            try {
-                JSONObject obj = new JSONObject(array.get(i).toString());
-                WorkingBean bean = new WorkingBean();
-                bean.setProcessName(obj.getString("realName"));
-                bean.setFlowName(obj.getString("nodeName"));
-                bean.setContent(DateUtils.setDataToStr(obj.getLong("actionTime")));
-                bean.setProcessState(obj.getString("doTimeShow"));
-                mList.add(bean);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        initView();
-    }
-
-    /**
      * 设置显示数据
+     * @param data
      */
-    private void initView() {
+    private void initView(List<HistoryBean> data) {
         rvTimeLineWaterfallFlow.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         mItemDecoration = new DotItemDecoration
                 .Builder(this)
@@ -209,7 +178,7 @@ public class ReviewProgressActivity extends BaseActivity {
             }
         });
         rvTimeLineWaterfallFlow.addItemDecoration(mItemDecoration);
-        mAdapter = new WaterfallFlowTimeLineAdapter(this, mList);
+        mAdapter = new WaterfallFlowTimeLineAdapter(this, data);
         rvTimeLineWaterfallFlow.setAdapter(mAdapter);
     }
 

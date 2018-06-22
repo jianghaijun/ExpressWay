@@ -10,7 +10,7 @@ public class WorkModel extends BaseModel {
     private WorkFlowModel data;
 
     public WorkFlowModel getData() {
-        return data;
+        return data == null ? new WorkFlowModel() : data;
     }
 
     public void setData(WorkFlowModel data) {

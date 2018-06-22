@@ -17,7 +17,7 @@ public class ConstantsUtil {
     /**
      * 中交路径
      */
-    //public static final String BASE_URL = "http://114.116.12.219:8012";
+//    public static final String BASE_URL = "http://114.116.12.219:8012";
     public static final String BASE_URL = "http://192.168.1.119:8080/web/";
 
     /**
@@ -35,13 +35,13 @@ public class ConstantsUtil {
     /**
      * 前缀
      */
-    //public static String prefix = "/zjapp/";
+//    public static String prefix = "/tongren/";
     public static String prefix = "";
     /**
      * accountId
      */
-    //public static String ACCOUNT_ID = "zj_qyh_app_id";
-    public static String ACCOUNT_ID = "sx_qyh_woa_id";
+//    public static String ACCOUNT_ID = "zj_qyh_app_id";
+    public static String ACCOUNT_ID = "sjz_qyh_woa_id";
 
     /**
      * 参数格式
@@ -109,7 +109,11 @@ public class ConstantsUtil {
     /**
      * 层级列表
      */
-    public static final String NEW_CONTRACTOR_LIST = prefix + "getAppChildrenNodeList";
+    public static final String NEW_CONTRACTOR_LIST = prefix + "getZxHwGxProjectLevelList";
+    public static final String getZxHwAqProjectLevelList = prefix + "getZxHwAqProjectLevelList";
+    public static final String getZxHwZlProjectLevelList = prefix + "getZxHwZlProjectLevelList";
+    // 搜索层级
+    //public static final String appGetGxProjectLevelList = prefix + "appGetGxProjectLevel";
     /**
      * 查询工序
      */
@@ -121,7 +125,9 @@ public class ConstantsUtil {
     /**
      * 图片上传
      */
-    public static final String UP_LOAD_PHOTOS = prefix + "appUploadPhoto";
+//    public static final String UP_LOAD_PHOTOS = prefix + "appUploadPhoto";
+    public static final String UP_LOAD_PHOTOS = prefix + "appUploadGxAttachment";
+    public static final String upload = prefix + "appUploadCommon";
     /**
      * 删除图片
      */
@@ -198,6 +204,10 @@ public class ConstantsUtil {
      * 已办列表
      */
     public static final String HAS_TO_DO_LIST = prefix + "getHasTodoList";
+    /**
+     * 待拍照
+     */
+    public static final String getZxHwGxProcessList = prefix + "getZxHwGxProcessList";
     /**
      * 获取已办待办数量
      */
