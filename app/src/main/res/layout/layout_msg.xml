@@ -12,13 +12,30 @@
         android:paddingBottom="@dimen/five_dp"
         android:scrollbars="none" />
 
-    <TextView
-        android:id="@+id/txtMsg"
+    <LinearLayout
+        android:id="@+id/llSearchData"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@null"
         android:gravity="center"
-        android:text="@string/no_msg"
-        android:textColor="@color/black"
-        android:textSize="@dimen/twenty_sp"
-        android:visibility="gone" />
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/txtMsg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_msg"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sixteen_sp" />
+
+        <TextView
+            android:id="@+id/txtClear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="清空条件"
+            android:textColor="@color/main_bg"
+            android:textSize="@dimen/sixteen_sp" />
+    </LinearLayout>
+
 </LinearLayout>

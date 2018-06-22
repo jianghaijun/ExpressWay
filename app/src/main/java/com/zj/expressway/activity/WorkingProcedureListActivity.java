@@ -5,6 +5,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -95,8 +96,6 @@ public class WorkingProcedureListActivity extends BaseActivity {
         isLoad = false;
         this.viewType = viewType;
         this.btnProcessNum = btnProcessNum;
-        holder.rvMsg.setVisibility(View.VISIBLE);
-        holder.txtMsg.setVisibility(View.GONE);
         // 创建被装饰者类实例
         switch (viewType) {
             case 1:
@@ -184,7 +183,12 @@ public class WorkingProcedureListActivity extends BaseActivity {
                                 // 显示无数据
                                 if (levelId != null && pagePosition == 1 && sum == 0) {
                                     holder.rvMsg.setVisibility(View.GONE);
-                                    holder.txtMsg.setVisibility(View.VISIBLE);
+                                    holder.llSearchData.setVisibility(View.VISIBLE);
+                                    holder.txtMsg.setText("未搜索到任何数据");
+                                    holder.txtClear.setText("，清空搜索条件");
+                                } else {
+                                    holder.rvMsg.setVisibility(View.VISIBLE);
+                                    holder.llSearchData.setVisibility(View.GONE);
                                 }
 
                                 if (!isLoad) {
@@ -298,5 +302,9 @@ public class WorkingProcedureListActivity extends BaseActivity {
         private RecyclerView rvMsg;
         @ViewInject(R.id.txtMsg)
         private TextView txtMsg;
+        @ViewInject(R.id.txtClear)
+        private TextView txtClear;
+        @ViewInject(R.id.llSearchData)
+        private LinearLayout llSearchData;
     }
 }

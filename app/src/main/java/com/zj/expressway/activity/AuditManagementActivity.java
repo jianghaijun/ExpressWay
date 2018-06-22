@@ -166,6 +166,16 @@ public class AuditManagementActivity extends BaseActivity {
         // 已完成
         finishActivity = new WorkingProcedureListActivity(mContext, layFinish);
 
+
+        TextView txtClear = (TextView) layTakePicture.findViewById(R.id.txtClear);
+
+        txtClear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takePictureActivity.initData(1, btnTakePicture, null);
+            }
+        });
+
         //每个页面的view数据
         views = new ArrayList<>();
         views.add(layTakePicture);
