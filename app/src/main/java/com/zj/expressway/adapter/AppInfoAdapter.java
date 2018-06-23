@@ -90,7 +90,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
         top.setBounds(0, 0, top.getMinimumWidth(), top.getMinimumHeight());
         holder.imgView.setImageDrawable(ContextCompat.getDrawable(mContext, appInfoBeanList.get(position).getImgUrl()));
         holder.txtTitle.setText(appInfoBeanList.get(position).getTitle());
-        if (position == 3) {
+        /*if (position == 3) {
             holder.txtSubmitPhoneNum.setVisibility(View.VISIBLE);
             List<PhotosBean> upLoadPhotosBeenList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "")).find(PhotosBean.class);
             if (upLoadPhotosBeenList != null) {
@@ -98,9 +98,9 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
             } else {
                 holder.txtSubmitPhoneNum.setVisibility(View.GONE);
             }
-        } else {
+        } else {*/
             holder.txtSubmitPhoneNum.setVisibility(View.GONE);
-        }
+        /*}*/
 
         holder.imgView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,21 +116,23 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     case 1:
                         intent = new Intent(mContext, QualityInspectionActivity.class);
                         intent.putExtra("type", "1");
+                        SpUtil.put(mContext, "ToDoType", "2");
                         mContext.startActivity(intent);
                         break;
                     // 安全巡查
                     case 2:
                         intent = new Intent(mContext, QualityInspectionActivity.class);
                         intent.putExtra("type", "2");
+                        SpUtil.put(mContext, "ToDoType", "3");
                         mContext.startActivity(intent);
                         break;
-                    // 待上传照片
+                    /*// 待上传照片
                     case 3:
                         intent = new Intent(mContext, UpLoadPhotosActivity.class);
                         mContext.startActivity(intent);
-                        break;
+                        break;*/
                     // 工序报表
-                    case 5:
+                    case 4:
                         if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                             getSameDayData();
                         } else {
@@ -138,7 +140,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         }
                         break;
                     // 审核管理
-                    case 6:
+                    case 5:
                         intent = new Intent(mContext, WorkingProcedureActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.USER_TYPE, "0");
                         mContext.startActivity(intent);

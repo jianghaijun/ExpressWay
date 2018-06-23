@@ -1,23 +1,19 @@
 package com.zj.expressway.activity;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.SensorManager;
-import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.IdRes;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Button;
@@ -26,38 +22,28 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.baidu.location.BDAbstractLocationListener;
-import com.baidu.location.BDLocation;
 import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PhotosListAdapter;
 import com.zj.expressway.adapter.TimeLineAdapter;
-import com.zj.expressway.application.MyApplication;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.dialog.HorizontalScreenHintDialog;
-import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.UpLoadPhotosDialog;
-import com.zj.expressway.listener.GPSLocationListener;
 import com.zj.expressway.listener.PermissionListener;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.listener.ShowPhotoListener;
-import com.zj.expressway.manager.GPSLocationManager;
 import com.zj.expressway.model.ButtonListModel;
 import com.zj.expressway.model.WorkModel;
-import com.zj.expressway.service.LocationService;
 import com.zj.expressway.utils.AppInfoUtil;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.DateUtils;
-import com.zj.expressway.utils.FileUtil;
-import com.zj.expressway.utils.ImageUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
@@ -71,24 +57,23 @@ import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hzw.graffiti.GraffitiActivity;
 import cn.hzw.graffiti.GraffitiParams;
+import cn.qqtheme.framework.picker.DatePicker;
+import cn.qqtheme.framework.util.ConvertUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -98,8 +83,6 @@ import okhttp3.Response;
  * 详情
  */
 public class ToDoDetailsActivity extends BaseActivity {
-    @ViewInject(R.id.actionBar)
-    private View actionBar;
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.txtTitle)
@@ -121,10 +104,6 @@ public class ToDoDetailsActivity extends BaseActivity {
     private RadioButton rBtn2;
     @ViewInject(R.id.rBtn3)
     private RadioButton rBtn3;
-
-
-
-
     @ViewInject(R.id.btnChangeDate)
     private Button btnChangeDate;
     @ViewInject(R.id.imgBtnAdd)
@@ -154,6 +133,8 @@ public class ToDoDetailsActivity extends BaseActivity {
     private String workId, flowId, processId, jsonData, buttonId;
     private Gson gson = new Gson();
     private WorkModel model;
+    private String levelId; // 层级id
+    private String selectText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +146,6 @@ public class ToDoDetailsActivity extends BaseActivity {
         ScreenManagerUtil.pushActivity(this);
         // actionBar
         txtTitle.setText(R.string.app_name);
-        actionBar.setVisibility(View.VISIBLE);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         // 任务id
@@ -175,10 +155,62 @@ public class ToDoDetailsActivity extends BaseActivity {
 
         initFilePath();
 
+        if (workId.equals("添加")) {
+            txtEntryTime.setText(DateUtils.setDataToStr(System.currentTimeMillis()));
+            setImgData(new ArrayList<PhotosBean>());
+            List<ButtonListModel> buttons = new ArrayList<>();
+            ButtonListModel btnModel = new ButtonListModel();
+            btnModel.setButtonId("saveInLocation");
+            btnModel.setButtonName("本地保存");
+            buttons.add(btnModel);
+            ButtonListModel btnSaveAdd = new ButtonListModel();
+            btnSaveAdd.setButtonId("saveAndAdd");
+            btnSaveAdd.setButtonName("保存继续添加");
+            buttons.add(btnSaveAdd);
+            ButtonListModel examine = new ButtonListModel();
+            examine.setButtonId("examine");
+            examine.setButtonName("发起审核");
+            buttons.add(examine);
+            setShowButton(buttons);
+        } else if (workId.equals("详情")) {
+            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
+            WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
+            setTableData(workingBean);
+            setImgData(new ArrayList<PhotosBean>());
+            List<ButtonListModel> buttons = new ArrayList<>();
+            ButtonListModel btnModel = new ButtonListModel();
+            btnModel.setButtonId("saveInLocation");
+            btnModel.setButtonName("本地保存");
+            buttons.add(btnModel);
+            ButtonListModel btnSaveAdd = new ButtonListModel();
+            btnSaveAdd.setButtonId("saveAndAdd");
+            btnSaveAdd.setButtonName("保存继续添加");
+            buttons.add(btnSaveAdd);
+            ButtonListModel examine = new ButtonListModel();
+            examine.setButtonId("examine");
+            examine.setButtonName("发起审核");
+            buttons.add(examine);
+            setShowButton(buttons);
+            List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", processId).find(HistoryBean.class);
+            initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
+        } else {
+            initData();
+        }
+
+        rgLevel.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                RadioButton radioButton = (RadioButton) findViewById(checkedId);
+                selectText = radioButton.getText().toString();
+            }
+        });
+    }
+
+    private void initData() {
         if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
             getData();
         } else {
-            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc",  workId).find(WorkingBean.class);
+            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", workId).find(WorkingBean.class);
             WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
             setTableData(workingBean);
             setImgData(new ArrayList<PhotosBean>());
@@ -186,8 +218,13 @@ public class ToDoDetailsActivity extends BaseActivity {
             if (workingBean != null && StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && workingBean.getFileOperationFlag().equals("1")) {
                 ButtonListModel btnModel = new ButtonListModel();
                 btnModel.setButtonId("saveInLocation");
-                btnModel.setButtonName("保存至本地");
+                btnModel.setButtonName("本地保存");
                 buttons.add(btnModel);
+
+                ButtonListModel save = new ButtonListModel();
+                save.setButtonId("saveInLocation");
+                save.setButtonName("保存继续添加");
+                buttons.add(save);
             }
             setShowButton(buttons);
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", workId).find(HistoryBean.class);
@@ -207,9 +244,9 @@ public class ToDoDetailsActivity extends BaseActivity {
         }
     }
 
-
     /**
      * 设置列表方向
+     *
      * @return
      */
     private LinearLayoutManager getLinearLayoutManager() {
@@ -218,6 +255,7 @@ public class ToDoDetailsActivity extends BaseActivity {
 
     /**
      * 初始化时间轴
+     *
      * @param flowHistoryList
      */
     private void initTimeLineView(List<HistoryBean> flowHistoryList) {
@@ -227,7 +265,7 @@ public class ToDoDetailsActivity extends BaseActivity {
 
         for (HistoryBean history : flowHistoryList) {
             history.setProcessId(workId);
-            history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime()+"", workId);
+            history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime() + "", workId);
         }
 
         rvTimeMarker.setLayoutManager(getLinearLayoutManager());
@@ -298,6 +336,7 @@ public class ToDoDetailsActivity extends BaseActivity {
 
     /**
      * 设置工序信息
+     *
      * @param flowBean
      */
     private void setTableData(WorkingBean flowBean) {
@@ -305,9 +344,13 @@ public class ToDoDetailsActivity extends BaseActivity {
             return;
         }
         // 保存
-        flowBean.setProcessId(workId);
-        flowBean.saveOrUpdate("processId=?", workId);
-        btnChoice.setVisibility(View.GONE);
+
+        if (!workId.equals("添加")) {
+            flowBean.setProcessId(workId);
+            flowBean.saveOrUpdate("processId=?", workId);
+            btnChoice.setVisibility(View.GONE);
+        }
+
         txtPressLocal.setText(flowBean.getLevelNameAll());   // 工序位置
         txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getCreateTime()));     // 检查时间
         edtHiddenTroubleHeadline.setFocusable(false);
@@ -315,7 +358,7 @@ public class ToDoDetailsActivity extends BaseActivity {
             edtHiddenTroubleHeadline.setText(flowBean.getTroubleTitle());     // 隐患标题
             if (flowBean.getTroubleLevel().equals("1")) {
                 rBtn1.setChecked(true);
-            } else if(flowBean.getTroubleLevel().equals("2")) {
+            } else if (flowBean.getTroubleLevel().equals("2")) {
                 rBtn2.setChecked(true);
             } else {
                 rBtn3.setChecked(true);
@@ -325,7 +368,7 @@ public class ToDoDetailsActivity extends BaseActivity {
             edtHiddenTroubleHeadline.setText(flowBean.getDangerTitle());     // 隐患标题
             if (flowBean.getDangerLevel().equals("1")) {
                 rBtn1.setChecked(true);
-            } else if(flowBean.getDangerLevel().equals("2")) {
+            } else if (flowBean.getDangerLevel().equals("2")) {
                 rBtn2.setChecked(true);
             } else {
                 rBtn3.setChecked(true);
@@ -337,18 +380,27 @@ public class ToDoDetailsActivity extends BaseActivity {
         edtRectificationRequirements.setFocusable(false);
 
         // 控制拍照按钮是否显示
-        if (!StrUtil.equals("1",flowBean.getFileOperationFlag())) {
+        if (!workId.equals("添加") && !workId.equals("详情") && !StrUtil.equals("1", flowBean.getFileOperationFlag())) {
             imgBtnAdd.setVisibility(View.GONE);
         }
     }
 
     /**
      * 设置照片信息
+     *
      * @param subTableObject
      */
     private void setImgData(List<PhotosBean> subTableObject) {
         // 查询本地保存照片
-        List<PhotosBean> localPhoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workId).find(PhotosBean.class);
+        String searchId;
+        if (workId.equals("添加")) {
+            searchId = StrUtil.isEmpty(levelId) ? "--" : levelId;
+        } else if (workId.equals("详情")) {
+            searchId = StrUtil.isEmpty(processId) ? "--" : processId;
+        } else {
+            searchId = workId;
+        }
+        List<PhotosBean> localPhoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), searchId).find(PhotosBean.class);
 
         // 添加本地照片
         if (localPhoneList != null && localPhoneList.size() > 0) {
@@ -369,6 +421,7 @@ public class ToDoDetailsActivity extends BaseActivity {
 
     /**
      * 设置显示按钮
+     *
      * @param buttons
      */
     private void setShowButton(List<ButtonListModel> buttons) {
@@ -377,7 +430,8 @@ public class ToDoDetailsActivity extends BaseActivity {
             return;
         }
 
-        for (ButtonListModel buttonModel : buttons) {
+        for (int i = 0; i < buttons.size(); i++) {
+            ButtonListModel buttonModel = buttons.get(i);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             lp.setMargins(DensityUtil.dip2px(5), 0, DensityUtil.dip2px(5), 0);
             lp.weight = 1;
@@ -386,8 +440,125 @@ public class ToDoDetailsActivity extends BaseActivity {
             button.setTextSize(14);
             button.setTextColor(ContextCompat.getColor(mContext, R.color.white));
             button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.btn_blue));
-            button.setOnClickListener(new ButtonClick(buttonModel));
+            if (workId.equals("添加") || workId.equals("详情")) {
+                button.setOnClickListener(new onClick(i+1));
+            } else {
+                button.setOnClickListener(new ButtonClick(buttonModel));
+            }
             llButtons.addView(button, lp);
+        }
+    }
+
+    /**
+     * 是否都填写了
+     * @return
+     */
+    private boolean isFill() {
+        if (StrUtil.isEmpty(txtPressLocal.getText().toString())) {
+            ToastUtil.showShort(mContext, "请先选择工序！");
+            return false;
+        } else if (StrUtil.isEmpty(edtHiddenTroubleHeadline.getText().toString())) {
+            ToastUtil.showShort(mContext, "请填写隐患标题！");
+            return false;
+        } else if (StrUtil.isEmpty(selectText)) {
+            ToastUtil.showShort(mContext, "请选择隐患级别！");
+            return false;
+        } else if (StrUtil.isEmpty(btnChangeDate.getText().toString())) {
+            ToastUtil.showShort(mContext, "请选择整改期限！");
+            return false;
+        } else if (StrUtil.isEmpty(edtRectificationRequirements.getText().toString())) {
+            ToastUtil.showShort(mContext, "请填写整改要求！");
+            return false;
+        } else if (photosList.size() == 0) {
+            ToastUtil.showShort(mContext, "请先拍照！");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+
+    /**
+     * 本地保存
+     */
+    private void saveLocation() {
+        WorkingBean bean = new WorkingBean();
+        bean.setProcessId(workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
+        bean.setType("2");
+        bean.setFlowType(String.valueOf(SpUtil.get(mContext, "ToDoType", "2")));
+        bean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "--"));
+        bean.setLevelNameAll(txtPressLocal.getText().toString());
+        bean.setCreateTime(System.currentTimeMillis());
+        String type = (String) SpUtil.get(mContext, "ToDoType", "2");
+        int level = 0;
+        switch (selectText) {
+            case "一般":
+                level = 1;
+                break;
+            case "严重":
+                level = 2;
+                break;
+            case "紧要":
+                level = 3;
+                break;
+        }
+        if (type.equals("2")) {
+            bean.setTroubleTitle(edtHiddenTroubleHeadline.getText().toString());
+            bean.setTroubleLevel(level+"");
+            bean.setTroubleRequire(edtRectificationRequirements.getText().toString());
+        } else {
+            bean.setDangerTitle(edtHiddenTroubleHeadline.getText().toString());
+            bean.setDangerLevel(level+"");
+            bean.setDangerRequire(edtRectificationRequirements.getText().toString());
+        }
+        bean.setDeadline(DateUtil.parse(btnChangeDate.getText().toString()).getTime());
+        bean.saveOrUpdate("processId=?", workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
+    }
+
+    private void clearData() {
+        txtPressLocal.setText("");
+        txtPressLocal.setFocusable(true);
+        edtHiddenTroubleHeadline.setText("");
+        btnChangeDate.setText("");
+        edtRectificationRequirements.setText("");
+        photosList.clear();
+        photosAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 点击事件
+     */
+    private class onClick implements View.OnClickListener {
+        private int point;
+
+        public onClick(int point) {
+            this.point = point;
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (point) {
+                // 本地保存
+                case 1:
+                    if (isFill()) {
+                        saveLocation();
+                        ToastUtil.showShort(mContext, "保存成功！");
+                        Intent intent = new Intent();
+                        setResult(Activity.RESULT_OK, intent);
+                        ToDoDetailsActivity.this.finish();
+                    }
+                    break;
+                // 保存并添加
+                case 2:
+                    if (isFill()) {
+                        saveLocation();
+                        clearData();
+                    }
+                    break;
+                // 提交审核
+                case 3:
+                    break;
+            }
         }
     }
 
@@ -663,6 +834,7 @@ public class ToDoDetailsActivity extends BaseActivity {
 
     /**
      * 回调
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -718,14 +890,25 @@ public class ToDoDetailsActivity extends BaseActivity {
                     // 启动涂鸦页面
                     GraffitiActivity.startActivityForResult(mContext, params, 202);
                     break;
+                case 110:
+                    clearData();
+                    txtPressLocal.setText(data.getStringExtra("procedureName"));
+                    levelId = data.getStringExtra("levelId");
+                    List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", levelId).find(WorkingBean.class);
+                    WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
+                    setTableData(workingBean);
+                    setImgData(new ArrayList<PhotosBean>());
+                    List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", levelId).find(HistoryBean.class);
+                    initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
+                    break;
                 case 201:
                     JSONObject object = new JSONObject(jsonData);
                     object.getJSONObject("data").put("buttonId", buttonId);
                     object.getJSONObject("data").put("reviewNodeId", data.getStringExtra("reviewNodeId"));
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("value",  data.getStringExtra("userId"));
-                    jsonObject.put("label",  data.getStringExtra("userName"));
-                    jsonObject.put("type",  data.getStringExtra("type"));
+                    jsonObject.put("value", data.getStringExtra("userId"));
+                    jsonObject.put("label", data.getStringExtra("userName"));
+                    jsonObject.put("type", data.getStringExtra("type"));
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(jsonObject);
                     object.getJSONObject("data").put("reviewUserObjectList", jsonArray);
@@ -736,7 +919,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                     addPhotoBean = new PhotosBean();
                     addPhotoBean.setIsToBeUpLoad(1);
                     addPhotoBean.setUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
-                    addPhotoBean.setProcessId(workId);
+                    addPhotoBean.setProcessId(workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
                     addPhotoBean.setThumbUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
                     addPhotoBean.setPhotoName(fileUrlName);
                     addPhotoBean.setCheckFlag("-1");
@@ -756,15 +939,66 @@ public class ToDoDetailsActivity extends BaseActivity {
     }
 
     /**
+     * 日期选择
+     */
+    public void onYearMonthDayPicker() {
+        final DatePicker picker = new DatePicker(mContext);
+        picker.setCanceledOnTouchOutside(true);
+        picker.setUseWeight(true);
+        picker.setTopPadding(ConvertUtils.toPx(mContext, 10));
+        picker.setRangeEnd(2100, 1, 31);
+        picker.setRangeStart(2000, 1, 31);
+        String date = btnChangeDate.getText().toString();
+        Date time = StrUtil.isEmpty(date) ? new Date() : DateUtil.parse(date);
+        picker.setSelectedItem(DateUtil.year(time), DateUtil.month(time) + 1, DateUtil.dayOfMonth(time));
+        picker.setResetWhileWheel(false);
+        picker.setOnDatePickListener(new DatePicker.OnYearMonthDayPickListener() {
+            @Override
+            public void onDatePicked(String year, String month, String day) {
+                btnChangeDate.setText(year + "-" + month + "-" + day);
+            }
+        });
+        picker.setOnWheelListener(new DatePicker.OnWheelListener() {
+            @Override
+            public void onYearWheeled(int index, String year) {
+                picker.setTitleText(year + "-" + picker.getSelectedMonth() + "-" + picker.getSelectedDay());
+            }
+
+            @Override
+            public void onMonthWheeled(int index, String month) {
+                picker.setTitleText(picker.getSelectedYear() + "-" + month + "-" + picker.getSelectedDay());
+            }
+
+            @Override
+            public void onDayWheeled(int index, String day) {
+                picker.setTitleText(picker.getSelectedYear() + "-" + picker.getSelectedMonth() + "-" + day);
+            }
+        });
+        picker.show();
+    }
+
+    /**
      * 点击事件
+     *
      * @param v
      */
-    @Event({R.id.imgBtnLeft,  R.id.imgBtnAdd, R.id.btnRight })
-    private void onClick(View v) {
+    @Event({R.id.imgBtnLeft, R.id.imgBtnAdd, R.id.btnRight, R.id.btnChoice, R.id.btnChangeDate})
+    private void click(View v) {
         switch (v.getId()) {
             // 返回
             case R.id.imgBtnLeft:
                 this.finish();
+                break;
+            // 选择位置
+            case R.id.btnChoice:
+                Intent intent = new Intent(mContext, ContractorTreeActivity.class);
+                String type = (String) SpUtil.get(mContext, "ToDoType", "2");
+                intent.putExtra("type", type);
+                startActivityForResult(intent, 110);
+                break;
+            // 选择日期
+            case R.id.btnChangeDate:
+                onYearMonthDayPicker();
                 break;
             // 拍照
             case R.id.imgBtnAdd:

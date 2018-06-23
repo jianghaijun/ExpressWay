@@ -123,10 +123,10 @@ public class AppActivity extends BaseActivity {
         bean.setImgUrl(R.drawable.group_management);
         bean.setTitle(mContext.getString(R.string.securityPatrol));
         appInfoList.add(bean);
-        bean = new AppInfoBean();
+        /*bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.submit_photo);
         bean.setTitle(mContext.getString(R.string.to_upload_photos));
-        appInfoList.add(bean);
+        appInfoList.add(bean);*/
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.experimental_management);
         bean.setTitle(mContext.getString(R.string.experimental_management));

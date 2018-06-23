@@ -1,16 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvMsg"
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/refreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/gray"
-        android:paddingBottom="@dimen/five_dp"
-        android:scrollbars="none" />
+        android:layout_above="@+id/btnAddProcess"
+        app:srlEnableLoadMoreWhenContentNotFull="true">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvMsg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/txtNOAnyData"
+            android:background="@color/white"
+            android:paddingBottom="@dimen/five_dp"
+            android:scrollbars="none" />
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+    <Button
+        android:id="@+id/btnAddProcess"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/forty"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/ten_dp"
+        android:background="@drawable/btn_blue"
+        android:text="@string/add"
+        android:visibility="gone"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp" />
+
+    <Button
+        android:id="@+id/btnNoProcessAdd"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_hundred_and_fifty_dp"
+        android:layout_centerVertical="true"
+        android:layout_margin="@dimen/ten_dp"
+        android:background="@drawable/btn_blue"
+        android:visibility="gone"
+        android:text="@string/add"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp" />
 
     <LinearLayout
         android:id="@+id/llSearchData"
@@ -38,4 +72,4 @@
             android:textSize="@dimen/sixteen_sp" />
     </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

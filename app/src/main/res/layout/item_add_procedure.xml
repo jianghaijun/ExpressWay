@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/five_dp"
+    android:layout_marginLeft="@dimen/ten_dp"
+    android:layout_marginRight="@dimen/ten_dp"
+    android:layout_marginTop="@dimen/five_dp"
+    android:background="@drawable/gray_stroke_white_solid_bg"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:minHeight="@dimen/thirty_five">
+
+        <Button
+            android:id="@+id/btnLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@null"
+            android:drawableLeft="@drawable/progress"
+            android:drawablePadding="@dimen/five_dp"
+            android:gravity="left|center"
+            android:minHeight="@dimen/thirty_five"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/ten_dp"
+            android:layout_toLeftOf="@+id/btnLevel"
+            android:gravity="left|center"
+            android:minHeight="@dimen/thirty_five"
+            android:paddingLeft="@dimen/ten_dp"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+    </RelativeLayout>
+
+
+    <Button
+        android:id="@+id/btnRequirements"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/one_dp"
+        android:layout_marginRight="@dimen/one_dp"
+        android:background="@drawable/touch_bg"
+        android:drawableRight="@drawable/right_arrows"
+        android:gravity="left|center"
+        android:minHeight="@dimen/sevenTy_dp"
+        android:padding="@dimen/ten_dp"
+        android:paddingLeft="@dimen/five_dp"
+        android:textColor="@color/black"
+        android:textSize="@dimen/twelve_sp" />
+
+
+    <RelativeLayout
+        android:id="@+id/rlBottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@null"
+        android:minHeight="@dimen/thirty_five">
+
+        <Button
+            android:id="@+id/btnEnterTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/ten_dp"
+            android:background="@null"
+            android:drawableLeft="@drawable/date"
+            android:drawablePadding="@dimen/five_dp"
+            android:gravity="left|center"
+            android:minHeight="@dimen/thirty_five"
+            android:paddingLeft="@dimen/five_dp"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+
+        <Button
+            android:id="@+id/btnDelete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/btnEnterTime"
+            android:background="@null"
+            android:drawableLeft="@drawable/delete_bg"
+            android:gravity="left|center"
+            android:minHeight="@dimen/thirty_five"
+            android:paddingLeft="@dimen/five_dp"
+            android:text="@string/delete"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+    </RelativeLayout>
+</LinearLayout>

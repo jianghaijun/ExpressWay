@@ -21,7 +21,6 @@ import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
-import com.zj.expressway.utils.ToastUtil;
 import com.zj.expressway.view.SonnyJackDragView;
 
 import org.litepal.crud.DataSupport;
@@ -80,9 +79,9 @@ public class AuditManagementActivity extends BaseActivity {
     private LinearLayout llButtons;
     // viewPage
     private View layTakePicture, layToBeAudited, layFinish;
-    private WorkingProcedureListActivity takePictureActivity;
-    private WorkingProcedureListActivity toBeAuditedActivity;
-    private WorkingProcedureListActivity finishActivity;
+    private ProcessListActivity takePictureActivity;
+    private ProcessListActivity toBeAuditedActivity;
+    private ProcessListActivity finishActivity;
     private ArrayList<View> views;
     private Activity mContext;
 
@@ -160,11 +159,11 @@ public class AuditManagementActivity extends BaseActivity {
         layToBeAudited = viewLI.inflate(R.layout.layout_msg, null);
         layFinish = viewLI.inflate(R.layout.layout_msg, null);
         // 待拍照
-        takePictureActivity = new WorkingProcedureListActivity(mContext, layTakePicture);
+        takePictureActivity = new ProcessListActivity(mContext, layTakePicture);
         // 待审核
-        toBeAuditedActivity = new WorkingProcedureListActivity(mContext, layToBeAudited);
+        toBeAuditedActivity = new ProcessListActivity(mContext, layToBeAudited);
         // 已完成
-        finishActivity = new WorkingProcedureListActivity(mContext, layFinish);
+        finishActivity = new ProcessListActivity(mContext, layFinish);
 
 
         TextView txtClear = (TextView) layTakePicture.findViewById(R.id.txtClear);

@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/zero_dp"
         android:layout_alignParentTop="true"
-        android:visibility="gone"
         app:layout_heightPercent="8%" />
 
     <ScrollView

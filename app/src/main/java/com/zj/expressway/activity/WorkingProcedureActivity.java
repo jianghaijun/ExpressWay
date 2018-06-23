@@ -18,7 +18,6 @@ import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
-import com.zj.expressway.utils.ToastUtil;
 
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
@@ -73,8 +72,8 @@ public class WorkingProcedureActivity extends BaseActivity {
     private ViewPager vpWorkingProcedure;
     // viewPage
     private View layToBeAudited, layFinish;
-    private WorkingProcedureListActivity toBeAuditedActivity;
-    private WorkingProcedureListActivity finishActivity;
+    private ProcessListActivity toBeAuditedActivity;
+    private ProcessListActivity finishActivity;
     private ArrayList<View> views;
     private Activity mContext;
 
@@ -123,9 +122,9 @@ public class WorkingProcedureActivity extends BaseActivity {
         layToBeAudited = viewLI.inflate(R.layout.layout_msg, null);
         layFinish = viewLI.inflate(R.layout.layout_msg, null);
         // 待审核
-        toBeAuditedActivity = new WorkingProcedureListActivity(mContext, layToBeAudited);
+        toBeAuditedActivity = new ProcessListActivity(mContext, layToBeAudited);
         // 已完成
-        finishActivity = new WorkingProcedureListActivity(mContext, layFinish);
+        finishActivity = new ProcessListActivity(mContext, layFinish);
 
         //每个页面的view数据
         views = new ArrayList<>();
