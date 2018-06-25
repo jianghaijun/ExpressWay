@@ -40,28 +40,8 @@ import java.util.List;
 import cn.hutool.core.util.StrUtil;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:00
- *       工序列表主界面
+ * Created by HaiJun on 2018/6/11 17:00
+ * 工序列表主界面
  */
 public class AuditManagementActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
@@ -139,7 +119,8 @@ public class AuditManagementActivity extends BaseActivity {
             }
 
             @Override
-            public void onButtonClicked(int buttonCode) {}
+            public void onButtonClicked(int buttonCode) {
+            }
         });
 
         searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
@@ -269,6 +250,7 @@ public class AuditManagementActivity extends BaseActivity {
 
     /**
      * 搜索
+     *
      * @param levelId
      */
     private void searchProcessData(String levelId) {
@@ -382,7 +364,7 @@ public class AuditManagementActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish, R.id.imgBtnRight })
+    @Event({R.id.imgBtnLeft, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish, R.id.imgBtnRight})
     private void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgBtnLeft:
