@@ -131,6 +131,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     ToastUtil.showShort(mContext, "请连接您的网络！");
                 } else {
+                    searchBar.setVisibility(View.GONE);
                     searchProcess(String.valueOf(text));
                 }
             }
@@ -142,12 +143,12 @@ public class ContractorTreeActivity extends BaseActivity {
         searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
             @Override
             public void OnItemClickListener(int position, View v) {
-                searchBar.setVisibility(View.GONE);
                 if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
                 } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     ToastUtil.showShort(mContext, "请连接您的网络！");
                 } else {
+                    searchBar.setVisibility(View.GONE);
                     searchProcess(String.valueOf(v.getTag()));
                 }
             }

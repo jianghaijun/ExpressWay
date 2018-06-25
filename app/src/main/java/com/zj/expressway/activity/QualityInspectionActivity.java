@@ -13,16 +13,25 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.ToastUtil;
 
+import org.litepal.crud.DataSupport;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import cn.hutool.core.util.StrUtil;
 
 /**
  *                     _ooOoo_
@@ -57,6 +66,8 @@ public class QualityInspectionActivity extends BaseActivity {
     private TextView txtTitle;
     @ViewInject(R.id.btnTakePicture)
     private Button btnTakePicture;
+    @ViewInject(R.id.searchBar)
+    private MaterialSearchBar searchBar;
     @ViewInject(R.id.vTakePicture)
     private View vTakePicture;
     @ViewInject(R.id.btnToBeAudited)
@@ -100,7 +111,53 @@ public class QualityInspectionActivity extends BaseActivity {
 
         initViewPageData();
         initTabName();
+        initSearchRecord();
         initRecyclerViewData();
+
+        searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+            @Override
+            public void onSearchStateChanged(boolean enabled) {
+                if (!enabled) {
+                    searchBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSearchConfirmed(CharSequence text) {
+                if (StrUtil.isEmpty(text)) {
+                    ToastUtil.showShort(mContext, "请输入搜索关键字");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, "请连接您的网络！");
+                } else {
+                    searchBar.setVisibility(View.GONE);
+                    searchProcessData(String.valueOf(text));
+                }
+            }
+
+            @Override
+            public void onButtonClicked(int buttonCode) {}
+        });
+
+        searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
+            @Override
+            public void OnItemClickListener(int position, View v) {
+                if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
+                    ToastUtil.showShort(mContext, "请输入搜索关键字");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, "请连接您的网络！");
+                } else {
+                    searchBar.setVisibility(View.GONE);
+                    searchProcessData(String.valueOf(v.getTag()));
+                }
+            }
+
+            @Override
+            public void OnItemDeleteListener(int position, View v) {
+                DataSupport.deleteAll(SearchRecordBean.class, "searchTitle=? and searchType=2", String.valueOf(searchBar.getLastSuggestions().get(position)));
+                searchBar.getLastSuggestions().remove(position);
+                searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
+            }
+        });
     }
 
     @Override
@@ -109,6 +166,20 @@ public class QualityInspectionActivity extends BaseActivity {
         if (ConstantsUtil.isLoading) {
             ConstantsUtil.isLoading = false;
             initRecyclerViewData();
+        }
+    }
+
+    /**
+     * 设置搜索历史列表
+     */
+    private void initSearchRecord() {
+        List<SearchRecordBean> searchList = DataSupport.where("searchType=1").find(SearchRecordBean.class);
+        if (searchList != null) {
+            List<String> stringList = new ArrayList<>();
+            for (SearchRecordBean bean : searchList) {
+                stringList.add(bean.getSearchTitle());
+            }
+            searchBar.setLastSuggestions(stringList);
         }
     }
 
@@ -269,13 +340,8 @@ public class QualityInspectionActivity extends BaseActivity {
                 this.finish();
                 break;
             case R.id.imgBtnRight:
-                Intent intent = new Intent(mContext, ContractorTreeActivity.class);
-                if (viewType.equals("1")) {
-                    intent.putExtra("type", "2");
-                } else {
-                    intent.putExtra("type", "3");
-                }
-                startActivityForResult(intent, 10002);
+                searchBar.setVisibility(View.VISIBLE);
+                searchBar.enableSearch();
                 break;
             case R.id.btnTakePicture:
                 vpWorkingProcedure.setCurrentItem(0);
@@ -293,5 +359,15 @@ public class QualityInspectionActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         ScreenManagerUtil.popActivity(this);
+        List<String> stringList = searchBar.getLastSuggestions();
+        if (stringList != null) {
+            DataSupport.deleteAll(SearchRecordBean.class, "searchType=1");
+            for (String str : stringList) {
+                SearchRecordBean bean = new SearchRecordBean();
+                bean.setSearchTitle(str);
+                bean.setSearchType("1");
+                bean.save();
+            }
+        }
     }
 }

@@ -76,7 +76,7 @@ public class ProcessListActivity extends BaseActivity {
     private Activity mContext;
     private Button btnProcessNum;
     private String userId;
-    private boolean isFirstLoad = false;
+    private boolean isFirstLoad = true;
     private int viewType, pagePosition = 1, processSum = 0, loadType = 0;
     private List<WorkingBean> workingBeanList = new ArrayList<>();
 
@@ -144,9 +144,11 @@ public class ProcessListActivity extends BaseActivity {
             List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType+"", userId, String.valueOf(SpUtil.get(mContext, "ToDoType", "2"))).find(WorkingBean.class);
             if (beanList == null || beanList.size() == 0) {
                 holder.btnNoProcessAdd.setVisibility(View.VISIBLE);
+                holder.btnAddProcess.setVisibility(View.GONE);
             } else {
                 processSum = beanList.size();
                 workingBeanList.addAll(beanList);
+                holder.btnNoProcessAdd.setVisibility(View.GONE);
                 holder.btnAddProcess.setVisibility(View.VISIBLE);
                 initProcessListData();
                 holder.refreshLayout.finishLoadMoreWithNoMoreData();
@@ -172,18 +174,25 @@ public class ProcessListActivity extends BaseActivity {
         JSONObject obj = new JSONObject();
         obj.put("page", pagePosition);
         obj.put("limit", 10);
+        if (!StrUtil.isEmpty(searchContext)) {
+            obj.put("parentNameAll", searchContext);
+        }
+
         String url = "";
         switch (viewType) {
             case 1:
                 url = ConstantsUtil.getZxHwGxProcessList;
+                obj.put("flowStatus", "0");
                 break;
             case 4:
                 // 待办
                 url = ConstantsUtil.TO_DO_LIST;
+                obj.put("flowStatus", "1");
                 break;
             case 5:
                 // 已办
                 url = ConstantsUtil.HAS_TO_DO_LIST;
+                obj.put("flowStatus", "2");
                 break;
         }
         Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
@@ -323,7 +332,7 @@ public class ProcessListActivity extends BaseActivity {
      */
     private void initProcessListData() {
         // 显示无数据
-        if (viewType != 2 && pagePosition == 1 && processSum == 0) {
+        if (!isFirstLoad && viewType != 2 && pagePosition == 1 && processSum == 0) {
             holder.rvMsg.setVisibility(View.GONE);
             holder.llSearchData.setVisibility(View.VISIBLE);
             holder.txtMsg.setText("未搜索到任何数据");
@@ -334,8 +343,8 @@ public class ProcessListActivity extends BaseActivity {
         }
 
         // 设置tab显示工序数量
-        if (!isFirstLoad) {
-            isFirstLoad = true;
+        if (isFirstLoad) {
+            isFirstLoad = false;
             String str = btnProcessNum.getText().toString();
             if (str.length() <= 3) {
                 btnProcessNum.setText(str + "（" + processSum + "）");

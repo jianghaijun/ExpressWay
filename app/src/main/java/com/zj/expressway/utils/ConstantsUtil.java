@@ -21,18 +21,6 @@ public class ConstantsUtil {
     public static final String BASE_URL = "http://192.168.1.119:8080/web/";
 
     /**
-     * 施工人员选择质检负责人
-     */
-    public static String roleFlag = "1";
-    /**
-     * 质检负责人选择监理
-     */
-    public static String roleFlag_2 = "2";
-    /**
-     * 监理选择领导
-     */
-    public static String roleFlag_3 = "21";
-    /**
      * 前缀
      */
 //    public static String prefix = "/tongren/";
@@ -119,10 +107,6 @@ public class ConstantsUtil {
      */
     public static final String PROCESS_LIST = prefix + "getSxZlProcessList";
     /**
-     * 获取图片列表
-     */
-    public static final String GET_PHONE_LIST = prefix + "appGetPhotoListByProcessId";
-    /**
      * 图片上传
      */
 //    public static final String UP_LOAD_PHOTOS = prefix + "appUploadPhoto";
@@ -132,22 +116,6 @@ public class ConstantsUtil {
      * 删除图片
      */
     public static final String DELETE_PHOTOS = prefix + "batchDeleteSxZlPhoto";
-    /**
-     * 审核人员
-     */
-    public static final String GET_AUDITORS = prefix + "getSxZlCheckUserSelect";
-    /**
-     * 提交审核照片
-     */
-    public static final String SUBMIT_AUDITORS_PICTURE = prefix + "sendProcessCheckMessage";
-    /**
-     * 驳回或完成
-     */
-    public static final String REJECT_FINISH = prefix + "dehAppYesOrNoPassCheck";
-    /**
-     * 检测项目
-     */
-    public static final String GET_CHECK_LEVEL_LIST = prefix + "appGetSxZlCheckLevelList";
     /**
      * 版本检查
      */
@@ -165,17 +133,9 @@ public class ConstantsUtil {
      */
     public static final String UPLOAD_ICON = prefix + "appUploadIcon";
     /**
-     * 上传层厚信息
-     */
-    public static final String UPDATE_SX_ZL_PROCESS = prefix + "updateSxZlProcess";
-    /**
      * 获取消息列表
      */
     public static final String GET_TIMER_TASK_LIST = prefix + "getSxZlTimerTaskList";
-    /**
-     * 获取工序详情
-     */
-    public static final String GET_PROCESS_DETAIL = prefix + "getSxZlProcessDetail";
     /**
      * 修改密码
      */

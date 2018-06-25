@@ -15,12 +15,17 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.mancj.materialsearchbar.MaterialSearchBar;
+import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
+import com.zj.expressway.utils.ToastUtil;
 import com.zj.expressway.view.SonnyJackDragView;
 
 import org.litepal.crud.DataSupport;
@@ -31,6 +36,8 @@ import org.xutils.x;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.hutool.core.util.StrUtil;
 
 /**
  *                     _ooOoo_
@@ -59,10 +66,14 @@ import java.util.List;
 public class AuditManagementActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
+    @ViewInject(R.id.imgBtnRight)
+    private ImageButton imgBtnRight;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
     @ViewInject(R.id.btnTakePicture)
     private Button btnTakePicture;
+    @ViewInject(R.id.searchBar)
+    private MaterialSearchBar searchBar;
     @ViewInject(R.id.vTakePicture)
     private View vTakePicture;
     @ViewInject(R.id.btnToBeAudited)
@@ -84,6 +95,7 @@ public class AuditManagementActivity extends BaseActivity {
     private ProcessListActivity finishActivity;
     private ArrayList<View> views;
     private Activity mContext;
+    private SonnyJackDragView dragView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,13 +108,60 @@ public class AuditManagementActivity extends BaseActivity {
         txtTitle.setText(R.string.app_name);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
+        imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
 
         initViewPageData();
 
         llButtons.setVisibility(View.GONE);
 
         initFabBtn();
+        initSearchRecord();
         initRecyclerViewData();
+
+        searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
+            @Override
+            public void onSearchStateChanged(boolean enabled) {
+                if (!enabled) {
+                    searchBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSearchConfirmed(CharSequence text) {
+                if (StrUtil.isEmpty(text)) {
+                    ToastUtil.showShort(mContext, "请输入搜索关键字");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, "请连接您的网络！");
+                } else {
+                    searchBar.setVisibility(View.GONE);
+                    searchProcessData(String.valueOf(text));
+                }
+            }
+
+            @Override
+            public void onButtonClicked(int buttonCode) {}
+        });
+
+        searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
+            @Override
+            public void OnItemClickListener(int position, View v) {
+                if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
+                    ToastUtil.showShort(mContext, "请输入搜索关键字");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, "请连接您的网络！");
+                } else {
+                    searchBar.setVisibility(View.GONE);
+                    searchProcessData(String.valueOf(v.getTag()));
+                }
+            }
+
+            @Override
+            public void OnItemDeleteListener(int position, View v) {
+                DataSupport.deleteAll(SearchRecordBean.class, "searchTitle=? and searchType=2", String.valueOf(searchBar.getLastSuggestions().get(position)));
+                searchBar.getLastSuggestions().remove(position);
+                searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
+            }
+        });
 
         btnTakePicture.setText("待拍照");
         btnToBeAudited.setText("未提交");
@@ -117,6 +176,20 @@ public class AuditManagementActivity extends BaseActivity {
         if (ConstantsUtil.isLoading) {
             initRecyclerViewData();
             ConstantsUtil.isLoading = false;
+        }
+    }
+
+    /**
+     * 设置搜索历史列表
+     */
+    private void initSearchRecord() {
+        List<SearchRecordBean> searchList = DataSupport.where("searchType=1").find(SearchRecordBean.class);
+        if (searchList != null) {
+            List<String> stringList = new ArrayList<>();
+            for (SearchRecordBean bean : searchList) {
+                stringList.add(bean.getSearchTitle());
+            }
+            searchBar.setLastSuggestions(stringList);
         }
     }
 
@@ -139,7 +212,7 @@ public class AuditManagementActivity extends BaseActivity {
             }
         });
 
-        new SonnyJackDragView.Builder()
+        dragView = new SonnyJackDragView.Builder()
                 .setActivity(this)
                 .setDefaultLeft(DensityUtil.getScreenWidth() - DensityUtil.dip2px(75))
                 .setDefaultTop(DensityUtil.getScreenHeight() - DensityUtil.dip2px(100))
@@ -164,7 +237,6 @@ public class AuditManagementActivity extends BaseActivity {
         toBeAuditedActivity = new ProcessListActivity(mContext, layToBeAudited);
         // 已完成
         finishActivity = new ProcessListActivity(mContext, layFinish);
-
 
         TextView txtClear = (TextView) layTakePicture.findViewById(R.id.txtClear);
 
@@ -277,14 +349,20 @@ public class AuditManagementActivity extends BaseActivity {
             case 0:
                 btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                dragView.getDragView().setVisibility(View.VISIBLE);
+                imgBtnRight.setVisibility(View.GONE);
                 break;
             case 1:
                 btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                dragView.getDragView().setVisibility(View.GONE);
+                imgBtnRight.setVisibility(View.VISIBLE);
                 break;
             case 2:
                 btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                dragView.getDragView().setVisibility(View.GONE);
+                imgBtnRight.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -304,11 +382,15 @@ public class AuditManagementActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish })
+    @Event({R.id.imgBtnLeft, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish, R.id.imgBtnRight })
     private void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgBtnLeft:
                 this.finish();
+                break;
+            case R.id.imgBtnRight:
+                searchBar.setVisibility(View.VISIBLE);
+                searchBar.enableSearch();
                 break;
             case R.id.btnTakePicture:
                 vpWorkingProcedure.setCurrentItem(0);
@@ -326,5 +408,15 @@ public class AuditManagementActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         ScreenManagerUtil.popActivity(this);
+        List<String> stringList = searchBar.getLastSuggestions();
+        if (stringList != null) {
+            DataSupport.deleteAll(SearchRecordBean.class, "searchType=1");
+            for (String str : stringList) {
+                SearchRecordBean bean = new SearchRecordBean();
+                bean.setSearchTitle(str);
+                bean.setSearchType("1");
+                bean.save();
+            }
+        }
     }
 }

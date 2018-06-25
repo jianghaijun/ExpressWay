@@ -63,7 +63,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
@@ -135,6 +137,7 @@ public class ToDoDetailsActivity extends BaseActivity {
     private WorkModel model;
     private String levelId; // 层级id
     private String selectText = "";
+    private WorkingBean deleteWorkingBean;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,8 +177,8 @@ public class ToDoDetailsActivity extends BaseActivity {
             setShowButton(buttons);
         } else if (workId.equals("详情")) {
             List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
-            WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
-            setTableData(workingBean);
+            deleteWorkingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
+            setTableData(deleteWorkingBean);
             setImgData(new ArrayList<PhotosBean>());
             List<ButtonListModel> buttons = new ArrayList<>();
             ButtonListModel btnModel = new ButtonListModel();
@@ -515,6 +518,9 @@ public class ToDoDetailsActivity extends BaseActivity {
         bean.saveOrUpdate("processId=?", workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
     }
 
+    /**
+     * 清除数据
+     */
     private void clearData() {
         txtPressLocal.setText("");
         txtPressLocal.setFocusable(true);
@@ -557,9 +563,147 @@ public class ToDoDetailsActivity extends BaseActivity {
                     break;
                 // 提交审核
                 case 3:
+                    if (isFill()) {
+                        toExaminePhoto();
+                    }
                     break;
             }
         }
+    }
+
+    /**
+     * 提交审核
+     * @param reviewNodeId
+     * @param userId
+     * @param userName
+     * @param userType
+     */
+    public void submitData(String reviewNodeId, String userId, String userName, String userType) {
+        Map<String, Object> object = new HashMap<>();
+        Map<String, Object> tableDataMap = new HashMap<>();
+        tableDataMap.put("levelNameAll", txtPressLocal.getText().toString());
+        tableDataMap.put("createTime", System.currentTimeMillis());
+        String type = (String) SpUtil.get(mContext, "ToDoType", "2");
+        if (type.equals("2")) {
+            tableDataMap.put("troubleTitle", edtHiddenTroubleHeadline.getText().toString());
+        } else {
+            tableDataMap.put("dangerTitle", edtHiddenTroubleHeadline.getText().toString());
+        }
+        int level = 0;
+        switch (selectText) {
+            case "一般":
+                level = 1;
+                break;
+            case "严重":
+                level = 2;
+                break;
+            case "紧要":
+                level = 3;
+                break;
+        }
+
+        if (type.equals("2")) {
+            tableDataMap.put("troubleLevel", level);
+        } else {
+            tableDataMap.put("dangerLevel", level);
+        }
+
+        tableDataMap.put("deadline", DateUtil.parse(btnChangeDate.getText().toString()).getTime());
+        if (type.equals("2")) {
+            tableDataMap.put("troubleRequire", edtRectificationRequirements.getText().toString());
+        } else {
+            tableDataMap.put("dangerRequire", edtRectificationRequirements.getText().toString());
+        }
+
+        object.put("mainTableDataObject", tableDataMap);
+        object.put("reviewNodeId", reviewNodeId);
+
+        Map<String, Object> jsonObject = new HashMap<>();
+        jsonObject.put("value",  userId);
+        jsonObject.put("label",  userName);
+        jsonObject.put("type",  userType);
+        List<Map<String, Object>> jsonArray = new ArrayList<>();
+        jsonArray.add(jsonObject);
+        object.put("reviewUserObjectList", jsonArray);
+        object.put("mainTablePrimaryIdName", "dangerId");
+        object.put("mainTableName", "fileId");
+
+        if (type.equals("2")) {
+            object.put("mainTableName", "zxHwZlHiddenDanger");
+            object.put("flowId", "zxHwZlHiddenDanger");
+        } else {
+            object.put("mainTableName", "zxHwAqHiddenDanger");
+            object.put("flowId", "zxHwAqHiddenDanger");
+        }
+
+        object.put("mainTablePrimaryId", "");
+
+        JSONArray jsonArr = new JSONArray(SpUtil.get(mContext, "uploadImgData", "[]"));
+        Map<String, Object> b = new HashMap<>();
+        Map<String, Object> o = new HashMap<>();
+        o.put("subTableType", "2");
+        o.put("subTablePrimaryIdName", "uid");
+        o.put("subTableDataObject", jsonArr);
+
+        if (type.equals("2")) {
+            b.put("zxHwZlAttachment", o);
+        } else {
+            b.put("zxHwAqAttachment", o);
+        }
+
+        object.put("subTableObject", b);
+        org.json.JSONObject data = new org.json.JSONObject(object);
+        submitData(data.toString());
+    }
+
+    /**
+     * 提交、驳回
+     */
+    private void submitData(String obj) {
+        LoadingUtils.showLoading(mContext);
+        String url = ConstantsUtil.startFlow;
+
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj);
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String jsonData = response.body().string().toString();
+                LoadingUtils.hideLoading();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    Gson gson = new Gson();
+                    BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
+                        mContext.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                clearData();
+                                if (workId.equals("详情")) {
+                                    PhotosBean.deleteAll("PhotosBean", "processId=?", processId);
+                                    deleteWorkingBean.delete();
+                                }
+                                ConstantsUtil.isLoading = true;
+                                ToDoDetailsActivity.this.finish();
+                                /*photosAdapter = new PhotosListAdapter(mContext, photosList, clickPhotoListener, "", "1");
+                                LinearLayoutManager ms = new LinearLayoutManager(mContext);
+                                ms.setOrientation(LinearLayoutManager.HORIZONTAL);
+                                rvContractorDetails.setLayoutManager(ms);
+                                rvContractorDetails.setAdapter(photosAdapter);*/
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
+                }
+            }
+        });
     }
 
     /**
@@ -902,18 +1046,22 @@ public class ToDoDetailsActivity extends BaseActivity {
                     initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
                     break;
                 case 201:
-                    JSONObject object = new JSONObject(jsonData);
-                    object.getJSONObject("data").put("buttonId", buttonId);
-                    object.getJSONObject("data").put("reviewNodeId", data.getStringExtra("reviewNodeId"));
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("value", data.getStringExtra("userId"));
-                    jsonObject.put("label", data.getStringExtra("userName"));
-                    jsonObject.put("type", data.getStringExtra("type"));
-                    JSONArray jsonArray = new JSONArray();
-                    jsonArray.add(jsonObject);
-                    object.getJSONObject("data").put("reviewUserObjectList", jsonArray);
-                    jsonData = object.toString();
-                    submitData();
+                    if (workId.equals("添加") || workId.equals("详情")) {
+                        submitData(data.getStringExtra("reviewNodeId"), data.getStringExtra("userId"), data.getStringExtra("userName"), data.getStringExtra("type"));
+                    } else {
+                        JSONObject object = new JSONObject(jsonData);
+                        object.getJSONObject("data").put("buttonId", buttonId);
+                        object.getJSONObject("data").put("reviewNodeId", data.getStringExtra("reviewNodeId"));
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("value", data.getStringExtra("userId"));
+                        jsonObject.put("label", data.getStringExtra("userName"));
+                        jsonObject.put("type", data.getStringExtra("type"));
+                        JSONArray jsonArray = new JSONArray();
+                        jsonArray.add(jsonObject);
+                        object.getJSONObject("data").put("reviewUserObjectList", jsonArray);
+                        jsonData = object.toString();
+                        submitData();
+                    }
                     break;
                 case 202:
                     addPhotoBean = new PhotosBean();
