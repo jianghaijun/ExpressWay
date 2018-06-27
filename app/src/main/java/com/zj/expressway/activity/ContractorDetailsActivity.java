@@ -144,7 +144,7 @@ public class ContractorDetailsActivity extends BaseActivity {
     private PhotosBean addPhotoBean;
     private File imgFile;
     private Activity mContext;
-    private String workId, flowId, processId, mainTablePrimaryId, sLocation, processPath, jsonData, buttonId;
+    private String workId, flowId, processId, mainTablePrimaryId, sLocation, processPath, jsonData, buttonId, mainTableId;
     private double longitude, latitude;
     private Gson gson = new Gson();
     private WorkModel model;
@@ -184,8 +184,8 @@ public class ContractorDetailsActivity extends BaseActivity {
             List<ButtonListModel> buttons = new ArrayList<>();
             if (StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && workingBean.getFileOperationFlag().equals("1")) {
                 ButtonListModel btnModel = new ButtonListModel();
-                btnModel.setButtonId("saveInLocation");
-                btnModel.setButtonName("保存至本地");
+                btnModel.setButtonId("save");
+                btnModel.setButtonName("本地保存");
                 buttons.add(btnModel);
             }
             setShowButton(buttons);
@@ -291,6 +291,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                                 WorkingBean flowBean = model.getData().getMainTableObject();
                                 flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                 flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
+                                mainTableId = model.getData().getMainTablePrimaryId();
                                 setTableData(flowBean);
                                 setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
                                 setShowButton(model.getData().getButtonList());
@@ -402,23 +403,46 @@ public class ContractorDetailsActivity extends BaseActivity {
 
         @Override
         public void onClick(View v) {
-            if (imgBtnAdd.getVisibility() == View.VISIBLE) {
-                if (buttonModel.getButtonName().contains("退") || buttonModel.getButtonName().contains("驳") || buttonModel.getButtonName().contains("回")) {
+            buttonId = buttonModel.getButtonId();
+            if (buttonModel.getButtonId().contains("reject")) {
+                boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                if (isEdit) {
                     Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                     ConstantsUtil.buttonModel = buttonModel;
-                    buttonId = buttonModel.getButtonId();
                     startActivityForResult(intent, 201);
                 } else {
-                    ConstantsUtil.buttonModel = buttonModel;
-                    buttonId = buttonModel.getButtonId();
-                    toExaminePhoto(true);
+                    JSONObject object = new JSONObject(jsonData);
+                    object.getJSONObject("data").put("buttonId", buttonId);
+                    object.getJSONObject("data").put("reviewNodeId", buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
+                    jsonData = object.toString();
+                    submitData(true);
                 }
+            } else if (buttonModel.getButtonId().contains("save")) {
+                ToastUtil.showShort(mContext, "保存成功！");
+            } else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
+                if (imgBtnAdd.getVisibility() == View.VISIBLE) {
+                    ConstantsUtil.buttonModel = buttonModel;
+                    toExaminePhoto(true);
+                } else {
+                    boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                    if (isEdit) {
+                        Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                        ConstantsUtil.buttonModel = buttonModel;
+                        startActivityForResult(intent, 201);
+                    } else {
+                        JSONObject object = new JSONObject(jsonData);
+                        object.getJSONObject("data").put("buttonId", buttonId);
+                        object.getJSONObject("data").put("reviewNodeId", buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
+                        jsonData = object.toString();
+                        submitData(true);
+                    }
+                }
+            } else if(buttonModel.getButtonId().contains("getback")) {
+                ToastUtil.showShort(mContext, "未知功能按钮");
             } else {
-                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                ConstantsUtil.buttonModel = buttonModel;
-                buttonId = buttonModel.getButtonId();
-                startActivityForResult(intent, 201);
+                ToastUtil.showShort(mContext, "未知按钮");
             }
+
         }
     }
 
@@ -718,8 +742,17 @@ public class ContractorDetailsActivity extends BaseActivity {
                         }
 
                         if (isToDoType) {
-                            Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                            startActivityForResult(intent, 201);
+                            boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                            if (isEdit) {
+                                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                                startActivityForResult(intent, 201);
+                            } else {
+                                JSONObject object = new JSONObject(jsonData);
+                                object.getJSONObject("data").put("buttonId", buttonId);
+                                object.getJSONObject("data").put("reviewNodeId", ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
+                                jsonData = object.toString();
+                                submitData(isToDoType);
+                            }
                         } else {
                             submitData(isToDoType);
                         }
@@ -730,8 +763,17 @@ public class ContractorDetailsActivity extends BaseActivity {
             upLoadPhotosDialog.show();
         } else {
             if (isToDoType) {
-                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                startActivityForResult(intent, 201);
+                boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                if (isEdit) {
+                    Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                    startActivityForResult(intent, 201);
+                } else {
+                    JSONObject object = new JSONObject(jsonData);
+                    object.getJSONObject("data").put("buttonId", buttonId);
+                    object.getJSONObject("data").put("reviewNodeId", ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
+                    jsonData = object.toString();
+                    submitData(isToDoType);
+                }
             } else {
                 submitData(isToDoType);
             }
@@ -784,6 +826,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         addPhotoBean.setUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
         addPhotoBean.setProcessId(isToDo ? workId : processId);
         addPhotoBean.setWorkId(workId);
+        addPhotoBean.setOtherId(mainTableId);
         addPhotoBean.setThumbUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
         addPhotoBean.setPhotoDesc(processPath); //描述换成rootNodeName
         addPhotoBean.setPhotoName(fileUrlName);
