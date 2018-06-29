@@ -45,110 +45,75 @@
         android:layout_height="@dimen/one_dp"
         android:background="@color/gray" />
 
-    <RelativeLayout
+    <Button
+        android:id="@+id/btnUpdatePassword"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/fifty_dp"
-        android:background="@null">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/ten_dp"
-            android:text="@string/update_password"
-            android:textColor="@color/dark_grey"
-            android:textSize="@dimen/twenty_sp" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/twenty_dp"
-            android:background="@drawable/right_arrows" />
-
-        <ImageView
-            android:id="@+id/imgViewUpdatePassword"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null" />
-    </RelativeLayout>
+        android:background="@drawable/touch_bg"
+        android:drawableRight="@drawable/right_arrows"
+        android:gravity="left|center"
+        android:paddingLeft="@dimen/ten_dp"
+        android:paddingRight="@dimen/ten_dp"
+        android:text="@string/update_password"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/twenty_sp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/one_dp"
         android:background="@color/gray" />
 
-    <RelativeLayout
+    <Button
+        android:id="@+id/btnChangeIp"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/fifty_dp"
-        android:background="@null">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/ten_dp"
-            android:text="@string/version_check"
-            android:textColor="@color/dark_grey"
-            android:textSize="@dimen/twenty_sp" />
-
-        <TextView
-            android:id="@+id/txtVersion"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/twenty_sp"
-            android:textColor="@color/dark_grey"
-            android:textSize="@dimen/twenty_sp" />
-
-        <ImageView
-            android:id="@+id/imgViewCheckVersion"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null" />
-    </RelativeLayout>
+        android:background="@drawable/touch_bg"
+        android:drawableRight="@drawable/right_arrows"
+        android:gravity="left|center"
+        android:paddingLeft="@dimen/ten_dp"
+        android:paddingRight="@dimen/ten_dp"
+        android:text="@string/changeIp"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/twenty_sp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/one_dp"
         android:background="@color/gray" />
 
-    <RelativeLayout
+    <Button
+        android:id="@+id/btnVersion"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="@dimen/fifty_dp"
-        android:background="@null">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/ten_dp"
-            android:text="@string/clean_up_caching"
-            android:textColor="@color/dark_grey"
-            android:textSize="@dimen/twenty_sp" />
-
-        <TextView
-            android:id="@+id/txtCachingSize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/twenty_sp"
-            android:textColor="@color/dark_grey"
-            android:textSize="@dimen/twenty_sp" />
-
-        <ImageView
-            android:id="@+id/imgViewCleanUpCaching"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null" />
-    </RelativeLayout>
+        android:background="@drawable/touch_bg"
+        android:gravity="left|center"
+        android:paddingLeft="@dimen/ten_dp"
+        android:text="@string/version_check"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/twenty_sp" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/one_dp"
         android:background="@color/gray" />
 
+    <Button
+        android:id="@+id/btnCleanUpCaching"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@drawable/touch_bg"
+        android:gravity="left|center"
+        android:paddingLeft="@dimen/ten_dp"
+        android:text="@string/clean_up_caching"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/twenty_sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
 </com.zhy.android.percent.support.PercentLinearLayout>

@@ -1,20 +1,16 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.IdRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,7 +29,7 @@ import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.dialog.HorizontalScreenHintDialog;
+import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.UpLoadPhotosDialog;
 import com.zj.expressway.listener.PermissionListener;
 import com.zj.expressway.listener.PromptListener;
@@ -47,6 +43,7 @@ import com.zj.expressway.utils.DateUtils;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
+import com.zj.expressway.utils.ProviderUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
@@ -58,24 +55,20 @@ import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hzw.graffiti.GraffitiActivity;
 import cn.hzw.graffiti.GraffitiParams;
-import cn.qqtheme.framework.picker.DatePicker;
-import cn.qqtheme.framework.util.ConvertUtils;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -119,25 +112,25 @@ public class ToDoDetailsActivity extends BaseActivity {
     @ViewInject(R.id.llButtons)
     private LinearLayout llButtons;
     private TimeLineAdapter timeLineAdapter;
-    // 屏幕方向监听
-    private AlbumOrientationEventListener mAlbumOrientationEventListener;
-    private int mOrientation = 0;
-    private boolean isHorizontalScreen = false;
+    private boolean isSubmit = false;
     // 图片列表
     private PhotosListAdapter photosAdapter;
     private List<PhotosBean> photosList = new ArrayList<>();
     // 拍照
-    private Uri uri = null;
-    private String fileUrlName, strFilePath;
-    private PhotosBean addPhotoBean;
-    private File imgFile;
     private Activity mContext;
-    private String workId, flowId, processId, jsonData, buttonId;
+    private String workId, flowId, processId, jsonData, buttonId, fileUrlName, strFilePath, selectText = "";
     private Gson gson = new Gson();
     private WorkModel model;
-    private String levelId; // 层级id
-    private String selectText = "";
-    private WorkingBean deleteWorkingBean;
+    private PhotosBean addPhotoBean;
+    private WorkingBean deleteWorkingBean; // 本地数据提交审核后--删除
+    private final int selectProcessPath = 1001; // 选择工序位置
+    private final int takePhoto = 1002; // 拍照
+    private final int graffiti = 1003; // 涂鸦
+    private final int selectPersonal = 1004; // 选人
+    private String checkType; // 质量or安全
+    private String selectLevelId = ""; // 选中层级id
+    private String userId; // 用户Id
+    private String uuid = RandomUtil.randomUUID();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,59 +140,28 @@ public class ToDoDetailsActivity extends BaseActivity {
         mContext = this;
         x.view().inject(this);
         ScreenManagerUtil.pushActivity(this);
+
         // actionBar
         txtTitle.setText(R.string.app_name);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
+
         // 任务id
         workId = getIntent().getStringExtra("workId");
         flowId = getIntent().getStringExtra("flowId");
         processId = getIntent().getStringExtra("processId");
+        userId = (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "");
+
+        checkType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
 
         initFilePath();
 
-        if (workId.equals("添加")) {
-            txtEntryTime.setText(DateUtils.setDataToStr(System.currentTimeMillis()));
-            setImgData(new ArrayList<PhotosBean>());
-            List<ButtonListModel> buttons = new ArrayList<>();
-            ButtonListModel btnModel = new ButtonListModel();
-            btnModel.setButtonId("saveInLocation");
-            btnModel.setButtonName("本地保存");
-            buttons.add(btnModel);
-            ButtonListModel btnSaveAdd = new ButtonListModel();
-            btnSaveAdd.setButtonId("saveAndAdd");
-            btnSaveAdd.setButtonName("保存继续添加");
-            buttons.add(btnSaveAdd);
-            ButtonListModel examine = new ButtonListModel();
-            examine.setButtonId("examine");
-            examine.setButtonName("发起审核");
-            buttons.add(examine);
-            setShowButton(buttons);
-        } else if (workId.equals("详情")) {
-            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
-            deleteWorkingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
-            setTableData(deleteWorkingBean);
-            setImgData(new ArrayList<PhotosBean>());
-            List<ButtonListModel> buttons = new ArrayList<>();
-            ButtonListModel btnModel = new ButtonListModel();
-            btnModel.setButtonId("saveInLocation");
-            btnModel.setButtonName("本地保存");
-            buttons.add(btnModel);
-            ButtonListModel btnSaveAdd = new ButtonListModel();
-            btnSaveAdd.setButtonId("saveAndAdd");
-            btnSaveAdd.setButtonName("保存继续添加");
-            buttons.add(btnSaveAdd);
-            ButtonListModel examine = new ButtonListModel();
-            examine.setButtonId("examine");
-            examine.setButtonName("发起审核");
-            buttons.add(examine);
-            setShowButton(buttons);
-            List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", processId).find(HistoryBean.class);
-            initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
-        } else {
-            initData();
+        // 是否直接弹出相机
+        if (getIntent().getBooleanExtra("isPopTakePhoto", false)) {
+            checkPhotosPermission();
         }
 
+        // 隐患级别点击事件
         rgLevel.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
@@ -207,8 +169,29 @@ public class ToDoDetailsActivity extends BaseActivity {
                 selectText = radioButton.getText().toString();
             }
         });
+
+        // 质量安全--工序
+        if (StrUtil.equals(workId, "add")) {
+            txtEntryTime.setText(DateUtils.setDataToStr(System.currentTimeMillis()));
+            setImgData(new ArrayList<PhotosBean>(), selectLevelId);
+            setShowButton(setButtons());
+        } else if (StrUtil.equals(workId, "details")) {
+            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
+            deleteWorkingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
+            selectLevelId = deleteWorkingBean.getLevelId();
+            setTableData(deleteWorkingBean);
+            setImgData(new ArrayList<PhotosBean>(), processId);
+            setShowButton(setButtons());
+            List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", processId).find(HistoryBean.class);
+            initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
+        } else {
+            initData();
+        }
     }
 
+    /**
+     * 初始化
+     */
     private void initData() {
         if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
             getData();
@@ -216,44 +199,44 @@ public class ToDoDetailsActivity extends BaseActivity {
             List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", workId).find(WorkingBean.class);
             WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
             setTableData(workingBean);
-            setImgData(new ArrayList<PhotosBean>());
-            List<ButtonListModel> buttons = new ArrayList<>();
-            if (workingBean != null && StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && workingBean.getFileOperationFlag().equals("1")) {
+            setImgData(new ArrayList<PhotosBean>(), workId);
+            if (workingBean != null && StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && !StrUtil.equals(workingBean.getFileOperationFlag(), "1")) {
+                llButtons.setVisibility(View.GONE);
+            } else {
+                List<ButtonListModel> buttons = new ArrayList<>();
                 ButtonListModel btnModel = new ButtonListModel();
-                btnModel.setButtonId("saveInLocation");
+                btnModel.setButtonId("save");
                 btnModel.setButtonName("本地保存");
                 buttons.add(btnModel);
-
-                ButtonListModel save = new ButtonListModel();
-                save.setButtonId("saveInLocation");
-                save.setButtonName("保存继续添加");
-                buttons.add(save);
+                setShowButton(buttons);
             }
-            setShowButton(buttons);
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", workId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
-        }
-
-        // 屏幕方向监听
-        mAlbumOrientationEventListener = new AlbumOrientationEventListener(mContext, SensorManager.SENSOR_DELAY_NORMAL);
-        if (mAlbumOrientationEventListener.canDetectOrientation()) {
-            mAlbumOrientationEventListener.enable();
-        }
-
-        // 是否直接弹出相机
-        boolean isPopTakePhoto = getIntent().getBooleanExtra("isPopTakePhoto", false);
-        if (isPopTakePhoto) {
-            checkPhotosPermission();
         }
     }
 
     /**
-     * 设置列表方向
+     * add按钮
      *
      * @return
      */
-    private LinearLayoutManager getLinearLayoutManager() {
-        return new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+    private List<ButtonListModel> setButtons() {
+        List<ButtonListModel> buttons = new ArrayList<>();
+        ButtonListModel btnModel = new ButtonListModel();
+        btnModel.setButtonId("save");
+        btnModel.setButtonName("本地保存");
+        buttons.add(btnModel);
+        ButtonListModel btnSaveAdd = new ButtonListModel();
+        btnSaveAdd.setButtonId("saveAndAdd");
+        btnSaveAdd.setButtonName("保存继续添加");
+        buttons.add(btnSaveAdd);
+        if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
+            ButtonListModel examine = new ButtonListModel();
+            examine.setButtonId("examine");
+            examine.setButtonName("发起审核");
+            buttons.add(examine);
+        }
+        return buttons;
     }
 
     /**
@@ -271,7 +254,7 @@ public class ToDoDetailsActivity extends BaseActivity {
             history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime() + "", workId);
         }
 
-        rvTimeMarker.setLayoutManager(getLinearLayoutManager());
+        rvTimeMarker.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         rvTimeMarker.setHasFixedSize(true);
         timeLineAdapter = new TimeLineAdapter(flowHistoryList);
         rvTimeMarker.setAdapter(timeLineAdapter);
@@ -283,7 +266,7 @@ public class ToDoDetailsActivity extends BaseActivity {
      */
     private void initFilePath() {
         strFilePath = mContext.getExternalCacheDir().getAbsolutePath() + "/";
-        imgFile = new File(strFilePath);
+        File imgFile = new File(strFilePath);
         if (!imgFile.exists()) {
             imgFile.mkdirs();
         }
@@ -296,6 +279,7 @@ public class ToDoDetailsActivity extends BaseActivity {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
         obj.put("workId", workId);
+        obj.put("flowId", flowId);
         Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.FLOW_DETAILS, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -317,10 +301,10 @@ public class ToDoDetailsActivity extends BaseActivity {
                                 flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                 flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
                                 setTableData(flowBean);
-                                if (flowId.equals("zxHwZlHiddenDanger")) {
-                                    setImgData(model.getData().getSubTableObject().getZxHwZlAttachment().getSubTableObject());
+                                if (StrUtil.equals(flowId, "zxHwZlTrouble")) {
+                                    setImgData(model.getData().getSubTableObject().getZxHwZlAttachment().getSubTableObject(), workId);
                                 } else {
-                                    setImgData(model.getData().getSubTableObject().getZxHwAqAttachment().getSubTableObject());
+                                    setImgData(model.getData().getSubTableObject().getZxHwAqAttachment().getSubTableObject(), workId);
                                 }
                                 setShowButton(model.getData().getButtonList());
                                 initTimeLineView(model.getData().getFlowHistoryList());
@@ -346,44 +330,53 @@ public class ToDoDetailsActivity extends BaseActivity {
         if (flowBean == null) {
             return;
         }
-        // 保存
 
-        if (!workId.equals("添加")) {
+        // 保存
+        if (!StrUtil.equals(workId, "details") && JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
             flowBean.setProcessId(workId);
             flowBean.saveOrUpdate("processId=?", workId);
+        }
+
+        if (!StrUtil.equals(workId, "details")) {
             btnChoice.setVisibility(View.GONE);
+            btnChangeDate.setEnabled(false);
+            edtHiddenTroubleHeadline.setFocusable(false);
+            edtRectificationRequirements.setFocusable(false);
         }
 
         txtPressLocal.setText(flowBean.getLevelNameAll());   // 工序位置
         txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getCreateTime()));     // 检查时间
-        edtHiddenTroubleHeadline.setFocusable(false);
-        if (flowId.equals("zxHwZlAttachment")) {
+        if (StrUtil.equals(flowId, "zxHwZlTrouble")) {
             edtHiddenTroubleHeadline.setText(flowBean.getTroubleTitle());     // 隐患标题
-            if (flowBean.getTroubleLevel().equals("1")) {
+            if (StrUtil.equals(flowBean.getTroubleLevel(), "1")) {
                 rBtn1.setChecked(true);
-            } else if (flowBean.getTroubleLevel().equals("2")) {
+                selectText = "一般";
+            } else if (StrUtil.equals(flowBean.getTroubleLevel(), "2")) {
                 rBtn2.setChecked(true);
+                selectText = "严重";
             } else {
                 rBtn3.setChecked(true);
+                selectText = "紧要";
             }
             edtRectificationRequirements.setText(flowBean.getTroubleRequire());
         } else {
             edtHiddenTroubleHeadline.setText(flowBean.getDangerTitle());     // 隐患标题
-            if (flowBean.getDangerLevel().equals("1")) {
+            if (StrUtil.equals(flowBean.getDangerLevel(), "1")) {
                 rBtn1.setChecked(true);
-            } else if (flowBean.getDangerLevel().equals("2")) {
+                selectText = "一般";
+            } else if (StrUtil.equals(flowBean.getDangerLevel(), "2")) {
                 rBtn2.setChecked(true);
+                selectText = "严重";
             } else {
                 rBtn3.setChecked(true);
+                selectText = "紧要";
             }
             edtRectificationRequirements.setText(flowBean.getDangerRequire());
         }
-        rgLevel.setFocusable(false);
-        btnChangeDate.setText(DateUtils.setDataToStr(flowBean.getDeadline()));
-        edtRectificationRequirements.setFocusable(false);
+        btnChangeDate.setText(DateUtils.setDataToStr2(flowBean.getDeadline()));
 
         // 控制拍照按钮是否显示
-        if (!workId.equals("添加") && !workId.equals("详情") && !StrUtil.equals("1", flowBean.getFileOperationFlag())) {
+        if (!StrUtil.equals(workId, "add") && !StrUtil.equals(workId, "details") && !StrUtil.equals("1", flowBean.getFileOperationFlag())) {
             imgBtnAdd.setVisibility(View.GONE);
         }
     }
@@ -392,24 +385,17 @@ public class ToDoDetailsActivity extends BaseActivity {
      * 设置照片信息
      *
      * @param subTableObject
+     * @param searchId
      */
-    private void setImgData(List<PhotosBean> subTableObject) {
+    private void setImgData(List<PhotosBean> subTableObject, String searchId) {
         // 查询本地保存照片
-        String searchId;
-        if (workId.equals("添加")) {
-            searchId = StrUtil.isEmpty(levelId) ? "--" : levelId;
-        } else if (workId.equals("详情")) {
-            searchId = StrUtil.isEmpty(processId) ? "--" : processId;
-        } else {
-            searchId = workId;
-        }
-        List<PhotosBean> localPhoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ? order by createTime desc", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), searchId).find(PhotosBean.class);
+        List<PhotosBean> localPhoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ? order by createTime desc", userId, searchId).find(PhotosBean.class);
 
-        // 添加本地照片
+        // add本地照片
         if (localPhoneList != null && localPhoneList.size() > 0) {
             photosList.addAll(localPhoneList);
         }
-        // 添加服务器照片
+        // add服务器照片
         if (subTableObject != null && subTableObject.size() > 0) {
             photosList.addAll(subTableObject);
         }
@@ -443,8 +429,8 @@ public class ToDoDetailsActivity extends BaseActivity {
             button.setTextSize(14);
             button.setTextColor(ContextCompat.getColor(mContext, R.color.white));
             button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.btn_blue));
-            if (workId.equals("添加") || workId.equals("详情")) {
-                button.setOnClickListener(new onClick(i+1));
+            if (StrUtil.equals(workId, "add") || StrUtil.equals(workId, "details")) {
+                button.setOnClickListener(new onClick(i + 1));
             } else {
                 button.setOnClickListener(new ButtonClick(buttonModel));
             }
@@ -454,6 +440,7 @@ public class ToDoDetailsActivity extends BaseActivity {
 
     /**
      * 是否都填写了
+     *
      * @return
      */
     private boolean isFill() {
@@ -480,19 +467,20 @@ public class ToDoDetailsActivity extends BaseActivity {
         }
     }
 
-
     /**
      * 本地保存
      */
     private void saveLocation() {
         WorkingBean bean = new WorkingBean();
-        bean.setProcessId(workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
+        bean.setProcessId(StrUtil.equals(workId, "add") ? uuid : processId);
         bean.setType("2");
-        bean.setFlowType(String.valueOf(SpUtil.get(mContext, "ToDoType", "2")));
-        bean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "--"));
+        if (StrUtil.isNotEmpty(selectLevelId)) {
+            bean.setLevelId(selectLevelId);
+        }
+        bean.setFlowType(checkType);
+        bean.setUserId(userId);
         bean.setLevelNameAll(txtPressLocal.getText().toString());
         bean.setCreateTime(System.currentTimeMillis());
-        String type = (String) SpUtil.get(mContext, "ToDoType", "2");
         int level = 0;
         switch (selectText) {
             case "一般":
@@ -505,25 +493,28 @@ public class ToDoDetailsActivity extends BaseActivity {
                 level = 3;
                 break;
         }
-        if (type.equals("2")) {
+        if (StrUtil.equals(checkType, "2")) {
             bean.setTroubleTitle(edtHiddenTroubleHeadline.getText().toString());
-            bean.setTroubleLevel(level+"");
+            bean.setTroubleLevel(level + "");
             bean.setTroubleRequire(edtRectificationRequirements.getText().toString());
         } else {
             bean.setDangerTitle(edtHiddenTroubleHeadline.getText().toString());
-            bean.setDangerLevel(level+"");
+            bean.setDangerLevel(level + "");
             bean.setDangerRequire(edtRectificationRequirements.getText().toString());
         }
         bean.setDeadline(DateUtil.parse(btnChangeDate.getText().toString()).getTime());
-        bean.saveOrUpdate("processId=?", workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
+        bean.saveOrUpdate("processId=?", StrUtil.equals(workId, "add") ? uuid : processId);
     }
 
     /**
      * 清除数据
      */
     private void clearData() {
+        uuid = RandomUtil.randomUUID();
+        workId = "add";
         txtPressLocal.setText("");
         txtPressLocal.setFocusable(true);
+        txtEntryTime.setText(DateUtils.setDataToStr(System.currentTimeMillis()));     // 检查时间
         edtHiddenTroubleHeadline.setText("");
         btnChangeDate.setText("");
         edtRectificationRequirements.setText("");
@@ -532,47 +523,8 @@ public class ToDoDetailsActivity extends BaseActivity {
     }
 
     /**
-     * 点击事件
-     */
-    private class onClick implements View.OnClickListener {
-        private int point;
-
-        public onClick(int point) {
-            this.point = point;
-        }
-
-        @Override
-        public void onClick(View v) {
-            switch (point) {
-                // 本地保存
-                case 1:
-                    if (isFill()) {
-                        saveLocation();
-                        ToastUtil.showShort(mContext, "保存成功！");
-                        Intent intent = new Intent();
-                        setResult(Activity.RESULT_OK, intent);
-                        ToDoDetailsActivity.this.finish();
-                    }
-                    break;
-                // 保存并添加
-                case 2:
-                    if (isFill()) {
-                        saveLocation();
-                        clearData();
-                    }
-                    break;
-                // 提交审核
-                case 3:
-                    if (isFill()) {
-                        toExaminePhoto();
-                    }
-                    break;
-            }
-        }
-    }
-
-    /**
      * 提交审核
+     *
      * @param reviewNodeId
      * @param userId
      * @param userName
@@ -582,9 +534,10 @@ public class ToDoDetailsActivity extends BaseActivity {
         Map<String, Object> object = new HashMap<>();
         Map<String, Object> tableDataMap = new HashMap<>();
         tableDataMap.put("levelNameAll", txtPressLocal.getText().toString());
+        tableDataMap.put("levelId", selectLevelId);
         tableDataMap.put("createTime", System.currentTimeMillis());
-        String type = (String) SpUtil.get(mContext, "ToDoType", "2");
-        if (type.equals("2")) {
+        String type = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
+        if (StrUtil.equals(type, "2")) {
             tableDataMap.put("troubleTitle", edtHiddenTroubleHeadline.getText().toString());
         } else {
             tableDataMap.put("dangerTitle", edtHiddenTroubleHeadline.getText().toString());
@@ -602,41 +555,25 @@ public class ToDoDetailsActivity extends BaseActivity {
                 break;
         }
 
-        if (type.equals("2")) {
+        if (StrUtil.equals(type, "2")) {
             tableDataMap.put("troubleLevel", level);
         } else {
             tableDataMap.put("dangerLevel", level);
         }
 
         tableDataMap.put("deadline", DateUtil.parse(btnChangeDate.getText().toString()).getTime());
-        if (type.equals("2")) {
+        if (StrUtil.equals(type, "2")) {
             tableDataMap.put("troubleRequire", edtRectificationRequirements.getText().toString());
         } else {
             tableDataMap.put("dangerRequire", edtRectificationRequirements.getText().toString());
         }
 
-        object.put("mainTableDataObject", tableDataMap);
-        object.put("reviewNodeId", reviewNodeId);
-
         Map<String, Object> jsonObject = new HashMap<>();
-        jsonObject.put("value",  userId);
-        jsonObject.put("label",  userName);
-        jsonObject.put("type",  userType);
+        jsonObject.put("value", userId);
+        jsonObject.put("label", userName);
+        jsonObject.put("type", userType);
         List<Map<String, Object>> jsonArray = new ArrayList<>();
         jsonArray.add(jsonObject);
-        object.put("reviewUserObjectList", jsonArray);
-        object.put("mainTablePrimaryIdName", "dangerId");
-        object.put("mainTableName", "fileId");
-
-        if (type.equals("2")) {
-            object.put("mainTableName", "zxHwZlHiddenDanger");
-            object.put("flowId", "zxHwZlHiddenDanger");
-        } else {
-            object.put("mainTableName", "zxHwAqHiddenDanger");
-            object.put("flowId", "zxHwAqHiddenDanger");
-        }
-
-        object.put("mainTablePrimaryId", "");
 
         JSONArray jsonArr = new JSONArray(SpUtil.get(mContext, "uploadImgData", "[]"));
         Map<String, Object> b = new HashMap<>();
@@ -645,13 +582,28 @@ public class ToDoDetailsActivity extends BaseActivity {
         o.put("subTablePrimaryIdName", "uid");
         o.put("subTableDataObject", jsonArr);
 
-        if (type.equals("2")) {
+        if (StrUtil.equals(type, "2")) {
             b.put("zxHwZlAttachment", o);
         } else {
             b.put("zxHwAqAttachment", o);
         }
 
+        object.put("title", edtHiddenTroubleHeadline.getText().toString());
+        if (StrUtil.equals(type, "2")) {
+            object.put("flowId", "zxHwZlTrouble");
+            object.put("mainTableName", "zxHwZlTrouble");
+            object.put("mainTablePrimaryIdName", "troubleId");
+        } else {
+            object.put("flowId", "zxHwAqHiddenDanger");
+            object.put("mainTableName", "zxHwAqHiddenDanger");
+            object.put("mainTablePrimaryIdName", "dangerId");
+        }
+        object.put("mainTablePrimaryId", "");
+        object.put("mainTableDataObject", tableDataMap);
+        object.put("reviewNodeId", reviewNodeId);
+        object.put("reviewUserObjectList", jsonArray);
         object.put("subTableObject", b);
+
         org.json.JSONObject data = new org.json.JSONObject(object);
         submitData(data.toString());
     }
@@ -672,28 +624,27 @@ public class ToDoDetailsActivity extends BaseActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String jsonData = response.body().string().toString();
+                jsonData = response.body().string().toString();
                 LoadingUtils.hideLoading();
                 if (JsonUtils.isGoodJson(jsonData)) {
                     Gson gson = new Gson();
-                    BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    final WorkModel model = gson.fromJson(jsonData, WorkModel.class);
                     if (model.isSuccess()) {
                         ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
                         mContext.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                clearData();
-                                if (workId.equals("详情")) {
-                                    PhotosBean.deleteAll("PhotosBean", "processId=?", processId);
-                                    deleteWorkingBean.delete();
+                                isSubmit = true;
+                                List<ButtonListModel> buttonList = model.getData().getButtonList();
+                                for (ButtonListModel buttonListModel : buttonList) {
+                                    if (StrUtil.equals(buttonListModel.getButtonId(), "submit")) {
+                                        boolean isEdit = buttonListModel.getNextShowFlowInfoList() == null || buttonListModel.getNextShowFlowInfoList().size() == 0 ? false : buttonListModel.getNextShowFlowInfoList().get(0).isEdit();
+                                        ConstantsUtil.buttonModel = buttonListModel;
+                                        buttonId = buttonListModel.getButtonId();
+                                        jumpSelectPersonal(isEdit);
+                                        return;
+                                    }
                                 }
-                                ConstantsUtil.isLoading = true;
-                                ToDoDetailsActivity.this.finish();
-                                /*photosAdapter = new PhotosListAdapter(mContext, photosList, clickPhotoListener, "", "1");
-                                LinearLayoutManager ms = new LinearLayoutManager(mContext);
-                                ms.setOrientation(LinearLayoutManager.HORIZONTAL);
-                                rvContractorDetails.setLayoutManager(ms);
-                                rvContractorDetails.setAdapter(photosAdapter);*/
                             }
                         });
                     } else {
@@ -718,30 +669,73 @@ public class ToDoDetailsActivity extends BaseActivity {
 
         @Override
         public void onClick(View v) {
-            if (imgBtnAdd.getVisibility() == View.VISIBLE) {
-                if (buttonModel.getButtonName().contains("退") || buttonModel.getButtonName().contains("驳") || buttonModel.getButtonName().contains("回")) {
-                    Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                    ConstantsUtil.buttonModel = buttonModel;
-                    buttonId = buttonModel.getButtonId();
-                    startActivityForResult(intent, 201);
+            buttonId = buttonModel.getButtonId();
+            ConstantsUtil.buttonModel = buttonModel;
+            boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+            if (buttonModel.getButtonId().contains("reject")) {
+                jumpSelectPersonal(isEdit);
+            } else if (buttonModel.getButtonId().contains("save")) {
+                ToastUtil.showShort(mContext, "保存成功！");
+            } else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
+                if (imgBtnAdd.getVisibility() == View.VISIBLE) {
+                    toExaminePhoto(false);
                 } else {
-                    ConstantsUtil.buttonModel = buttonModel;
-                    buttonId = buttonModel.getButtonId();
-                    toExaminePhoto();
+                    jumpSelectPersonal(isEdit);
                 }
+            } else if (buttonModel.getButtonId().contains("getback")) {
+                ToastUtil.showShort(mContext, "未知功能按钮");
             } else {
-                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                ConstantsUtil.buttonModel = buttonModel;
-                buttonId = buttonModel.getButtonId();
-                startActivityForResult(intent, 201);
+                ToastUtil.showShort(mContext, "未知按钮");
             }
         }
     }
 
     /**
-     * 上传照片--->提交审核
+     * 本地添加、本地详情点击事件
      */
-    private void toExaminePhoto() {
+    private class onClick implements View.OnClickListener {
+        private int point;
+
+        public onClick(int point) {
+            this.point = point;
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (point) {
+                // 本地保存
+                case 1:
+                    if (isFill()) {
+                        saveLocation();
+                        ToastUtil.showShort(mContext, "保存成功！");
+                        ConstantsUtil.isLoading = true;
+                        ToDoDetailsActivity.this.finish();
+                    }
+                    break;
+                // 保存并add
+                case 2:
+                    if (isFill()) {
+                        saveLocation();
+                        clearData();
+                    }
+                    break;
+                // 提交审核
+                case 3:
+                    if (isFill()) {
+                        toExaminePhoto(true);
+                    }
+                    break;
+            }
+        }
+    }
+
+
+    /**
+     * 上传照片--->提交审核
+     *
+     * @param isStart 是否为新流程
+     */
+    private void toExaminePhoto(final boolean isStart) {
         final List<PhotosBean> submitPictureList = new ArrayList<>();
         // 检查是否有新拍摄的照片
         for (PhotosBean photo : photosList) {
@@ -765,17 +759,36 @@ public class ToDoDetailsActivity extends BaseActivity {
                             photosAdapter.notifyDataSetChanged();
                         }
 
-                        Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                        startActivityForResult(intent, 201);
+                        if (isStart) {
+                            submitData("", "", "", "");
+                        } else {
+                            boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                            jumpSelectPersonal(isEdit);
+                        }
                     }
                 }
             });
             upLoadPhotosDialog.setCanceledOnTouchOutside(false);
             upLoadPhotosDialog.show();
         } else {
-            Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-            startActivityForResult(intent, 201);
+            if (isStart) {
+                submitData("", "", "", "");
+            } else {
+                boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                jumpSelectPersonal(isEdit);
+            }
         }
+    }
+
+    /**
+     * 跳转到选人界面
+     *
+     * @param isEdit
+     */
+    private void jumpSelectPersonal(boolean isEdit) {
+        Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+        intent.putExtra("isEdit", isEdit);
+        startActivityForResult(intent, selectPersonal);
     }
 
     /**
@@ -787,7 +800,7 @@ public class ToDoDetailsActivity extends BaseActivity {
         String newJsonData, url;
         url = ConstantsUtil.submitFlow;
         String type;
-        if (flowId.equals("zxHwZlAttachment")) {
+        if (StrUtil.equals("2", checkType)) {
             type = "zxHwZlAttachment";
         } else {
             type = "zxHwAqAttachment";
@@ -816,9 +829,23 @@ public class ToDoDetailsActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
-                                ConstantsUtil.isLoading = true;
-                                finish();
+                                if (isSubmit) {
+                                    if (StrUtil.equals(workId, "details")) {
+                                        PhotosBean.deleteAll("PhotosBean", "processId=?", processId);
+                                        if (deleteWorkingBean != null) {
+                                            deleteWorkingBean.delete();
+                                        }
+                                    }
+                                    clearData();
+                                    SpUtil.remove(mContext, "uploadImgData");
+                                    ConstantsUtil.isLoading = true;
+                                    ToDoDetailsActivity.this.finish();
+                                } else {
+                                    ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
+                                    ConstantsUtil.isLoading = true;
+                                    SpUtil.remove(mContext, "uploadImgData");
+                                    finish();
+                                }
                             }
                         });
                     } else {
@@ -840,9 +867,6 @@ public class ToDoDetailsActivity extends BaseActivity {
             int len = photosList.size();
             for (int i = 0; i < len; i++) {
                 String fileUrl = photosList.get(i).getUrl();
-                /*if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
-                    fileUrl = ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl;
-                }*/
                 urls.add(fileUrl);
             }
             Intent intent = new Intent(mContext, ShowPhotosActivity.class);
@@ -851,44 +875,6 @@ public class ToDoDetailsActivity extends BaseActivity {
             startActivity(intent);
         }
     };
-
-    /**
-     * 屏幕方向旋转监听
-     */
-    private class AlbumOrientationEventListener extends OrientationEventListener {
-        public AlbumOrientationEventListener(Context context) {
-            super(context);
-        }
-
-        public AlbumOrientationEventListener(Context context, int rate) {
-            super(context, rate);
-        }
-
-        @Override
-        public void onOrientationChanged(int orientation) {
-            if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
-                return;
-            }
-
-            //保证只返回四个方向
-            int newOrientation = ((orientation + 45) / 90 * 90) % 360;
-
-            if (newOrientation != mOrientation) {
-                // 返回的mOrientation就是手机方向，为0°、90°、180°和270°中的一个
-                mOrientation = newOrientation;
-                switch (mOrientation) {
-                    case 0:
-                    case 180:
-                        isHorizontalScreen = false;
-                        break;
-                    case 90:
-                    case 270:
-                        isHorizontalScreen = true;
-                        break;
-                }
-            }
-        }
-    }
 
     /**
      * 检查拍照权限
@@ -915,65 +901,12 @@ public class ToDoDetailsActivity extends BaseActivity {
      * 拍照
      */
     private void takePictures() {
-        if (!isHorizontalScreen) {
-            HorizontalScreenHintDialog screenHintDialog = new HorizontalScreenHintDialog(mContext, true);
-            screenHintDialog.show();
-        } else {
-            Intent intent = new Intent();
-            intent.setClass(mContext, PhotographActivity.class);
-            startActivityForResult(intent, 1);
-        }
-    }
-
-    /**
-     * 旋转图片
-     *
-     * @param angle
-     * @return Bitmap
-     */
-    public static Bitmap rotateImageView(int angle, String path) {
-        BitmapFactory.Options bitmapOptions = new BitmapFactory.Options();
-        // 此处采样，导致分辨率降到1/4,否则会报OOM
-        bitmapOptions.inSampleSize = 1;
-        Bitmap cameraBitmap = BitmapFactory.decodeFile(path, bitmapOptions);
-        // 旋转图片 动作
-        Matrix matrix = new Matrix();
-
-        matrix.postRotate(angle);
-        // 创建新的图片
-        Bitmap resizedBitmap = Bitmap.createBitmap(cameraBitmap, 0, 0, cameraBitmap.getWidth(), cameraBitmap.getHeight(), matrix, true);
-        cameraBitmap.recycle();
-        return resizedBitmap;
-    }
-
-    /**
-     * 保存图片
-     *
-     * @param bm
-     * @param path
-     * @param filename
-     * @return
-     */
-    private String saveBitmap(Bitmap bm, String path, String filename) {
-        File f = new File(path);
-        if (!f.exists()) {
-            f.mkdirs();
-        }
-
-        path = path + "/" + filename;
-        File f2 = new File(path);
-        try {
-            FileOutputStream out = new FileOutputStream(f2);
-            bm.compress(Bitmap.CompressFormat.PNG, 100, out);
-            out.flush();
-            out.close();
-            return path;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "";
+        Intent openCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        fileUrlName = System.currentTimeMillis() + ".png";
+        Uri photoUri = FileProvider.getUriForFile(mContext, ProviderUtil.getFileProviderName(mContext), new File(strFilePath + fileUrlName));
+        openCameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        openCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+        startActivityForResult(openCameraIntent, takePhoto);
     }
 
     /**
@@ -988,65 +921,45 @@ public class ToDoDetailsActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
-                case 1:
-                    if (data == null) {
-                        return;
-                    }
-                    Bundle extras = data.getExtras();
-                    if (extras != null) {
-                        String path = extras.getString("maxImgPath");
-                        if (path != null) {
-                            uri = Uri.parse(path);
-                            // 如果图像是旋转的，需要旋转后保存,目前只发现三星如此
-                            int degree = extras.getInt("degree");
-                            switch (degree) {
-                                case 0:
-                                    degree = 90;
-                                    break;
-                                case 90:
-                                    degree = 180;
-                                    break;
-                                case 180:
-                                    degree = 270;
-                                    break;
-                                case 270:
-                                    degree = 0;
-                                    break;
-                            }
-                            if (degree != 0) {
-                                Bitmap bitmap = rotateImageView(degree, path);
-                                String newPath = saveBitmap(bitmap, ConstantsUtil.SAVE_PATH, System.currentTimeMillis() + ".png");
-                                uri = Uri.parse("file://" + newPath);
-                            }
-                            LoadingUtils.hideLoading();
-                        }
-                    }
-
-                    fileUrlName = String.valueOf(System.currentTimeMillis()) + ".png";
+                // 选择工序位置
+                case selectProcessPath:
+                    clearData();
+                    txtPressLocal.setText(data.getStringExtra("procedureName"));
+                    selectLevelId = data.getStringExtra("levelId");
+                    break;
+                // 拍照回调
+                case takePhoto:
                     // 涂鸦参数
                     GraffitiParams params = new GraffitiParams();
                     // 图片路径
-                    params.mImagePath = uri.toString();
-
+                    params.mImagePath = strFilePath + fileUrlName;
                     params.mSavePath = ConstantsUtil.SAVE_PATH + fileUrlName;
                     // 初始画笔大小
                     params.mPaintSize = 20;
                     // 启动涂鸦页面
-                    GraffitiActivity.startActivityForResult(mContext, params, 202);
+                    GraffitiActivity.startActivityForResult(mContext, params, graffiti);
                     break;
-                case 110:
-                    clearData();
-                    txtPressLocal.setText(data.getStringExtra("procedureName"));
-                    levelId = data.getStringExtra("levelId");
-                    List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", levelId).find(WorkingBean.class);
-                    WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
-                    setTableData(workingBean);
-                    setImgData(new ArrayList<PhotosBean>());
-                    List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", levelId).find(HistoryBean.class);
-                    initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
+                // 涂鸦
+                case graffiti:
+                    addPhotoBean = new PhotosBean();
+                    addPhotoBean.setIsToBeUpLoad(1);
+                    addPhotoBean.setUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
+                    addPhotoBean.setProcessId(StrUtil.equals(workId, "add") ? uuid : StrUtil.equals(workId, "details") ? processId : workId);
+                    addPhotoBean.setThumbUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
+                    addPhotoBean.setPhotoName(fileUrlName);
+                    addPhotoBean.setCheckFlag("-1");
+                    addPhotoBean.setIsNewAdd(1);
+                    addPhotoBean.setRoleFlag("1");
+                    addPhotoBean.setUserId(userId);
+                    addPhotoBean.setPhotoType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
+                    addPhotoBean.setCreateTime(System.currentTimeMillis());
+                    addPhotoBean.save();
+                    photosList.add(addPhotoBean);
+                    photosAdapter.notifyDataSetChanged();
                     break;
-                case 201:
-                    if (workId.equals("添加") || workId.equals("详情")) {
+                // 选人
+                case selectPersonal:
+                    if ((StrUtil.equals(workId, "add") || StrUtil.equals(workId, "details")) && !isSubmit) {
                         submitData(data.getStringExtra("reviewNodeId"), data.getStringExtra("userId"), data.getStringExtra("userName"), data.getStringExtra("type"));
                     } else {
                         JSONObject object = new JSONObject(jsonData);
@@ -1063,23 +976,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                         submitData();
                     }
                     break;
-                case 202:
-                    addPhotoBean = new PhotosBean();
-                    addPhotoBean.setIsToBeUpLoad(1);
-                    addPhotoBean.setUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
-                    addPhotoBean.setProcessId(workId.equals("添加") ? levelId : workId.equals("详情") ? processId : workId);
-                    addPhotoBean.setThumbUrl(ConstantsUtil.SAVE_PATH + fileUrlName);
-                    addPhotoBean.setPhotoName(fileUrlName);
-                    addPhotoBean.setCheckFlag("-1");
-                    addPhotoBean.setIsNewAdd(1);
-                    addPhotoBean.setRoleFlag("1");
-                    addPhotoBean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-                    addPhotoBean.setPhotoType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
-                    addPhotoBean.setCreateTime(System.currentTimeMillis());
-                    addPhotoBean.save();
-                    photosList.add(addPhotoBean);
-                    photosAdapter.notifyDataSetChanged();
-                    break;
+
                 default:
                     break;
             }
@@ -1087,42 +984,18 @@ public class ToDoDetailsActivity extends BaseActivity {
     }
 
     /**
-     * 日期选择
+     * 是否有新照片
+     *
+     * @return
      */
-    public void onYearMonthDayPicker() {
-        final DatePicker picker = new DatePicker(mContext);
-        picker.setCanceledOnTouchOutside(true);
-        picker.setUseWeight(true);
-        picker.setTopPadding(ConvertUtils.toPx(mContext, 10));
-        picker.setRangeEnd(2100, 1, 31);
-        picker.setRangeStart(2000, 1, 31);
-        String date = btnChangeDate.getText().toString();
-        Date time = StrUtil.isEmpty(date) ? new Date() : DateUtil.parse(date);
-        picker.setSelectedItem(DateUtil.year(time), DateUtil.month(time) + 1, DateUtil.dayOfMonth(time));
-        picker.setResetWhileWheel(false);
-        picker.setOnDatePickListener(new DatePicker.OnYearMonthDayPickListener() {
-            @Override
-            public void onDatePicked(String year, String month, String day) {
-                btnChangeDate.setText(year + "-" + month + "-" + day);
+    private boolean isHaveNewPhoto() {
+        // 检查是否有新拍摄的照片
+        for (PhotosBean photo : photosList) {
+            if (photo.getIsToBeUpLoad() == 1) {
+                return true;
             }
-        });
-        picker.setOnWheelListener(new DatePicker.OnWheelListener() {
-            @Override
-            public void onYearWheeled(int index, String year) {
-                picker.setTitleText(year + "-" + picker.getSelectedMonth() + "-" + picker.getSelectedDay());
-            }
-
-            @Override
-            public void onMonthWheeled(int index, String month) {
-                picker.setTitleText(picker.getSelectedYear() + "-" + month + "-" + picker.getSelectedDay());
-            }
-
-            @Override
-            public void onDayWheeled(int index, String day) {
-                picker.setTitleText(picker.getSelectedYear() + "-" + picker.getSelectedMonth() + "-" + day);
-            }
-        });
-        picker.show();
+        }
+        return false;
     }
 
     /**
@@ -1135,18 +1008,35 @@ public class ToDoDetailsActivity extends BaseActivity {
         switch (v.getId()) {
             // 返回
             case R.id.imgBtnLeft:
-                this.finish();
+                if (StrUtil.equals("add", workId)) {
+                    if (!StrUtil.isEmpty(txtPressLocal.getText().toString()) || isHaveNewPhoto()) {
+                        new PromptDialog(mContext, new PromptListener() {
+                            @Override
+                            public void returnTrueOrFalse(boolean trueOrFalse) {
+                                if (trueOrFalse) {
+                                    saveLocation();
+                                    ToastUtil.showShort(mContext, "保存成功！");
+                                    ConstantsUtil.isLoading = true;
+                                    mContext.finish();
+                                } else {
+                                    PhotosBean.deleteAll("processId=?", uuid);
+                                    mContext.finish();
+                                }
+                            }
+                        }, "提示", "您已添加数据是否保存至本地？", "否", "是").show();
+                    }
+                } else {
+                    mContext.finish();
+                }
                 break;
             // 选择位置
             case R.id.btnChoice:
                 Intent intent = new Intent(mContext, ContractorTreeActivity.class);
-                String type = (String) SpUtil.get(mContext, "ToDoType", "2");
-                intent.putExtra("type", type);
-                startActivityForResult(intent, 110);
+                startActivityForResult(intent, selectProcessPath);
                 break;
             // 选择日期
             case R.id.btnChangeDate:
-                onYearMonthDayPicker();
+                DateUtils.onYearMonthDayPicker(mContext, btnChangeDate);
                 break;
             // 拍照
             case R.id.imgBtnAdd:
@@ -1164,9 +1054,5 @@ public class ToDoDetailsActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         ScreenManagerUtil.popActivity(this);    // 退出当前activity
-        // 取消屏幕旋转监听
-        if (mAlbumOrientationEventListener != null) {
-            mAlbumOrientationEventListener.disable();
-        }
     }
 }

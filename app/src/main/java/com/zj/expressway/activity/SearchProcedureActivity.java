@@ -95,8 +95,8 @@ public class SearchProcedureActivity extends BaseActivity {
         obj.put("parentNameAll", getIntent().getStringExtra("searchTitle"));
         String url;
         if (getIntent().getStringExtra("searchType").equals("1")) {
-            url = ConstantsUtil.NEW_CONTRACTOR_LIST;
-        } else if (getIntent().getStringExtra("type").equals("2")) {
+            url = ConstantsUtil.getZxHwGxProjectLevelList;
+        } else if (getIntent().getStringExtra("searchType").equals("2")) {
             url = ConstantsUtil.getZxHwZlProjectLevelList;
         } else {
             url = ConstantsUtil.getZxHwAqProjectLevelList;

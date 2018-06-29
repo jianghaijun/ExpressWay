@@ -18,6 +18,7 @@ public class PhotosBean extends DataSupport implements Serializable {
     private String photoName;
     private long createTime;
     private String url;
+    private String uid;
     private String longitude;
     private String latitude;
     private String location;
@@ -29,6 +30,14 @@ public class PhotosBean extends DataSupport implements Serializable {
     private String photoType;
     private String createUser;
     private String otherId;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
     public int getIsToBeUpLoad() {
         return isToBeUpLoad;

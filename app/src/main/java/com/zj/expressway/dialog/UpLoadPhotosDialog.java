@@ -49,6 +49,13 @@ public class UpLoadPhotosDialog extends Dialog {
     private ProgressBar proBarUpLoadPhotos;
     private PromptListener choiceListener;
 
+    /**
+     *
+     * @param context
+     * @param type  工序--质量
+     * @param upLoadPhotosBeenList
+     * @param choiceListener
+     */
     public UpLoadPhotosDialog(Context context, int type, List<PhotosBean> upLoadPhotosBeenList, PromptListener choiceListener) {
         super(context);
         this.type = type;
@@ -117,11 +124,11 @@ public class UpLoadPhotosDialog extends Dialog {
         Map<String, File> fileMap = new HashMap<>();
         for (PhotosBean fileBean : upLoadPhotosBeenList) {
             Map<String, Object> map = new HashMap<>();
-            map.put("processId", fileBean.getProcessId());
-            map.put("troubleId", fileBean.getProcessId());
-            map.put("dangerId", fileBean.getProcessId());
+            map.put("processId", fileBean.getOtherId());
+            map.put("troubleId", fileBean.getOtherId());
+            map.put("dangerId", fileBean.getOtherId());
             map.put("fileDesc", fileBean.getPhotoDesc());
-            map.put("otherId", fileBean.getProcessId());
+            map.put("otherId", fileBean.getOtherId());
             map.put("longitude", fileBean.getLongitude());
             map.put("latitude", fileBean.getLatitude());
             map.put("location", fileBean.getLocation() == null ? "" : fileBean.getLocation());
@@ -168,8 +175,10 @@ public class UpLoadPhotosDialog extends Dialog {
                                 upLoadPhotosHandler.sendMessage(jsonErr);
                             } else {
                                 JSONObject obj = new JSONObject(jsonData);
-                                String data = String.valueOf(obj.getJSONArray("data"));
-                                SpUtil.put(mContext, "uploadImgData", data);
+                                if (type == 3 || type == 4) {
+                                    String data = String.valueOf(obj.getJSONArray("data"));
+                                    SpUtil.put(mContext, "uploadImgData", data);
+                                }
                                 Message success = new Message();
                                 success.what = 200;
                                 upLoadPhotosHandler.sendMessage(success);

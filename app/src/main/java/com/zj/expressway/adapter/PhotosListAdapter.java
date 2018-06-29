@@ -3,9 +3,7 @@ package com.zj.expressway.adapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,22 +14,19 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
 import com.zj.expressway.R;
-import com.zj.expressway.activity.LoginActivity;
+import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.PictureBean;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.listener.ShowPhotoListener;
 import com.zj.expressway.model.PictureModel;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.LoadingUtils;
-import com.zj.expressway.utils.ScreenManagerUtil;
-import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
@@ -41,7 +36,6 @@ import java.util.List;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -100,9 +94,6 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
         anim.start();
 
         String fileUrl = phoneListBean.get(position).getThumbUrl();
-        /*if (!TextUtils.isEmpty(fileUrl) && !fileUrl.contains(ConstantsUtil.SAVE_PATH)) {
-            fileUrl = ConstantsUtil.BASE_URL + ConstantsUtil.prefix + fileUrl;
-        }*/
 
         holder.txtStatus.setVisibility(View.VISIBLE);
         if (phoneListBean.get(position).getIsToBeUpLoad() == 1) {
@@ -194,91 +185,40 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
     private void deletePhoto(final PhotosBean bean, final int point) {
         LoadingUtils.showLoading(mContext);
         // 参数
-        PictureModel model = new PictureModel();
-        model.setSelectUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-        model.setRootLevelId(levelId);
-        model.setProcessId(bean.getProcessId());
         List<PictureBean> beanList = new ArrayList<>();
         PictureBean picBean = new PictureBean();
-        picBean.setPhotoId(bean.getPhotoId());
+        picBean.setUid(bean.getUid());
         beanList.add(picBean);
-        model.setSxZlPhotoList(beanList);
 
-        Gson gson = new Gson();
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, gson.toJson(model).toString());
-
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.DELETE_PHOTOS)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
-
+        final Gson gson = new Gson();
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.DELETE_PHOTOS, gson.toJson(beanList).toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                mContext.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        LoadingUtils.hideLoading();
-                        ToastUtil.showShort(mContext, mContext.getString(R.string.server_exception));
-                    }
-                });
+                ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.server_exception));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
-                    try {
-                        JSONObject obj = new JSONObject(jsonData);
-                        boolean resultFlag = obj.getBoolean("success");
-                        final String msg = obj.getString("message");
-                        final String code = obj.getString("code");
-                        if (resultFlag) {
-                            mContext.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    LoadingUtils.hideLoading();
-                                    ToastUtil.showShort(mContext, "删除成功！");
-                                    phoneListBean.remove(point);
-                                    DataSupport.deleteAll(PhotosBean.class, "photoId=?", bean.getPhotoId());
-                                    PhotosListAdapter.this.notifyDataSetChanged();
-                                }
-                            });
-                        } else {
-                            mContext.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    LoadingUtils.hideLoading();
-                                    switch (code) {
-                                        case "3003":
-                                        case "3004":
-                                            // Token异常重新登录
-                                            ToastUtil.showLong(mContext, "Token过期请重新登录！");
-                                            SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                                            ScreenManagerUtil.popAllActivityExceptOne();
-                                            mContext.startActivity(new Intent(mContext, LoginActivity.class));
-                                            break;
-                                        default:
-                                            ToastUtil.showLong(mContext, msg);
-                                            break;
-                                    }
-                                }
-                            });
-                        }
-                    } catch (JSONException e) {
-                        LoadingUtils.hideLoading();
-                        ToastUtil.showLong(mContext, mContext.getString(R.string.data_error));
-                        e.printStackTrace();
+                    BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        mContext.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                LoadingUtils.hideLoading();
+                                ToastUtil.showShort(mContext, "删除成功！");
+                                phoneListBean.remove(point);
+                                DataSupport.deleteAll(PhotosBean.class, "photoId=?", bean.getPhotoId());
+                                PhotosListAdapter.this.notifyDataSetChanged();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                     }
                 } else {
-                    mContext.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            LoadingUtils.hideLoading();
-                            ToastUtil.showLong(mContext, mContext.getString(R.string.json_error));
-                        }
-                    });
+                    ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.json_error));
                 }
             }
         });

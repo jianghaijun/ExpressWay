@@ -14,8 +14,9 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 
+import com.ashokvarma.bottomnavigation.BottomNavigationBar;
+import com.ashokvarma.bottomnavigation.BottomNavigationItem;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
@@ -25,7 +26,6 @@ import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.UserInfo;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.listener.PermissionListener;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.WorkingModel;
 import com.zj.expressway.utils.ChildThreadUtil;
@@ -37,7 +37,6 @@ import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
-import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
@@ -52,48 +51,14 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 16:44
- *       主界面
+ * Created by HaiJun on 2018/6/11 16:44
+ * 主界面
  */
 public class MainActivity extends BaseActivity {
     @ViewInject(R.id.vpMain)
     private ViewPager vpMain;
-    @ViewInject(R.id.imgMsg)
-    private ImageView imgMsg;
-    @ViewInject(R.id.txtMsg)
-    private TextView txtMsg;
-    @ViewInject(R.id.imgApplication)
-    private ImageView imgApplication;
-    @ViewInject(R.id.txtApplication)
-    private TextView txtApplication;
-    @ViewInject(R.id.imgFriends)
-    private ImageView imgFriends;
-    @ViewInject(R.id.txtFriends)
-    private TextView txtFriends;
-    @ViewInject(R.id.imgMe)
-    private ImageView imgMe;
-    @ViewInject(R.id.txtMe)
-    private TextView txtMe;
+    @ViewInject(R.id.bottom_navigation_bar)
+    private BottomNavigationBar bottomNavigationBar;
     private ImageView imgViewUserAvatar;
     private Activity mContext;
     private List<String> urlList;
@@ -105,9 +70,7 @@ public class MainActivity extends BaseActivity {
     private MySettingActivity mySettingActivity;
     // View列表
     private ArrayList<View> views;
-
     private boolean isUploadHead = false;
-    private WorkingBean data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +129,40 @@ public class MainActivity extends BaseActivity {
         views.add(layoutFriends);
         views.add(layoutMe);
 
+        bottomNavigationBar.addItem(new BottomNavigationItem(R.drawable.msg_select, "消息").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.msg_un_select)))
+                .addItem(new BottomNavigationItem(R.drawable.application_select, "应用").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.application_un_select)))
+                .addItem(new BottomNavigationItem(R.drawable.friend_select, "联系人").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.friend_un_select)))
+                .addItem(new BottomNavigationItem(R.drawable.me_select, "个人中心").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.me_un_select)))
+                .setMode(BottomNavigationBar.MODE_FIXED)
+                .setActiveColor("#13227A")
+                .setInActiveColor("#F78E62")
+                .setBackgroundStyle(BottomNavigationBar.BACKGROUND_STYLE_STATIC)
+                .setFirstSelectedPosition(1)
+                .initialise();
+
+        bottomNavigationBar.setTabSelectedListener(new BottomNavigationBar.SimpleOnTabSelectedListener() {
+            @Override
+            public void onTabSelected(int position) {
+                switch (position) {
+                    case 0:
+                        vpMain.setCurrentItem(0);
+                        break;
+                    case 1:
+                        appActivity.startBanner();
+                        vpMain.setCurrentItem(1);
+                        break;
+                    case 2:
+                        vpMain.setCurrentItem(2);
+                        break;
+                    case 3:
+                        vpMain.setCurrentItem(3);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+
         vpMain.setOnPageChangeListener(new MyOnPageChangeListener());
         vpMain.setAdapter(mPagerAdapter);
         vpMain.setCurrentItem(1);
@@ -200,7 +197,6 @@ public class MainActivity extends BaseActivity {
                                 workingBean.setCreateTime(System.currentTimeMillis());
                                 appActivity.setDate(urlList, workingBean);
                                 mySettingActivity.checkVersion();
-                                data = workingBean;
                                 msgMainActivity.setDate(workingBean);
                                 workingBean.saveOrUpdate();
                             }
@@ -237,7 +233,7 @@ public class MainActivity extends BaseActivity {
                 if (!isUploadHead) {
                     //getData();
                     appActivity.setDate(urlList, new WorkingBean());
-                    msgMainActivity.setDate(null);
+                    //msgMainActivity.setDate(null);
                 }
             } else {
                 List<WorkingBean> beanList = DataSupport.where("flowType=1 order by createTime").find(WorkingBean.class);
@@ -278,7 +274,7 @@ public class MainActivity extends BaseActivity {
     private class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
         public void onPageSelected(int arg0) {
-            setStates(arg0);
+            bottomNavigationBar.selectTab(arg0);
         }
 
         @Override
@@ -287,47 +283,6 @@ public class MainActivity extends BaseActivity {
 
         @Override
         public void onPageScrolled(int arg0, float arg1, int arg2) {
-        }
-    }
-
-    /**
-     * 设置背景
-     *
-     * @param option
-     */
-    private void setStates(int option) {
-        imgMsg.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.msg_un_select));
-        txtMsg.setTextColor(ContextCompat.getColor(mContext, R.color.tab_color));
-
-        imgApplication.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.application_un_select));
-        txtApplication.setTextColor(ContextCompat.getColor(mContext, R.color.tab_color));
-
-        imgFriends.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.friend_un_select));
-        txtFriends.setTextColor(ContextCompat.getColor(mContext, R.color.tab_color));
-
-        imgMe.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.me_un_select));
-        txtMe.setTextColor(ContextCompat.getColor(mContext, R.color.tab_color));
-
-        switch (option) {
-            case 0:
-                imgMsg.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.msg_select));
-                txtMsg.setTextColor(ContextCompat.getColor(mContext, R.color.v_2_tab_select_color));
-                msgMainActivity.setDate(data);
-                break;
-            case 1:
-                appActivity.startBanner();
-                imgApplication.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.application_select));
-                txtApplication.setTextColor(ContextCompat.getColor(mContext, R.color.v_2_tab_select_color));
-                break;
-            case 2:
-                imgFriends.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.friend_select));
-                txtFriends.setTextColor(ContextCompat.getColor(mContext, R.color.v_2_tab_select_color));
-                break;
-            case 3:
-                imgMe.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.me_select));
-                txtMe.setTextColor(ContextCompat.getColor(mContext, R.color.v_2_tab_select_color));
-                mySettingActivity.setVersion();
-                break;
         }
     }
 
@@ -459,32 +414,6 @@ public class MainActivity extends BaseActivity {
                         super.inProgress(progress, total, id);
                     }
                 });
-    }
-
-    /**
-     * 点击事件
-     *
-     * @param v
-     */
-    @Event({R.id.llMsg, R.id.llApplication, R.id.llFriends, R.id.llMe})
-    private void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.llMsg:
-                vpMain.setCurrentItem(0);
-                break;
-            case R.id.llApplication:
-                appActivity.startBanner();
-                vpMain.setCurrentItem(1);
-                break;
-            case R.id.llFriends:
-                vpMain.setCurrentItem(2);
-                break;
-            case R.id.llMe:
-                vpMain.setCurrentItem(3);
-                break;
-            default:
-                break;
-        }
     }
 
 }

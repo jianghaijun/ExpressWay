@@ -106,10 +106,10 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         }
 
         public void bind(WorkingBean data) {
-            txtReviewProgress.setText(data.getTrackStatus());
+            txtReviewProgress.setText(data.getFlowStatus());
             txtProcedureName.setText(data.getNodeName());
             txtProcedurePath.setText(data.getTitle());
-            txtProcedureState.setText(data.getNodeName());
+            txtProcedureState.setText(data.getFlowName());
             txtPersonals.setText(data.getSendUserName());
             txtCheckTime.setText(DateUtil.format(DateUtil.date(data.getSendTime() == 0 ? System.currentTimeMillis() : data.getSendTime()), "yyyy-MM-dd HH:mm:ss"));
             rlBottom.setOnClickListener(new onClick(data));
@@ -168,16 +168,16 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
      */
     private void takePhotoActivity(WorkingBean bean, boolean isPopTakePhoto) {
         Intent intent;
-        if (bean.getFlowId().equals("zxHwZlHiddenDanger")) {
+        if (bean.getFlowId().equals("zxHwZlTrouble")) {
             intent = new Intent(mContext, ToDoDetailsActivity.class);
         } else if (bean.getFlowId().equals("zxHwAqHiddenDanger")) {
             intent = new Intent(mContext, ToDoDetailsActivity.class);
         } else {
             intent = new Intent(mContext, ContractorDetailsActivity.class);
         }
-        intent.putExtra("flowId", bean.getFlowId());
-        intent.putExtra("workId", bean.getWorkId());
-        intent.putExtra("mainTablePrimaryId", bean.getMainTablePrimaryId());
+        intent.putExtra("flowId", bean.getFlowId() == null ? "" : bean.getFlowId());
+        intent.putExtra("workId", bean.getWorkId() == null ? "" : bean.getWorkId());
+        intent.putExtra("mainTablePrimaryId", bean.getMainTablePrimaryId() == null ? "" : bean.getMainTablePrimaryId());
         intent.putExtra("isToDo", true);
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);
         mContext.startActivity(intent);

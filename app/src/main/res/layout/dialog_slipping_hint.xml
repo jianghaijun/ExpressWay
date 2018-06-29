@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rlTop"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#e0000000"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btnPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/cloud"
+        android:gravity="bottom|center"
+        android:paddingBottom="@dimen/thirty"
+        android:text="@string/prompt"
+        android:textColor="@color/black"
+        android:textSize="@dimen/ten_dp" />
+</RelativeLayout>

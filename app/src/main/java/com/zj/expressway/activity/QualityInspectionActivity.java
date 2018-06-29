@@ -91,7 +91,6 @@ public class QualityInspectionActivity extends BaseActivity {
     private ArrayList<View> views;
 
     private Activity mContext;
-    private String viewType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +101,6 @@ public class QualityInspectionActivity extends BaseActivity {
         x.view().inject(this);
         llButtons.setVisibility(View.GONE);
         ScreenManagerUtil.pushActivity(this);
-        viewType = getIntent().getStringExtra("type");
 
         txtTitle.setText(R.string.app_name);
         imgBtnLeft.setVisibility(View.VISIBLE);
@@ -126,9 +124,9 @@ public class QualityInspectionActivity extends BaseActivity {
             public void onSearchConfirmed(CharSequence text) {
                 if (StrUtil.isEmpty(text)) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     ToastUtil.showShort(mContext, "请连接您的网络！");
-                } else {
+                }*/ else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(text));
                 }
@@ -143,9 +141,9 @@ public class QualityInspectionActivity extends BaseActivity {
             public void OnItemClickListener(int position, View v) {
                 if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     ToastUtil.showShort(mContext, "请连接您的网络！");
-                } else {
+                }*/ else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(v.getTag()));
                 }
@@ -311,20 +309,18 @@ public class QualityInspectionActivity extends BaseActivity {
 
     /**
      * 搜索
-     * @param levelId
+     * @param searchContext
      */
-    private void searchProcessData(String levelId) {
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == 10002) {
-                searchProcessData(data.getStringExtra("levelId"));
-            } else if (requestCode == 20001) {
-                qualityActivity.updateData();
-            }
+    private void searchProcessData(String searchContext) {
+        switch (vpWorkingProcedure.getCurrentItem()) {
+            case 0:
+                break;
+            case 1:
+                toDoActivity.initData(4, btnToBeAudited, searchContext);
+                break;
+            case 2:
+                hasToDoActivity.initData(5, btnFinish, searchContext);
+                break;
         }
     }
 

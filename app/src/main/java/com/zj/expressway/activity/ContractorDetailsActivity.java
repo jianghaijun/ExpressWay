@@ -14,7 +14,9 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -59,6 +61,7 @@ import com.zj.expressway.utils.ImageUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
+import com.zj.expressway.utils.ProviderUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
@@ -127,10 +130,6 @@ public class ContractorDetailsActivity extends BaseActivity {
     @ViewInject(R.id.rvTimeMarker)
     private RecyclerView rvTimeMarker;
     private TimeLineAdapter timeLineAdapter;
-    // 屏幕方向监听
-    private AlbumOrientationEventListener mAlbumOrientationEventListener;
-    private int mOrientation = 0;
-    private boolean isHorizontalScreen = false;
     // 图片列表
     private PhotosListAdapter photosAdapter;
     private List<PhotosBean> photosList = new ArrayList<>();
@@ -191,12 +190,6 @@ public class ContractorDetailsActivity extends BaseActivity {
             setShowButton(buttons);
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", isToDo ? workId : processId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
-        }
-
-        // 屏幕方向监听
-        mAlbumOrientationEventListener = new AlbumOrientationEventListener(mContext, SensorManager.SENSOR_DELAY_NORMAL);
-        if (mAlbumOrientationEventListener.canDetectOrientation()) {
-            mAlbumOrientationEventListener.enable();
         }
 
         // 是否直接弹出相机
@@ -406,7 +399,12 @@ public class ContractorDetailsActivity extends BaseActivity {
             buttonId = buttonModel.getButtonId();
             if (buttonModel.getButtonId().contains("reject")) {
                 boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-                if (isEdit) {
+                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                ConstantsUtil.buttonModel = buttonModel;
+                intent.putExtra("isEdit", isEdit);
+                startActivityForResult(intent, 201);
+
+                /*if (isEdit) {
                     Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                     ConstantsUtil.buttonModel = buttonModel;
                     startActivityForResult(intent, 201);
@@ -416,7 +414,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                     object.getJSONObject("data").put("reviewNodeId", buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
                     jsonData = object.toString();
                     submitData(true);
-                }
+                }*/
             } else if (buttonModel.getButtonId().contains("save")) {
                 ToastUtil.showShort(mContext, "保存成功！");
             } else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
@@ -425,7 +423,11 @@ public class ContractorDetailsActivity extends BaseActivity {
                     toExaminePhoto(true);
                 } else {
                     boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-                    if (isEdit) {
+                    Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                    ConstantsUtil.buttonModel = buttonModel;
+                    intent.putExtra("isEdit", isEdit);
+                    startActivityForResult(intent, 201);
+                    /*if (isEdit) {
                         Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                         ConstantsUtil.buttonModel = buttonModel;
                         startActivityForResult(intent, 201);
@@ -435,7 +437,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                         object.getJSONObject("data").put("reviewNodeId", buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
                         jsonData = object.toString();
                         submitData(true);
-                    }
+                    }*/
                 }
             } else if(buttonModel.getButtonId().contains("getback")) {
                 ToastUtil.showShort(mContext, "未知功能按钮");
@@ -538,44 +540,6 @@ public class ContractorDetailsActivity extends BaseActivity {
             startActivity(intent);
         }
     };
-
-    /**
-     * 屏幕方向旋转监听
-     */
-    private class AlbumOrientationEventListener extends OrientationEventListener {
-        public AlbumOrientationEventListener(Context context) {
-            super(context);
-        }
-
-        public AlbumOrientationEventListener(Context context, int rate) {
-            super(context, rate);
-        }
-
-        @Override
-        public void onOrientationChanged(int orientation) {
-            if (orientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
-                return;
-            }
-
-            //保证只返回四个方向
-            int newOrientation = ((orientation + 45) / 90 * 90) % 360;
-
-            if (newOrientation != mOrientation) {
-                // 返回的mOrientation就是手机方向，为0°、90°、180°和270°中的一个
-                mOrientation = newOrientation;
-                switch (mOrientation) {
-                    case 0:
-                    case 180:
-                        isHorizontalScreen = false;
-                        break;
-                    case 90:
-                    case 270:
-                        isHorizontalScreen = true;
-                        break;
-                }
-            }
-        }
-    }
 
     /**
      * 获取定位权限
@@ -743,7 +707,11 @@ public class ContractorDetailsActivity extends BaseActivity {
 
                         if (isToDoType) {
                             boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-                            if (isEdit) {
+                            Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                            intent.putExtra("isEdit", isEdit);
+                            startActivityForResult(intent, 201);
+
+                            /*if (isEdit) {
                                 Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                                 startActivityForResult(intent, 201);
                             } else {
@@ -752,7 +720,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                                 object.getJSONObject("data").put("reviewNodeId", ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
                                 jsonData = object.toString();
                                 submitData(isToDoType);
-                            }
+                            }*/
                         } else {
                             submitData(isToDoType);
                         }
@@ -764,7 +732,10 @@ public class ContractorDetailsActivity extends BaseActivity {
         } else {
             if (isToDoType) {
                 boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-                if (isEdit) {
+                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
+                intent.putExtra("isEdit", isEdit);
+                startActivityForResult(intent, 201);
+                /*if (isEdit) {
                     Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                     startActivityForResult(intent, 201);
                 } else {
@@ -773,7 +744,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                     object.getJSONObject("data").put("reviewNodeId", ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
                     jsonData = object.toString();
                     submitData(isToDoType);
-                }
+                }*/
             } else {
                 submitData(isToDoType);
             }
@@ -805,14 +776,12 @@ public class ContractorDetailsActivity extends BaseActivity {
      * 拍照
      */
     private void takePictures() {
-        if (!isHorizontalScreen) {
-            HorizontalScreenHintDialog screenHintDialog = new HorizontalScreenHintDialog(mContext, true);
-            screenHintDialog.show();
-        } else {
-            Intent intent = new Intent();
-            intent.setClass(mContext, PhotographActivity.class);
-            startActivityForResult(intent, 1);
-        }
+        Intent openCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        fileUrlName = System.currentTimeMillis() + ".png";
+        Uri photoUri = FileProvider.getUriForFile(mContext, ProviderUtil.getFileProviderName(mContext), new File(strFilePath + fileUrlName));
+        openCameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        openCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+        startActivityForResult(openCameraIntent, 1);
     }
 
     /**
@@ -853,15 +822,15 @@ public class ContractorDetailsActivity extends BaseActivity {
     private class StorageTask extends AsyncTask<String, Void, Void> {
         @Override
         protected Void doInBackground(String... params) {
-            Bitmap bitmap = BitmapFactory.decodeFile(FileUtil.getRealFilePath(mContext, uri));
+            Bitmap bitmap = BitmapFactory.decodeFile(strFilePath + fileUrlName);
             // 压缩图片
-            bitmap = FileUtil.compressBitmap(bitmap);
+            //bitmap = FileUtil.compressBitmap(bitmap);
             // 在图片上添加水印
             bitmap = ImageUtil.createWaterMaskLeftTop(mContext, bitmap, params[0], addPhotoBean);
             // 保存到SD卡指定文件夹下
             saveBitmapFile(bitmap, fileUrlName);
             // 删除拍摄的照片
-            FileUtil.deleteFile(FileUtil.getRealFilePath(mContext, uri));
+            //FileUtil.deleteFile(strFilePath + fileUrlName);
             return null;
         }
 
@@ -962,40 +931,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case 1:
-                    if (data == null) {
-                        return;
-                    }
-                    Bundle extras = data.getExtras();
-                    if (extras != null) {
-                        String path = extras.getString("maxImgPath");
-                        if (path != null) {
-                            uri = Uri.parse(path);
-                            // 如果图像是旋转的，需要旋转后保存,目前只发现三星如此
-                            int degree = extras.getInt("degree");
-                            switch (degree) {
-                                case 0:
-                                    degree = 90;
-                                    break;
-                                case 90:
-                                    degree = 180;
-                                    break;
-                                case 180:
-                                    degree = 270;
-                                    break;
-                                case 270:
-                                    degree = 0;
-                                    break;
-                            }
-                            if (degree != 0) {
-                                Bitmap bitmap = rotateImageView(degree, path);
-                                String newPath = saveBitmap(bitmap, ConstantsUtil.SAVE_PATH, System.currentTimeMillis() + ".png");
-                                uri = Uri.parse("file://" + newPath);
-                            }
-                            LoadingUtils.hideLoading();
-                        }
-                    }
-
-                    fileUrlName = String.valueOf(System.currentTimeMillis()) + ".png";
+                    uri = Uri.parse("file://" + ConstantsUtil.SAVE_PATH + fileUrlName);
                     saveLocalFile();
                     break;
                 case 201:
@@ -1080,10 +1016,6 @@ public class ContractorDetailsActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         ScreenManagerUtil.popActivity(this);    // 退出当前activity
-        // 取消屏幕旋转监听
-        if (mAlbumOrientationEventListener != null) {
-            mAlbumOrientationEventListener.disable();
-        }
         // 终止定位
         if (gpsLocationManager != null) {
             gpsLocationManager.stop();

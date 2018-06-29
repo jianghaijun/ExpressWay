@@ -23,20 +23,12 @@ import java.lang.annotation.RetentionPolicy;
 import static android.R.attr.drawableRight;
 
 /**
- * *          _       _
- * *   __   _(_)_   _(_) __ _ _ __
- * *   \ \ / / \ \ / / |/ _` | '_ \
- * *    \ V /| |\ V /| | (_| | | | |
- * *     \_/ |_| \_/ |_|\__,_|_| |_|
- * <p>
- * Created by vivian on 2017/6/9.
+ * 瀑布流时间轴
  */
-
 public class DotItemDecoration extends RecyclerView.ItemDecoration {
     public static final int STYLE_DRAW = 0;
     public static final int STYLE_RESOURCE = 1;
 
-    //you can choose to draw or use resource as divider
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STYLE_DRAW, STYLE_RESOURCE})
     public @interface ItemStyle {
@@ -46,7 +38,6 @@ public class DotItemDecoration extends RecyclerView.ItemDecoration {
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
 
-    //you can choose the orientation of item decoration
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({VERTICAL, HORIZONTAL})
     public @interface Orientation {

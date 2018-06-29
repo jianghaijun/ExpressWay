@@ -17,14 +17,14 @@ public class ConstantsUtil {
     /**
      * 中交路径
      */
-//    public static final String BASE_URL = "http://114.116.12.219:8012";
-    public static final String BASE_URL = "http://192.168.1.119:8080/web/";
+    public static String BASE_URL = "http://114.116.12.219:8012/tongren/";
+//    public static String BASE_URL = "http://192.168.1.119:8080/web/";
 
     /**
      * 前缀
      */
-//    public static String prefix = "/tongren/";
     public static String prefix = "";
+//    public static String prefix = "";
     /**
      * accountId
      */
@@ -38,9 +38,7 @@ public class ConstantsUtil {
     public static boolean isDownloadApk = false;
     public static ButtonListModel buttonModel;
 
-    /**
-     * 参数格式
-     */
+    // 参数格式
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     /**
      * 用户id
@@ -55,10 +53,6 @@ public class ConstantsUtil {
      */
     public static String USER_TYPE = "USER_TYPE";
     /**
-     * 已经加载的层级
-     */
-    public static String LEVEL_ID = "LEVEL_ID";
-    /**
      * token
      */
     public static String TOKEN = "TOKEN";
@@ -66,14 +60,13 @@ public class ConstantsUtil {
      * userHead
      */
     public static String USER_HEAD = "USER_HEAD";
-    /**
-     * 屏幕高度
-     */
+    // 屏幕高度
     public static String SCREEN_HEIGHT = "SCREEN_HEIGHT";
-    /**
-     * 选中人员id
-     */
+    // 选中人员id
     public static String SELECT_USER_ID = "SELECT_USER_ID";
+    // 工序列表类型（0：工序 1：质量 2：安全）
+    public static String PROCESS_LIST_TYPE = "PROCESS_LIST_TYPE";
+
     /**
      * OkHttpClient
      */
@@ -81,9 +74,7 @@ public class ConstantsUtil {
             .connectTimeout(30000L, TimeUnit.MILLISECONDS)
             .readTimeout(30000L, TimeUnit.MILLISECONDS)
             .build();
-    /**
-     * 是否登录成功
-     */
+    // 是否登录成功
     public static final String IS_LOGIN_SUCCESSFUL = "IS_LOGIN_SUCCESSFUL";
 
     /**
@@ -97,25 +88,21 @@ public class ConstantsUtil {
     /**
      * 层级列表
      */
-    public static final String NEW_CONTRACTOR_LIST = prefix + "getZxHwGxProjectLevelList";
+    public static final String getZxHwGxProjectLevelList = prefix + "getZxHwGxProjectLevelList";
     public static final String getZxHwAqProjectLevelList = prefix + "getZxHwAqProjectLevelList";
     public static final String getZxHwZlProjectLevelList = prefix + "getZxHwZlProjectLevelList";
-    // 搜索层级
-    //public static final String appGetGxProjectLevelList = prefix + "appGetGxProjectLevel";
-    /**
-     * 查询工序
-     */
-    public static final String PROCESS_LIST = prefix + "getSxZlProcessList";
+
+    public static final String addLevel = prefix + "addZxHwGxProjectLevel";
+    public static final String deleteLevel = prefix + "batchDeleteUpdateZxHwGxProjectLevel";
     /**
      * 图片上传
      */
-//    public static final String UP_LOAD_PHOTOS = prefix + "appUploadPhoto";
     public static final String UP_LOAD_PHOTOS = prefix + "appUploadGxAttachment";
     public static final String upload = prefix + "appUploadCommon";
     /**
      * 删除图片
      */
-    public static final String DELETE_PHOTOS = prefix + "batchDeleteSxZlPhoto";
+    public static final String DELETE_PHOTOS = prefix + "appBatchDeleteZxHwGxAttachment";
     /**
      * 版本检查
      */
@@ -139,7 +126,7 @@ public class ConstantsUtil {
     /**
      * 修改密码
      */
-    public static final String UPDATE_PASSWORD = prefix + "updateUserPassword";
+    public static final String UPDATE_PASSWORD = prefix + "user/updateUserPwd";
     /**
      * 工序报表获取首页数据
      */
@@ -160,10 +147,12 @@ public class ConstantsUtil {
      * 待办列表
      */
     public static final String TO_DO_LIST = prefix + "getTodoList";
+    public static final String getTodoListBySenduser = prefix + "getTodoListBySenduser";
     /**
      * 已办列表
      */
     public static final String HAS_TO_DO_LIST = prefix + "getHasTodoList";
+    public static final String getHasTodoListBySenduser = prefix + "getHasTodoListBySenduser";
     /**
      * 待拍照
      */
@@ -232,6 +221,19 @@ public class ConstantsUtil {
     // flowId
     public static final String flowId = "sxdehzl";
     public static boolean isLoading = false;
+
+    // 项目名称
+    public static String projectName = "中交一公局";
+    // 工程名称
+    public static String engineeringName = "工程名称：";
+    // 工程名称
+    public static String constructionSite = "施工部位：";
+    // 现场技术员
+    public static String technician = "拍照人员：";
+    // 质检负责人
+    public static String inspection = "    质检负责人：";
+    // 拍照时间
+    public static String takeTime = "拍照时间：";
 
     // 下载apk文件名称
     public static final String APK_NAME = "expressway.apk";

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,6 +25,7 @@ import com.zj.expressway.dialog.SelectPhotoWayDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.CheckVersionModel;
 import com.zj.expressway.utils.AppInfoUtil;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.GlideCatchUtil;
 import com.zj.expressway.utils.JsonUtils;
@@ -41,7 +43,6 @@ import java.io.IOException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -83,9 +84,9 @@ public class MySettingActivity extends BaseActivity {
         x.view().inject(myHolder, layoutMy);
         this.checkListener = checkListener;
 
-        myHolder.txtVersion.setText("当前版本" + AppInfoUtil.getVersion(mContext));
+        myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mContext));
         myHolder.txtUserName.setText((String) SpUtil.get(mContext, "UserName", ""));
-        myHolder.txtCachingSize.setText(GlideCatchUtil.getCacheSize());
+        myHolder.btnCleanUpCaching.setText("清理缓存：" + GlideCatchUtil.getCacheSize());
 
         // 自定义图片加载器
         ISNav.getInstance().init(new ImageLoader() {
@@ -98,136 +99,147 @@ public class MySettingActivity extends BaseActivity {
         setData();
     }
 
+    /**
+     * 设置版本号
+     */
     public void setVersion() {
-        myHolder.txtVersion.setText("当前版本" + AppInfoUtil.getVersion(mContext));
+        myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mContext));
     }
 
     /**
      * 赋值
      */
     private void setData() {
-        myHolder.btnSignOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                ScreenManagerUtil.popAllActivityExceptOne();
-                mContext.startActivity(new Intent(mContext, LoginActivity.class));
-            }
-        });
-
+        // 注销
+        myHolder.btnSignOut.setOnClickListener(new OnClick());
         // 修改密码
-        myHolder.imgViewUpdatePassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mContext.startActivity(new Intent(mContext, UpdatePassWordActivity.class));
-            }
-        });
-
+        myHolder.btnUpdatePassword.setOnClickListener(new OnClick());
+        // 设置ip
+        myHolder.btnChangeIp.setOnClickListener(new OnClick());
         // 版本检查
-        myHolder.imgViewCheckVersion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
-                    checkVersion();
-                } else {
-                    ToastUtil.showShort(mContext, mActivity.getString(R.string.not_network));
-                }
-            }
-        });
-
+        myHolder.btnVersion.setOnClickListener(new OnClick());
         // 更换头像
-        myHolder.imgViewUserAvatar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
-                    SelectPhotoWayDialog selectPhotoWayDialog = new SelectPhotoWayDialog(mContext, new PromptListener() {
-                        @Override
-                        public void returnTrueOrFalse(boolean trueOrFalse) {
-                            if (trueOrFalse) {
-                                // 拍照
-                                ISCameraConfig config = new ISCameraConfig.Builder()
-                                        .needCrop(true) // 裁剪
-                                        .cropSize(1, 1, 1200, 1200)
-                                        .build();
-                                ISNav.getInstance().toCameraActivity(mActivity, config, 1001);
-                            } else {
-                                // 相册
-                                ISListConfig config = new ISListConfig.Builder()
-                                        // 是否多选, 默认true
-                                        .multiSelect(false)
-                                        // 使用沉浸式状态栏
-                                        .statusBarColor(Color.parseColor("#0099FF"))
-                                        // 返回图标ResId
-                                        .backResId(R.drawable.back_btn)
-                                        // 标题
-                                        .title("照片")
-                                        // 标题文字颜色
-                                        .titleColor(Color.WHITE)
-                                        // TitleBar背景色
-                                        .titleBgColor(Color.parseColor("#0099FF"))
-                                        // 裁剪大小。needCrop为true的时候配置
-                                        .cropSize(1, 1, 1200, 1200)
-                                        .needCrop(true)
-                                        // 第一个是否显示相机，默认true
-                                        .needCamera(false)
-                                        // 最大选择图片数量，默认9
-                                        .maxNum(1)
-                                        .build();
-                                // 跳转到图片选择器
-                                ISNav.getInstance().toListActivity(mActivity, config, 1002);
-                            }
-                        }
-                    });
-                    selectPhotoWayDialog.show();
-                } else {
-                    ToastUtil.showShort(mContext, mActivity.getString(R.string.not_network));
-                }
-            }
-        });
+        myHolder.imgViewUserAvatar.setOnClickListener(new OnClick());
+        // 清理缓存
+        myHolder.btnCleanUpCaching.setOnClickListener(new OnClick());
+    }
 
-        myHolder.imgViewCleanUpCaching.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LoadingUtils.showLoading(mContext);
-                // 清除已加载工序列表
-                SpUtil.put(mContext, ConstantsUtil.LEVEL_ID, "");
-                DataSupport.deleteAll(ContractorBean.class);
-                /*清除工序下的图片*/
-                //DataSupport.deleteAll(PhotosBean.class);
-                DataSupport.deleteAll(WorkingBean.class);
-
-                //DataSupport.deleteAll(UserInfo.class);
-                boolean isClean = GlideCatchUtil.cleanCatchDisk();
-                myHolder.txtCachingSize.setText(GlideCatchUtil.getCacheSize());
-                LoadingUtils.hideLoading();
-                if (isClean) {
-                    ToastUtil.showShort(mContext, "清理成功");
-                } else {
-                    ToastUtil.showShort(mContext, "清理失败");
-                }
+    /**
+     * 点击事件
+     */
+    private class OnClick implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                // 注销
+                case R.id.btnSignOut:
+                    SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
+                    ScreenManagerUtil.popAllActivityExceptOne();
+                    mContext.startActivity(new Intent(mContext, LoginActivity.class));
+                    break;
+                // 修改密码
+                case R.id.btnUpdatePassword:
+                    mContext.startActivity(new Intent(mContext, UpdatePassWordActivity.class));
+                    break;
+                // 设置ip
+                case R.id.btnChangeIp:
+                    mContext.startActivity(new Intent(mContext, ChangeIpActivity.class));
+                    break;
+                // 版本检查
+                case R.id.btnVersion:
+                    if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
+                        checkVersion();
+                    } else {
+                        ToastUtil.showShort(mContext, mActivity.getString(R.string.not_network));
+                    }
+                    break;
+                // 更换头像
+                case R.id.imgViewUserAvatar:
+                    uploadUserAvatar();
+                    break;
+                // 清除缓存
+                case R.id.btnCleanUpCaching:
+                    LoadingUtils.showLoading(mContext);
+                    // 清除已加载层级列表
+                    DataSupport.deleteAll(ContractorBean.class);
+                    // 清除工序下的图片
+                    // DataSupport.deleteAll(PhotosBean.class);
+                    // 清除已加载工序列表
+                    DataSupport.deleteAll(WorkingBean.class);
+                    // 清除用户信息
+                    // DataSupport.deleteAll(UserInfo.class);
+                    // 清理图片缓存
+                    boolean isClean = GlideCatchUtil.cleanCatchDisk();
+                    myHolder.btnCleanUpCaching.setText("清理缓存：" + GlideCatchUtil.getCacheSize());
+                    LoadingUtils.hideLoading();
+                    if (isClean) {
+                        ToastUtil.showShort(mContext, "清理成功");
+                    } else {
+                        ToastUtil.showShort(mContext, "清理失败");
+                    }
+                    break;
             }
-        });
+        }
+    }
+
+    /**
+     * 更换头像
+     */
+    private void uploadUserAvatar() {
+        if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
+            SelectPhotoWayDialog selectPhotoWayDialog = new SelectPhotoWayDialog(mContext, new PromptListener() {
+                @Override
+                public void returnTrueOrFalse(boolean trueOrFalse) {
+                    if (trueOrFalse) {
+                        // 拍照
+                        ISCameraConfig config = new ISCameraConfig.Builder()
+                                .needCrop(true) // 裁剪
+                                .cropSize(1, 1, 1200, 1200)
+                                .build();
+                        ISNav.getInstance().toCameraActivity(mActivity, config, 1001);
+                    } else {
+                        // 相册
+                        ISListConfig config = new ISListConfig.Builder()
+                                // 是否多选, 默认true
+                                .multiSelect(false)
+                                // 使用沉浸式状态栏
+                                .statusBarColor(Color.parseColor("#0099FF"))
+                                // 返回图标ResId
+                                .backResId(R.drawable.back_btn)
+                                // 标题
+                                .title("照片")
+                                // 标题文字颜色
+                                .titleColor(Color.WHITE)
+                                // TitleBar背景色
+                                .titleBgColor(Color.parseColor("#0099FF"))
+                                // 裁剪大小。needCrop为true的时候配置
+                                .cropSize(1, 1, 1200, 1200)
+                                .needCrop(true)
+                                // 第一个是否显示相机，默认true
+                                .needCamera(false)
+                                // 最大选择图片数量，默认9
+                                .maxNum(1)
+                                .build();
+                        // 跳转到图片选择器
+                        ISNav.getInstance().toListActivity(mActivity, config, 1002);
+                    }
+                }
+            });
+            selectPhotoWayDialog.show();
+        } else {
+            ToastUtil.showShort(mContext, mActivity.getString(R.string.not_network));
+        }
     }
 
     /**
      * 版本检查
      */
     public void checkVersion() {
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.CHECK_VERSION)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .get()
-                .build();
-        client.newCall(request).enqueue(new Callback() {
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.CHECK_VERSION, "");
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                mActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastUtil.showShort(mContext, mActivity.getString(R.string.server_exception));
-                    }
-                });
+                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
             }
 
             @Override
@@ -253,25 +265,15 @@ public class MySettingActivity extends BaseActivity {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    myHolder.txtVersion.setText("当前已是最新版本！");
+                                    myHolder.btnVersion.setText("当前已是最新版本！");
                                 }
                             });
                         }
                     } else {
-                        mActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ToastUtil.showShort(mContext, mActivity.getString(R.string.get_data_exception));
-                            }
-                        });
+                        ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
                     }
                 } else {
-                    mActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ToastUtil.showShort(mContext, mActivity.getString(R.string.json_error));
-                        }
-                    });
+                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
                 }
             }
         });
@@ -301,31 +303,24 @@ public class MySettingActivity extends BaseActivity {
         downloadApkDialog.show();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     /**
      * 容纳器
      */
     private class MyHolder {
-        @ViewInject(R.id.txtVersion)
-        private TextView txtVersion;
-        @ViewInject(R.id.txtUserName)
-        private TextView txtUserName;
-        @ViewInject(R.id.txtCachingSize)
-        private TextView txtCachingSize;
-        @ViewInject(R.id.btnSignOut)
-        private TextView btnSignOut;
-        @ViewInject(R.id.imgViewUpdatePassword)
-        private ImageView imgViewUpdatePassword;
         @ViewInject(R.id.imgViewUserAvatar)
         private ImageView imgViewUserAvatar;
-        @ViewInject(R.id.imgViewCheckVersion)
-        private ImageView imgViewCheckVersion;
-        @ViewInject(R.id.imgViewCleanUpCaching)
-        private ImageView imgViewCleanUpCaching;
+        @ViewInject(R.id.txtUserName)
+        private TextView txtUserName;
+        @ViewInject(R.id.btnSignOut)
+        private TextView btnSignOut;
+        @ViewInject(R.id.btnUpdatePassword)
+        private Button btnUpdatePassword;
+        @ViewInject(R.id.btnChangeIp)
+        private Button btnChangeIp;
+        @ViewInject(R.id.btnVersion)
+        private Button btnVersion;
+        @ViewInject(R.id.btnCleanUpCaching)
+        private Button btnCleanUpCaching;
     }
 
 }

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/gray"
     android:orientation="vertical">
 
     <com.scwang.smartrefresh.layout.SmartRefreshLayout
@@ -17,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/txtNOAnyData"
-            android:background="@color/white"
+            android:background="@color/gray"
             android:paddingBottom="@dimen/five_dp"
             android:scrollbars="none" />
     </com.scwang.smartrefresh.layout.SmartRefreshLayout>
@@ -30,9 +31,9 @@
         android:layout_margin="@dimen/ten_dp"
         android:background="@drawable/btn_blue"
         android:text="@string/add"
-        android:visibility="gone"
         android:textColor="@color/white"
-        android:textSize="@dimen/fourteen_sp" />
+        android:textSize="@dimen/fourteen_sp"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/btnNoProcessAdd"
@@ -41,10 +42,10 @@
         android:layout_centerVertical="true"
         android:layout_margin="@dimen/ten_dp"
         android:background="@drawable/btn_blue"
-        android:visibility="gone"
         android:text="@string/add"
         android:textColor="@color/white"
-        android:textSize="@dimen/fourteen_sp" />
+        android:textSize="@dimen/fourteen_sp"
+        android:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/llSearchData"

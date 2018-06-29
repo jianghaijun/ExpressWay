@@ -23,7 +23,7 @@
     <RelativeLayout
         android:id="@+id/rlBottom"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/sevenTy_dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/white">
 
@@ -33,124 +33,13 @@
             android:layout_height="@dimen/two_px"
             android:background="@color/black" />
 
-        <LinearLayout
+        <com.ashokvarma.bottomnavigation.BottomNavigationBar
+            android:id="@+id/bottom_navigation_bar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_below="@+id/view"
-            android:background="@null"
-            android:orientation="horizontal"
-            android:paddingBottom="@dimen/five_dp"
-            android:paddingTop="@dimen/five_dp">
-
-            <LinearLayout
-                android:id="@+id/llMsg"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/white"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/imgMsg"
-                    android:layout_width="@dimen/thirty_five"
-                    android:layout_height="@dimen/thirty_five"
-                    android:background="@drawable/msg_un_select"
-                    android:scaleType="fitXY" />
-
-                <TextView
-                    android:id="@+id/txtMsg"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/twenty_dp"
-                    android:gravity="center"
-                    android:text="@string/msg"
-                    android:textColor="@color/tab_color"
-                    android:textSize="@dimen/fourteen_sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llApplication"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/white"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/imgApplication"
-                    android:layout_width="@dimen/thirty_five"
-                    android:layout_height="@dimen/thirty_five"
-                    android:background="@drawable/application_un_select"
-                    android:scaleType="fitXY" />
-
-                <TextView
-                    android:id="@+id/txtApplication"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/twenty_dp"
-                    android:gravity="center"
-                    android:text="@string/application"
-                    android:textColor="@color/tab_color"
-                    android:textSize="@dimen/fourteen_sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llFriends"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/white"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/imgFriends"
-                    android:layout_width="@dimen/thirty_five"
-                    android:layout_height="@dimen/thirty_five"
-                    android:background="@drawable/friend_un_select"
-                    android:scaleType="fitXY" />
-
-                <TextView
-                    android:id="@+id/txtFriends"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/twenty_dp"
-                    android:gravity="center"
-                    android:text="@string/friends"
-                    android:textColor="@color/tab_color"
-                    android:textSize="@dimen/fourteen_sp" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llMe"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@color/white"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:id="@+id/imgMe"
-                    android:layout_width="@dimen/thirty_five"
-                    android:layout_height="@dimen/thirty_five"
-                    android:background="@drawable/me_un_select"
-                    android:scaleType="fitXY" />
-
-                <TextView
-                    android:id="@+id/txtMe"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/twenty_dp"
-                    android:gravity="center"
-                    android:text="@string/me"
-                    android:textColor="@color/tab_color"
-                    android:textSize="@dimen/fourteen_sp" />
-
-            </LinearLayout>
-
-        </LinearLayout>
+            android:elevation="0dp"
+            android:orientation="horizontal" />
     </RelativeLayout>
 
 </com.zhy.android.percent.support.PercentRelativeLayout>

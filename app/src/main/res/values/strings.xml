@@ -38,9 +38,11 @@
     <string name="login_error">用户名或密码不正确!</string>
     <string name="version_check">版本检查</string>
     <string name="update_password">密码修改</string>
+    <string name="changeIp">设置IP</string>
     <string name="sign_out">注销</string>
     <string name="old_password">原始密码</string>
     <string name="new_password">新密码</string>
+    <string name="new_ip">新IP:</string>
     <string name="query_password">确认密码</string>
     <string name="old_pswd_can_not_be_empty">原始密码不能为空!</string>
     <string name="new_pswd_can_not_be_empty">新密码不能为空!</string>
@@ -90,6 +92,7 @@
     <string name="experimental_management">品质工程评价</string>
     <string name="attendance_card">考勤打卡</string>
     <string name="process_report">工序报表</string>
+    <string name="process_manager">工序管理</string>
     <string name="no">NO.</string>
     <string name="choice">选择</string>
     <string name="working_name">工序名称：</string>
@@ -167,4 +170,7 @@
     <string name="rectificationRequirements">整改要求：</string>
     <string name="noSearchContext">无搜索内容！</string>
     <string name="add">添加</string>
+    <string name="prompt">向左滑动可删除或添加层级！</string>
+    <string name="sameLevelAdd">同级新增</string>
+    <string name="childLevelAdd">子级新增</string>
 </resources>

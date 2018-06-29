@@ -14,9 +14,7 @@ import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.UserInfo;
-import com.zj.expressway.bean.UserLevelBean;
 import com.zj.expressway.listener.PermissionListener;
-import com.zj.expressway.model.AliasModel;
 import com.zj.expressway.model.LoginModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -44,27 +42,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by dell on 2017/10/20 14:13
+ * 佛祖保佑       永无BUG
+ * Created by dell on 2017/10/20 14:13
  */
 public class LoginActivity extends BaseActivity {
     @ViewInject(R.id.edtUserName)
@@ -95,7 +74,8 @@ public class LoginActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= 23) {
             requestAuthority(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.CAMERA}, new PermissionListener() {
                 @Override
-                public void agree() {}
+                public void agree() {
+                }
 
                 @Override
                 public void refuse(List<String> refusePermission) {
@@ -117,7 +97,7 @@ public class LoginActivity extends BaseActivity {
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
                         if (!isLogin) {
                             isLogin = true;
-                            Login ();
+                            Login();
                         }
                     } else {
                         // 根据userId password获取用户信息
@@ -152,7 +132,7 @@ public class LoginActivity extends BaseActivity {
     /**
      * 登录
      */
-    private void Login () {
+    private void Login() {
         LoadingUtils.showLoading(mContext);
         JSONObject boj = new JSONObject();
         boj.put("userId", edtUserName.getText().toString().trim());
@@ -191,95 +171,17 @@ public class LoginActivity extends BaseActivity {
                                 // 设置极光别名
                                 int sequence = (int) System.currentTimeMillis();
                                 JPushInterface.setAlias(mContext, sequence, userInfo.getUserId());
-
-
                                 LoadingUtils.hideLoading();
                                 isLogin = false;
                                 SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, true);
-                                //SpUtil.put(mContext, ConstantsUtil.USER_LEVEL, aliasModel.getData() == null ? "" : aliasModel.getData().getRoleFlag());
-                                // 各分部质检负责人
-                                /*if (aliasModel.getData().getSxZlUserExtendList() != null) {
-                                    for (UserLevelBean qualityBean : aliasModel.getData().getSxZlUserExtendList()) {
-                                        qualityBean.saveOrUpdate("userExtendId=?", qualityBean.getUserExtendId());
-                                    }
-                                }*/
-                                // 保存用户信息
-                                /*List<UserInfo> userList = DataSupport.where("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(UserInfo.class);
-                                if (userList != null && userList.size() > 0) {
-                                    UserInfo user = userList.get(0);
-                                    user.setUserLevel(aliasModel.getData().getRoleFlag() == null ? "0" : aliasModel.getData().getRoleFlag());
-                                    user.saveOrUpdate("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")));
-                                }*/
                                 startActivity(new Intent(mContext, MainActivity.class));
                                 LoginActivity.this.finish();
                                 edtUserPassWord.setText("");
-
-                                //LoginSuccessful();
-                                //startActivity(new Intent(mContext, MainActivity.class));
                             }
                         });
                     } else {
                         isLogin = false;
                         ChildThreadUtil.checkTokenHidden(mContext, loginModel.getMessage(), loginModel.getCode());
-                    }
-                } else {
-                    isLogin = false;
-                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
-                }
-            }
-        });
-    }
-
-    /**
-     * 登录成功--->上传极光别名
-     */
-    private void LoginSuccessful () {
-        JSONObject boj = new JSONObject();
-        boj.put("userId", SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-        boj.put("alias", SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.SUBMIT_ALIAS, boj.toString());
-        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                isLogin = false;
-                ChildThreadUtil.toastMsgHidden(mContext, "别名上传失败！");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String jsonData = response.body().string().toString();
-                if (JsonUtils.isGoodJson(jsonData)) {
-                    Gson gson = new Gson();
-                    final AliasModel aliasModel = gson.fromJson(jsonData, AliasModel.class);
-                    if (aliasModel.isSuccess()) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LoadingUtils.hideLoading();
-                                isLogin = false;
-                                SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, true);
-                                SpUtil.put(mContext, ConstantsUtil.USER_LEVEL, aliasModel.getData() == null ? "" : aliasModel.getData().getRoleFlag());
-                                // 各分部质检负责人
-                                if (aliasModel.getData().getSxZlUserExtendList() != null) {
-                                    for (UserLevelBean qualityBean : aliasModel.getData().getSxZlUserExtendList()) {
-                                        qualityBean.saveOrUpdate("userExtendId=?", qualityBean.getUserExtendId());
-                                    }
-                                }
-                                // 保存用户信息
-                                List<UserInfo> userList = DataSupport.where("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(UserInfo.class);
-                                if (userList != null && userList.size() > 0) {
-                                    UserInfo user = userList.get(0);
-                                    user.setUserLevel(aliasModel.getData().getRoleFlag() == null ? "0" : aliasModel.getData().getRoleFlag());
-                                    user.saveOrUpdate("userId=?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")));
-                                }
-                                startActivity(new Intent(mContext, MainActivity.class));
-                                LoginActivity.this.finish();
-                                edtUserPassWord.setText("");
-                            }
-                        });
-                    } else {
-                        isLogin = false;
-                        ChildThreadUtil.checkTokenHidden(mContext, aliasModel.getMessage(), aliasModel.getCode());
                     }
                 } else {
                     isLogin = false;

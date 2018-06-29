@@ -1,7 +1,6 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -28,28 +27,8 @@ import cn.hutool.core.util.StrUtil;
 
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 16:32
- *       应用图标列表
+ * Created by HaiJun on 2018/6/11 16:32
+ * 应用图标列表
  */
 public class AppActivity extends BaseActivity {
     private AppHold hold;
@@ -87,27 +66,6 @@ public class AppActivity extends BaseActivity {
         // 跑马灯文字
         if (data != null && StrUtil.isNotEmpty(data.getProcessId())) {
             hold.mMarqueeView.setText(ConstantsUtil.uploadFilePath + data.getLevelNameAll().replaceAll(",", "→") + "→" + data.getProcessName());
-            hold.mMarqueeView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent;
-                    if (data.getFlowId().equals("zxHwZlHiddenDanger")) {
-                        intent = new Intent(mContext, ToDoDetailsActivity.class);
-                    } else if (data.getFlowId().equals("zxHwAqHiddenDanger")) {
-                        intent = new Intent(mContext, ToDoDetailsActivity.class);
-                    } else {
-                        intent = new Intent(mContext, ContractorDetailsActivity.class);
-                    }
-                    intent.putExtra("flowId", data.getFlowId());
-                    intent.putExtra("processId", data.getProcessId());
-                    intent.putExtra("processState", data.getProcessState());
-                    intent.putExtra("processPath", data.getLevelNameAll());
-                    intent.putExtra("taskId", data.getTaskId());
-                    intent.putExtra("canCheck", data.getCanCheck());
-                    intent.putExtra("isPopTakePhoto", data);
-                    mContext.startActivity(intent);
-                }
-            });
         }
         // 添加图片、标题
         List<AppInfoBean> appInfoList = new ArrayList<>();
@@ -123,21 +81,21 @@ public class AppActivity extends BaseActivity {
         bean.setImgUrl(R.drawable.group_management);
         bean.setTitle(mContext.getString(R.string.securityPatrol));
         appInfoList.add(bean);
-        /*bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.submit_photo);
-        bean.setTitle(mContext.getString(R.string.to_upload_photos));
-        appInfoList.add(bean);*/
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.experimental_management);
-        bean.setTitle(mContext.getString(R.string.experimental_management));
+        bean.setImgUrl(R.drawable.bim_platform);
+        bean.setTitle(mContext.getString(R.string.audit_management));
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.mail_list);
         bean.setTitle(mContext.getString(R.string.process_report));
         appInfoList.add(bean);
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.bim_platform);
-        bean.setTitle(mContext.getString(R.string.audit_management));
+        bean.setImgUrl(R.drawable.group_management);
+        bean.setTitle(mContext.getString(R.string.process_manager));
+        appInfoList.add(bean);
+        bean = new AppInfoBean();
+        bean.setImgUrl(R.drawable.experimental_management);
+        bean.setTitle(mContext.getString(R.string.experimental_management));
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.qr_code);

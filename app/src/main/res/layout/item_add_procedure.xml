@@ -17,10 +17,13 @@
 
         <Button
             android:id="@+id/btnLevel"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:background="@null"
+            android:layout_marginRight="@dimen/one_dp"
+            android:layout_marginTop="@dimen/one_dp"
+            android:background="@drawable/touch_bg"
             android:drawableLeft="@drawable/progress"
             android:drawablePadding="@dimen/five_dp"
             android:gravity="left|center"
@@ -41,9 +44,16 @@
             android:textSize="@dimen/twelve_sp" />
     </RelativeLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:layout_marginLeft="@dimen/ten_dp"
+        android:layout_marginRight="@dimen/ten_dp"
+        android:background="@color/gray" />
 
     <Button
         android:id="@+id/btnRequirements"
+        style="?android:attr/borderlessButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/one_dp"
@@ -57,6 +67,12 @@
         android:textColor="@color/black"
         android:textSize="@dimen/twelve_sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:layout_marginLeft="@dimen/ten_dp"
+        android:layout_marginRight="@dimen/ten_dp"
+        android:background="@color/gray" />
 
     <RelativeLayout
         android:id="@+id/rlBottom"
@@ -67,11 +83,13 @@
 
         <Button
             android:id="@+id/btnEnterTime"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/one_dp"
             android:layout_marginRight="@dimen/ten_dp"
-            android:background="@null"
+            android:background="@drawable/touch_bg"
             android:drawableLeft="@drawable/date"
             android:drawablePadding="@dimen/five_dp"
             android:gravity="left|center"
@@ -82,10 +100,13 @@
 
         <Button
             android:id="@+id/btnDelete"
+            style="?android:attr/borderlessButtonStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/one_dp"
+            android:layout_marginLeft="@dimen/one_dp"
             android:layout_toLeftOf="@+id/btnEnterTime"
-            android:background="@null"
+            android:background="@drawable/touch_bg"
             android:drawableLeft="@drawable/delete_bg"
             android:gravity="left|center"
             android:minHeight="@dimen/thirty_five"

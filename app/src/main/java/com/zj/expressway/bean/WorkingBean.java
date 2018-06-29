@@ -26,6 +26,7 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String checkNameAll;     // 确认者姓名all
     private String createUser;       // 拍照者
     private String processState;     // 工序状态
+    private String flowStatus;     // 工序状态
     private String dismissal;        // 驳回原因
     private long sendTime;
     private String content;
@@ -78,6 +79,14 @@ public class WorkingBean extends DataSupport implements Serializable {
     private long deadline; // 整改期限
     private String troubleRequire; // 整改内容
     private String dangerRequire;
+
+    public String getFlowStatus() {
+        return flowStatus;
+    }
+
+    public void setFlowStatus(String flowStatus) {
+        this.flowStatus = flowStatus;
+    }
 
     public String getTroubleTitle() {
         return troubleTitle;

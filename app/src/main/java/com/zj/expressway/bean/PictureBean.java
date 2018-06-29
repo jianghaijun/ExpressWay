@@ -26,6 +26,15 @@ package com.zj.expressway.bean;
  */
 public class PictureBean {
     private String photoId;
+    private String uid;
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 
     public String getPhotoId() {
         return photoId;

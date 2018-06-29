@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <litepal>
     <dbname value="ZJ_EXPRESSWAY"/>
-    <version value="2"/>
+    <version value="3"/>
 
     <list>
         <mapping class="com.zj.expressway.bean.PhotosBean"/>

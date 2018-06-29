@@ -20,7 +20,6 @@ import com.zj.expressway.adapter.ProcessListAdapter;
 import com.zj.expressway.adapter.ToDoProcessAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.listener.ILoadCallback;
 import com.zj.expressway.model.WorkingListModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -45,28 +44,28 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
+ * _ooOoo_
+ * o8888888o
+ * 88" . "88
+ * (| -_- |)
+ * O\  =  /O
+ * ____/`---'\____
+ * .'  \\|     |//  `.
+ * /  \\|||  :  |||//  \
+ * /  _||||| -:- |||||-  \
+ * |   | \\\  -  /// |   |
+ * | \_|  ''\---/''  |   |
+ * \  .-\__  `-`  ___/-. /
+ * ___`. .'  /--.--\  `. . __
+ * ."" '<  `.___\_<|>_/___.'  >'"".
+ * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+ * \  \ `-.   \_ __\ /__ _/   .-` /  /
  * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
+ * `=---='
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:01
- *       工序列表
+ * 佛祖保佑       永无BUG
+ * Created by HaiJun on 2018/6/11 17:01
+ * 工序列表
  */
 public class ProcessListActivity extends BaseActivity {
     private WorkingProcedureHolder holder;
@@ -82,6 +81,7 @@ public class ProcessListActivity extends BaseActivity {
 
     /**
      * 重载
+     *
      * @param mContext
      * @param layout
      */
@@ -94,12 +94,18 @@ public class ProcessListActivity extends BaseActivity {
 
     /**
      * 初始化
-     * @param viewType
+     *
+     * @param viewType      tab类型（1：待拍照 2：本地质量安全数据 4：待办 5：已办）
+     * @param btnProcessNum 工序数量
+     * @param searchContext 搜索文字
      */
     public void initData(int viewType, Button btnProcessNum, final String searchContext) {
         this.viewType = viewType;
         this.btnProcessNum = btnProcessNum;
         loadType = 0;
+        if (StrUtil.isEmpty(searchContext)) {
+            isFirstLoad = true;
+        }
         workingBeanList.clear();
 
         // 设置主题颜色
@@ -110,10 +116,6 @@ public class ProcessListActivity extends BaseActivity {
         holder.refreshLayout.setOnMultiPurposeListener(new SimpleMultiPurposeListener() {
             @Override
             public void onStateChanged(@NonNull RefreshLayout refreshLayout, @NonNull RefreshState oldState, @NonNull RefreshState newState) {
-                if (oldState == RefreshState.LoadFinish && newState == RefreshState.None) {
-                    // refreshLayout.autoRefresh();
-                    // refreshLayout.setOnMultiPurposeListener(null);
-                }
             }
 
             @Override
@@ -121,7 +123,11 @@ public class ProcessListActivity extends BaseActivity {
                 loadType = 1;
                 if (workingBeanList.size() < processSum) {
                     pagePosition++;
-                    getData(searchContext);
+                    if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                        getData(searchContext);
+                    } else {
+                        getLocalData(searchContext);
+                    }
                 } else {
                     ToastUtil.showShort(mContext, "没有更多数据了！");
                     refreshLayout.finishLoadMore(1000);
@@ -133,18 +139,33 @@ public class ProcessListActivity extends BaseActivity {
                 loadType = 2;
                 pagePosition = 1;
                 workingBeanList.clear();
-                getData(searchContext);
+                if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    getData(searchContext);
+                } else {
+                    getLocalData(searchContext);
+                }
             }
         });
 
-        holder.btnAddProcess.setOnClickListener(new onClick());
-        holder.btnNoProcessAdd.setOnClickListener(new onClick());
+        holder.btnAddProcess.setOnClickListener(new onClick(0));
+        holder.btnNoProcessAdd.setOnClickListener(new onClick(1));
+        holder.txtClear.setOnClickListener(new onClick(2));
 
         if (viewType == 2) {
-            List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType+"", userId, String.valueOf(SpUtil.get(mContext, "ToDoType", "2"))).find(WorkingBean.class);
+            List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType + "", userId, String.valueOf(SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2"))).find(WorkingBean.class);
             if (beanList == null || beanList.size() == 0) {
                 holder.btnNoProcessAdd.setVisibility(View.VISIBLE);
                 holder.btnAddProcess.setVisibility(View.GONE);
+                String str = btnProcessNum.getText().toString();
+                if (str.contains("（")) {
+                    btnProcessNum.setText(str.substring(0, str.indexOf("（")) + "（" + 0 + "）");
+                } else {
+                    if (str.length() <= 3) {
+                        btnProcessNum.setText(str + "（" + 0 + "）");
+                    } else {
+                        btnProcessNum.setText(str.substring(0, 3) + "（" + 0 + "）");
+                    }
+                }
             } else {
                 processSum = beanList.size();
                 workingBeanList.addAll(beanList);
@@ -160,7 +181,7 @@ public class ProcessListActivity extends BaseActivity {
 
         // 有网---无网
         if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-            // getLocalData(pagePosition, pageSize, callback, isHave);
+            getLocalData(searchContext);
         } else {
             getData(searchContext);
         }
@@ -168,6 +189,7 @@ public class ProcessListActivity extends BaseActivity {
 
     /**
      * 获取工序列表
+     *
      * @param searchContext
      */
     private void getData(String searchContext) {
@@ -175,10 +197,15 @@ public class ProcessListActivity extends BaseActivity {
         obj.put("page", pagePosition);
         obj.put("limit", 10);
         if (!StrUtil.isEmpty(searchContext)) {
-            obj.put("parentNameAll", searchContext);
+            if (viewType == 1) {
+                obj.put("levelId", searchContext);
+            } else {
+                obj.put("title", searchContext);
+            }
         }
 
         String url = "";
+        String processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "");
         switch (viewType) {
             case 1:
                 url = ConstantsUtil.getZxHwGxProcessList;
@@ -186,13 +213,35 @@ public class ProcessListActivity extends BaseActivity {
                 break;
             case 4:
                 // 待办
-                url = ConstantsUtil.TO_DO_LIST;
                 obj.put("flowStatus", "1");
+                if (processType.equals("1")) {
+                    url = ConstantsUtil.getTodoListBySenduser;
+                    obj.put("flowId", "sxdehzl");
+                } else if (processType.equals("2")) {
+                    url = ConstantsUtil.getTodoListBySenduser;
+                    obj.put("flowId", "zxHwZlTrouble");
+                } else if (processType.equals("3")) {
+                    url = ConstantsUtil.getTodoListBySenduser;
+                    obj.put("flowId", "zxHwAqHiddenDanger");
+                } else {
+                    url = ConstantsUtil.TO_DO_LIST;
+                }
                 break;
             case 5:
                 // 已办
-                url = ConstantsUtil.HAS_TO_DO_LIST;
                 obj.put("flowStatus", "2");
+                if (processType.equals("1")) {
+                    url = ConstantsUtil.getHasTodoListBySenduser;
+                    obj.put("flowId", "sxdehzl");
+                } else if (processType.equals("2")) {
+                    url = ConstantsUtil.getHasTodoListBySenduser;
+                    obj.put("flowId", "zxHwZlTrouble");
+                } else if (processType.equals("3")) {
+                    url = ConstantsUtil.getHasTodoListBySenduser;
+                    obj.put("flowId", "zxHwAqHiddenDanger");
+                } else {
+                    url = ConstantsUtil.HAS_TO_DO_LIST;
+                }
                 break;
         }
         Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
@@ -219,7 +268,12 @@ public class ProcessListActivity extends BaseActivity {
                                     for (WorkingBean bean : model.getData()) {
                                         bean.setType(viewType + "");
                                         bean.setUserId(userId);
-                                        bean.saveOrUpdate("processId=?", StrUtil.isEmpty(bean.getProcessId()) ? bean.getWorkId() : bean.getProcessId());
+                                        if (viewType == 1) {
+                                            bean.saveOrUpdate("processId=?", bean.getProcessId());
+                                        } else {
+                                            bean.setProcessId(bean.getWorkId());
+                                            bean.saveOrUpdate("processId=? and nodeName=?", bean.getWorkId(), bean.getNodeName());
+                                        }
                                     }
                                     workingBeanList.addAll(model.getData());
                                 }
@@ -243,13 +297,32 @@ public class ProcessListActivity extends BaseActivity {
      * 点击事件
      */
     private class onClick implements View.OnClickListener {
+        private int point;
+
+        public onClick(int point) {
+            this.point = point;
+        }
+
         @Override
         public void onClick(View v) {
-            Intent intent = new Intent(mContext, ToDoDetailsActivity.class);
-            intent.putExtra("workId", "添加");
-            intent.putExtra("flowId", "");
-            intent.putExtra("processId", "");
-            mContext.startActivityForResult(intent, 20001);
+            switch (point) {
+                case 0:
+                case 1:
+                    Intent intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    intent.putExtra("workId", "add");
+                    String processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "");
+                    if (StrUtil.equals("2", processType)) {
+                        intent.putExtra("flowId", "zxHwZlTrouble");
+                    } else {
+                        intent.putExtra("flowId", "zxHwAqHiddenDanger");
+                    }
+                    intent.putExtra("processId", "");
+                    mContext.startActivity(intent);
+                    break;
+                case 2:
+                    initData(viewType, btnProcessNum, "");
+                    break;
+            }
         }
     }
 
@@ -257,11 +330,18 @@ public class ProcessListActivity extends BaseActivity {
      * 更新适配器
      */
     public void updateData() {
-        if (addProcessAdapter != null) {
-            List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType+"", userId, String.valueOf(SpUtil.get(mContext, "ToDoType", "2"))).find(WorkingBean.class);
+        List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType + "", userId, String.valueOf(SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2"))).find(WorkingBean.class);
+        if (beanList == null || beanList.size() == 0) {
+            holder.btnNoProcessAdd.setVisibility(View.VISIBLE);
+            holder.btnAddProcess.setVisibility(View.GONE);
+        } else {
+            processSum = beanList.size();
             workingBeanList.clear();
             workingBeanList.addAll(beanList);
-            addProcessAdapter.notifyDataSetChanged();
+            holder.btnNoProcessAdd.setVisibility(View.GONE);
+            holder.btnAddProcess.setVisibility(View.VISIBLE);
+            initProcessListData();
+            holder.refreshLayout.finishLoadMoreWithNoMoreData();
         }
     }
 
@@ -278,53 +358,51 @@ public class ProcessListActivity extends BaseActivity {
 
     /**
      * 获取本地数据
-     * @param pagePosition
-     * @param pageSize
-     * @param callback
-     * @param isHave
      */
-    private void getLocalData(final int pagePosition, final int pageSize, final ILoadCallback callback, final boolean isHave) {
-        /*runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                String start = String.valueOf((pagePosition-1)*pageSize);
-                String end = String.valueOf(pagePosition*pageSize);
-                List<WorkingBean> workingBeanList = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType+"", start, end).find(WorkingBean.class);
-                List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", userId, viewType+"").find(WorkingBean.class);
-                sum = beanSize == null ? 0 : beanSize.size();
-                if (!isLoad) {
-                    isLoad = true;
-                    String str = btnProcessNum.getText().toString();
-                    if (str.length() <= 3) {
-                        btnProcessNum.setText(str + "（" + sum + "）");
-                    } else {
-                        btnProcessNum.setText(str.substring(0, 3) + "（" + sum + "）");
-                    }
-                }
-
-                // 数据的处理最终还是交给被装饰的adapter来处理
-                if (!isHave) {
-                    if (viewType == 1) {
-                        mAdapter.appendData(workingBeanList);
-                    } else {
-                        toDoAdapter.appendData(workingBeanList);
-                    }
-                }
-
-                callback.onSuccess();
-
-                if (!isHave) {
-                    int sumSize = holder.rvMsg.computeVerticalScrollRange();
-                    int size = viewType == 1 ? mAdapter.getItemCount() * DensityUtil.dip2px(144) : toDoAdapter.getItemCount() * DensityUtil.dip2px(144);
-                    boolean isFull = size >= sumSize ? true : false;
-                    if (workingBeanList == null || workingBeanList.size() == 0 || !isFull) {
-                        callback.onFailure();
-                    }
+    private void getLocalData(String searchContext) {
+        String start = String.valueOf((pagePosition - 1) * 10);
+        String end = String.valueOf(pagePosition * 10);
+        List<WorkingBean> workingBeen;
+        String str = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "");
+        if (StrUtil.isEmpty(searchContext)) {
+            if (viewType == 1 || viewType == 2) {
+                workingBeen = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType + "", start, end).find(WorkingBean.class);
+            } else {
+                if (str.equals("1")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "sxdehzl", start, end).find(WorkingBean.class);
+                } else if (str.equals("2")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "zxHwZlTrouble", start, end).find(WorkingBean.class);
+                } else if (str.equals("3")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "zxHwAqHiddenDanger", start, end).find(WorkingBean.class);
                 } else {
-                    callback.onFailure();
+                    workingBeen = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType + "", start, end).find(WorkingBean.class);
                 }
             }
-        });*/
+        } else {
+            if (viewType == 1) {
+                workingBeen = DataSupport.where("userId=? and type=? and levelNameAll=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+            } else if (viewType == 2) {
+                if (str.equals("2")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and troubleTitle=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                } else {
+                    workingBeen = DataSupport.where("userId=? and type=? and dangerTitle=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                }
+            } else {
+                if (str.equals("1")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and title=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, "sxdehzl", start, end).find(WorkingBean.class);
+                } else if (str.equals("2")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and title=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, "zxHwZlTrouble", start, end).find(WorkingBean.class);
+                } else if (str.equals("3")) {
+                    workingBeen = DataSupport.where("userId=? and type=? and title=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, "zxHwAqHiddenDanger", start, end).find(WorkingBean.class);
+                } else {
+                    workingBeen = DataSupport.where("userId=? and type=? and title=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                }
+            }
+        }
+        processSum = workingBeen == null ? 0 : workingBeen.size();
+        workingBeanList.addAll(workingBeen);
+        stopLoad();
+        initProcessListData();
     }
 
     /**
@@ -337,6 +415,11 @@ public class ProcessListActivity extends BaseActivity {
             holder.llSearchData.setVisibility(View.VISIBLE);
             holder.txtMsg.setText("未搜索到任何数据");
             holder.txtClear.setText("，清空搜索条件");
+        } else if (pagePosition == 1 && processSum == 0) {
+            holder.rvMsg.setVisibility(View.GONE);
+            holder.llSearchData.setVisibility(View.VISIBLE);
+            holder.txtMsg.setText("暂无数据");
+            holder.txtClear.setText("");
         } else {
             holder.rvMsg.setVisibility(View.VISIBLE);
             holder.llSearchData.setVisibility(View.GONE);
@@ -346,10 +429,14 @@ public class ProcessListActivity extends BaseActivity {
         if (isFirstLoad) {
             isFirstLoad = false;
             String str = btnProcessNum.getText().toString();
-            if (str.length() <= 3) {
-                btnProcessNum.setText(str + "（" + processSum + "）");
+            if (str.contains("（")) {
+                btnProcessNum.setText(str.substring(0, str.indexOf("（")) + "（" + processSum + "）");
             } else {
-                btnProcessNum.setText(str.substring(0, 3) + "（" + processSum + "）");
+                if (str.length() <= 3) {
+                    btnProcessNum.setText(str + "（" + processSum + "）");
+                } else {
+                    btnProcessNum.setText(str.substring(0, 3) + "（" + processSum + "）");
+                }
             }
         }
 

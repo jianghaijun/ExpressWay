@@ -22,7 +22,6 @@ import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.utils.ConstantsUtil;
-import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
@@ -88,13 +87,14 @@ public class AuditManagementActivity extends BaseActivity {
         txtTitle.setText(R.string.app_name);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
+        imgBtnRight.setVisibility(View.VISIBLE);
         imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
-
-        initViewPageData();
 
         llButtons.setVisibility(View.GONE);
 
         initFabBtn();
+        initBtnTitle();
+        initViewPageData();
         initSearchRecord();
         initRecyclerViewData();
 
@@ -110,9 +110,9 @@ public class AuditManagementActivity extends BaseActivity {
             public void onSearchConfirmed(CharSequence text) {
                 if (StrUtil.isEmpty(text)) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     ToastUtil.showShort(mContext, "请连接您的网络！");
-                } else {
+                }*/ else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(text));
                 }
@@ -128,9 +128,9 @@ public class AuditManagementActivity extends BaseActivity {
             public void OnItemClickListener(int position, View v) {
                 if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     ToastUtil.showShort(mContext, "请连接您的网络！");
-                } else {
+                }*/ else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(v.getTag()));
                 }
@@ -143,12 +143,6 @@ public class AuditManagementActivity extends BaseActivity {
                 searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
             }
         });
-
-        btnTakePicture.setText("待拍照");
-        btnToBeAudited.setText("未提交");
-        List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")), "5").find(WorkingBean.class);
-        int sum = beanSize == null ? 0 : beanSize.size();
-        btnFinish.setText("已提交（" + sum + "）");
     }
 
     @Override
@@ -172,6 +166,17 @@ public class AuditManagementActivity extends BaseActivity {
             }
             searchBar.setLastSuggestions(stringList);
         }
+    }
+
+    /**
+     * 设置按钮显示文字
+     */
+    private void initBtnTitle() {
+        btnTakePicture.setText("待拍照");
+        btnToBeAudited.setText("未提交");
+        List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")), "5").find(WorkingBean.class);
+        int sum = beanSize == null ? 0 : beanSize.size();
+        btnFinish.setText("已提交（" + sum + "）");
     }
 
     /**
@@ -332,19 +337,16 @@ public class AuditManagementActivity extends BaseActivity {
                 btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 dragView.getDragView().setVisibility(View.VISIBLE);
-                imgBtnRight.setVisibility(View.GONE);
                 break;
             case 1:
                 btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 dragView.getDragView().setVisibility(View.GONE);
-                imgBtnRight.setVisibility(View.VISIBLE);
                 break;
             case 2:
                 btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 dragView.getDragView().setVisibility(View.GONE);
-                imgBtnRight.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -371,8 +373,18 @@ public class AuditManagementActivity extends BaseActivity {
                 this.finish();
                 break;
             case R.id.imgBtnRight:
-                searchBar.setVisibility(View.VISIBLE);
-                searchBar.enableSearch();
+                switch (vpWorkingProcedure.getCurrentItem()) {
+                    case 0:
+                        Intent intent = new Intent(mContext, ContractorTreeActivity.class);
+                        intent.putExtra("type", "1");
+                        startActivityForResult(intent, 10002);
+                        break;
+                    case 1:
+                    case 2:
+                        searchBar.setVisibility(View.VISIBLE);
+                        searchBar.enableSearch();
+                        break;
+                }
                 break;
             case R.id.btnTakePicture:
                 vpWorkingProcedure.setCurrentItem(0);

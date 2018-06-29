@@ -3,7 +3,6 @@ package com.zj.expressway.activity;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.text.SpannableString;
@@ -18,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -28,6 +28,7 @@ import com.zj.expressway.bean.NextShowFlow;
 import com.zj.expressway.bean.PersonnelBean;
 import com.zj.expressway.model.PersonnelListModel;
 import com.zj.expressway.tree.Node;
+import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
@@ -54,6 +55,9 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+/**
+ * 人员选择
+ */
 public class PersonnelSelectionActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
@@ -71,6 +75,8 @@ public class PersonnelSelectionActivity extends BaseActivity {
     private TextView txtSelect;
     @ViewInject(R.id.llPersonal)
     private LinearLayout llPersonal;
+    @ViewInject(R.id.rlTop)
+    private RelativeLayout rlTop;
     // 工序人员List
     @ViewInject(R.id.lvContractorList)
     private ListView lvPersonnelList;
@@ -81,6 +87,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
     private List<Node> nodeList = new ArrayList<>();
     private Node selectNode;
     private String reviewNodeId = "";
+    private boolean isEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +135,8 @@ public class PersonnelSelectionActivity extends BaseActivity {
             }
         });
 
+        txtNode.setClickable(true);
+
         if (ConstantsUtil.buttonModel != null && ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() > 0) {
             txtSelect.setVisibility(View.VISIBLE);
             txtSelect.setText("流程操作：" + ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeName());
@@ -136,21 +145,15 @@ public class PersonnelSelectionActivity extends BaseActivity {
             txtSelect.setVisibility(View.GONE);
         }
 
-        if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
+        isEdit = getIntent().getBooleanExtra("isEdit", true);
+        if (!JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
+            ToastUtil.showShort(mContext, getString(R.string.not_network));
+        } else if (isEdit) {
             getData();
         } else {
-            ToastUtil.showShort(mContext, getString(R.string.not_network));
+            txtNode.setVisibility(View.GONE);
+            rlTop.setVisibility(View.GONE);
         }
-
-        txtNode.setClickable(true);
-        nodeList.clear();
-        Node node = new Node();
-        node.setLevelName("全部");
-        node.setLevelId("");
-        nodeList.add(node);
-        txtNode.setText(getClickableSpan(nodeList));
-        txtNode.setMovementMethod(LinkMovementMethod.getInstance());
-        txtNode.setHighlightColor(ContextCompat.getColor(mContext, android.R.color.transparent));
     }
 
     /**
@@ -218,25 +221,11 @@ public class PersonnelSelectionActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             nodeList.clear();
-            if (node.getLevelName().equals("全部")) {
-                Node n = new Node();
-                n.setLevelName("全部");
-                n.setLevelId("");
-                nodeList.add(n);
-                txtNode.setText(getClickableSpan(nodeList));
-                treeAdapter.ExpandOrCollapse(allNode.get(0).getParent());
-            } else {
-                Node n = new Node();
-                n.setLevelName("全部");
-                n.setLevelId("");
-                nodeList.add(n);
-                setParent(node);
-                txtNode.setText(getClickableSpan(nodeList));
-                treeAdapter.ExpandOrCollapse(node);
-            }
+            setParent(node);
+            txtNode.setText(getClickableSpan(nodeList));
+            treeAdapter.ExpandOrCollapse(node);
         }
     }
-
 
     private void setParent(Node node) {
         nodeList.add(node);
@@ -298,12 +287,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
      */
     private void getData() {
         LoadingUtils.showLoading(mContext);
-        RequestBody requestBody = RequestBody.create(ConstantsUtil.JSON, "");
-        Request request = new Request.Builder()
-                .url(ConstantsUtil.BASE_URL + ConstantsUtil.PERSONNEL_LIST)
-                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
-                .post(requestBody)
-                .build();
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.PERSONNEL_LIST, "");
         ConstantsUtil.okHttpClient.newCall(request).enqueue(callback);
     }
 
@@ -313,55 +297,30 @@ public class PersonnelSelectionActivity extends BaseActivity {
     private Callback callback = new Callback() {
         @Override
         public void onFailure(Call call, IOException e) {
-            uiThread(true, getString(R.string.server_exception));
+            ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
         }
 
         @Override
         public void onResponse(Call call, Response response) throws IOException {
             String jsonData = response.body().string().toString();
             if (JsonUtils.isGoodJson(jsonData)) {
-                try {
-                    JSONObject obj = new JSONObject(jsonData);
-                    boolean resultFlag = obj.getBoolean("success");
-                    final String msg = obj.getString("message");
-                    final String code = obj.getString("code");
-                    if (resultFlag) {
-                        Gson gson = new Gson();
-                        final PersonnelListModel model = gson.fromJson(jsonData, PersonnelListModel.class);
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                // 设置节点
-                                setPersonnelNode(model.getData());
-                                LoadingUtils.hideLoading();
-                            }
-                        });
-                    } else {
-                        LoadingUtils.hideLoading();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                switch (code) {
-                                    case "3003":
-                                    case "3004":
-                                        ToastUtil.showLong(mContext, "Token过期请重新登录！");
-                                        SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
-                                        ScreenManagerUtil.popAllActivityExceptOne();
-                                        startActivity(new Intent(mContext, LoginActivity.class));
-                                        break;
-                                    default:
-                                        ToastUtil.showLong(mContext, msg);
-                                        break;
-                                }
-                            }
-                        });
-                    }
-                } catch (JSONException e) {
-                    uiThread(true, getString(R.string.data_error));
-                    e.printStackTrace();
+                Gson gson = new Gson();
+                final PersonnelListModel model = gson.fromJson(jsonData, PersonnelListModel.class);
+                if (model.isSuccess()) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // 设置节点
+                            PersonnelBean personnelBean = model.getData();
+                            setPersonnelNode(personnelBean);
+                            LoadingUtils.hideLoading();
+                        }
+                    });
+                } else {
+                    ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                 }
             } else {
-                uiThread(true, getString(R.string.json_error));
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
             }
         }
     };
@@ -376,7 +335,16 @@ public class PersonnelSelectionActivity extends BaseActivity {
         if (personnelNode != null) {
             // 创建根节点
             Node root = new Node();
+            root.setLevelId(personnelNode.getValue());
+            root.setLevelName(personnelNode.getLabel());
+            root.setParentId(personnelNode.getValuePid());
+            root.setFolderFlag(personnelNode.getType());
+            root.setExpanded(false);
             root.setFolderFlag("1");
+            nodeList.add(root);
+            txtNode.setText(getClickableSpan(nodeList));
+            txtNode.setMovementMethod(LinkMovementMethod.getInstance());
+            txtNode.setHighlightColor(ContextCompat.getColor(mContext, android.R.color.transparent));
             personnelNode(personnelNode, root);
             addNode(root);
             if (selectNode != null) {
@@ -398,44 +366,58 @@ public class PersonnelSelectionActivity extends BaseActivity {
      * @param root
      */
     private void personnelNode(PersonnelBean personnelNode, Node root) {
-        // 创建子节点
-        Node n = new Node();
-        n.setParent(root);
-        n.setLevelId(personnelNode.getValue());
-        n.setLevelName(personnelNode.getLabel());
-        n.setParentId(personnelNode.getValuePid());
-        n.setFolderFlag(personnelNode.getType());
-        n.setExpanded(false);
-        root.add(n);
-        String selectUserId = (String) SpUtil.get(mContext, ConstantsUtil.SELECT_USER_ID, "");
-        if (selectUserId.equals(n.getLevelId())) {
-            selectNode = n;
-        }
+        if (personnelNode != null) {
+            for (PersonnelBean person : personnelNode.getChildren()) {
+                // 创建子节点
+                Node n = new Node();
+                n.setParent(root);
+                n.setLevelId(person.getValue());
+                n.setLevelName(person.getLabel());
+                n.setParentId(person.getValuePid());
+                n.setFolderFlag(person.getType());
+                n.setExpanded(false);
+                root.add(n);
+                String selectUserId = (String) SpUtil.get(mContext, ConstantsUtil.SELECT_USER_ID, "");
+                if (selectUserId.equals(n.getLevelId())) {
+                    selectNode = n;
+                }
 
-        if (personnelNode.getChildren() != null && personnelNode.getChildren().size() > 0) {
-            for (PersonnelBean node : personnelNode.getChildren()) {
-                personnelNode(node, n);
+                if (person.getChildren() != null && person.getChildren().size() > 0) {
+                    personnelChildNode(person, n);
+                }
             }
         }
     }
 
     /**
-     * 子线程运行
-     *
-     * @param isDismiss 是否隐藏加载动画
-     * @param msg       提示信息
+     * 设置子级节点
+     * @param personnelNode
+     * @param root
      */
-    private void uiThread(boolean isDismiss, final String msg) {
-        if (isDismiss) {
-            LoadingUtils.hideLoading();
-        }
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ToastUtil.showLong(mContext, msg);
+    private void personnelChildNode(PersonnelBean personnelNode, Node root) {
+        if (personnelNode != null && personnelNode.getChildren().size() > 0) {
+            for (PersonnelBean person : personnelNode.getChildren()) {
+                // 创建子节点
+                Node n = new Node();
+                n.setParent(root);
+                n.setLevelId(person.getValue());
+                n.setLevelName(person.getLabel());
+                n.setParentId(person.getValuePid());
+                n.setFolderFlag(person.getType());
+                n.setExpanded(false);
+                root.add(n);
+                String selectUserId = (String) SpUtil.get(mContext, ConstantsUtil.SELECT_USER_ID, "");
+                if (selectUserId.equals(n.getLevelId())) {
+                    selectNode = n;
+                }
+
+                if (person.getChildren() != null && person.getChildren().size() > 0) {
+                    personnelChildNode(person, n);
+                }
             }
-        });
+        }
     }
+
 
     @Event({R.id.imgBtnLeft, R.id.ivDelete, R.id.btnRight, R.id.txtSelect})
     private void onClick(View view) {
@@ -450,8 +432,16 @@ public class PersonnelSelectionActivity extends BaseActivity {
                 llPersonal.setVisibility(View.GONE);
                 break;
             case R.id.btnRight:
-                if (selectNode == null) {
+                if (selectNode == null && isEdit) {
                     ToastUtil.showShort(mContext, "请先选择人员");
+                } else if (selectNode == null && !isEdit) {
+                    Intent intent = new Intent();
+                    intent.putExtra("reviewNodeId", reviewNodeId);
+                    intent.putExtra("userId", "");
+                    intent.putExtra("userName", "");
+                    intent.putExtra("type", "");
+                    setResult(Activity.RESULT_OK, intent);
+                    this.finish();
                 } else {
                     Intent intent = new Intent();
                     intent.putExtra("reviewNodeId", reviewNodeId);

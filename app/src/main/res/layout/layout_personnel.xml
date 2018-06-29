@@ -31,13 +31,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/five_dp"
-        android:background="@drawable/gray_stroke_white_solid_bg"
+        android:background="@color/gray"
         android:gravity="left|center"
         android:minHeight="@dimen/forty"
         android:padding="@dimen/five_dp"
         android:textSize="@dimen/sixteen_sp" />
 
     <RelativeLayout
+        android:id="@+id/rlTop"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/five_dp"

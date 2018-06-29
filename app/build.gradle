@@ -38,8 +38,8 @@ android {
         }
     }
 
-    compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.zj.expressway"
 
@@ -56,7 +56,7 @@ android {
         ]
 
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -64,7 +64,12 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keyFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+            debuggable true
         }
 
         release {
@@ -103,9 +108,11 @@ dependencies {
     })
 
     // 系统jar
+    compile 'com.android.support:support-v4:27.1.0'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
     // 引入百度定位所需jar包
     compile files('libs/BaiduLBS_Android.jar')
     // 百分比布局所需jar包
@@ -119,7 +126,7 @@ dependencies {
     // 网络请求所需jar包
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     // json解析所需jar包
-    compile 'com.google.code.gson:gson:2.6.2'
+    compile 'com.google.code.gson:gson:2.8.5'
     // 多文件上传所需jar包
     compile 'com.zhy:okhttputils:2.6.2'
     // 网络请求加载dialog
@@ -157,6 +164,18 @@ dependencies {
     compile 'com.forward.androids:androids:1.1.8'
     // 上拉加载、下拉刷新
     compile 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-7'
+    // 右滑关闭
+    compile 'cn.bingoogolapple:bga-swipebacklayout:1.1.9'
+    // 沉浸式状态栏
+    compile 'com.gyf.barlibrary:barlibrary:2.3.0'
+    // 底部导航
+    compile 'com.ashokvarma.android:bottom-navigation-bar:2.0.1'
+    // 腾讯Bugly
+    compile 'com.tencent.bugly:crashreport:2.6.6'
+    compile 'com.tencent.bugly:nativecrashreport:3.3.1'
+    // 侧滑删除
+    //compile 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
+    //compile 'jp.wasabeef:recyclerview-animators:2.3.0'
 
     testCompile 'junit:junit:4.12'
 }

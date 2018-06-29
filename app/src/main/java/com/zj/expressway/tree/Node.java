@@ -115,7 +115,7 @@ public class Node {
      * @return
      */
     public List<Node> getChildren() {
-        return this.children;
+        return this.children == null ? new ArrayList<Node>() : this.children;
     }
 
     /**
@@ -211,19 +211,5 @@ public class Node {
         if (!parent.isExpanded())
             return true;
         return parent.isParentCollapsed();
-    }
-
-    /**
-     * 递归判断所给的节点是否当前节点的父节点
-     *
-     * @param node 所给节点
-     * @return
-     */
-    public boolean isParent(Node node) {
-        if (parent == null)
-            return false;
-        if (node.equals(parent))
-            return true;
-        return parent.isParent(node);
     }
 }

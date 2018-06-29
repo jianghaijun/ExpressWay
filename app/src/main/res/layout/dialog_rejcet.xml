@@ -11,7 +11,7 @@
         android:layout_height="0dp"
         android:background="@null"
         android:orientation="vertical"
-        app:layout_heightPercent="30%h"
+        app:layout_heightPercent="45%h"
         app:layout_widthPercent="90%w">
 
         <RelativeLayout
@@ -30,25 +30,55 @@
                 android:textColor="@color/black" />
         </RelativeLayout>
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:background="@color/white"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            app:layout_heightPercent="45%">
+            android:orientation="vertical"
+            app:layout_heightPercent="55%">
+
+            <RadioGroup
+                android:id="@+id/radioGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/ten_dp"
+                android:layout_marginRight="@dimen/ten_dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbSameLevelAdd"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="@string/sameLevelAdd"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <RadioButton
+                    android:id="@+id/rbChildLevelAdd"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="@string/childLevelAdd"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
+            </RadioGroup>
 
             <EditText
                 android:id="@+id/edtContext"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="left|center"
-                android:hint="@string/please_input_remark"
                 android:paddingLeft="@dimen/ten_dp"
                 android:paddingRight="@dimen/ten_dp"
                 android:textColor="@color/black"
                 android:textSize="@dimen/fourteen_sp" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,7 +86,7 @@
             android:background="@color/white"
             android:orientation="horizontal"
             android:padding="10dp"
-            app:layout_heightPercent="35%">
+            app:layout_heightPercent="25%">
 
             <Button
                 android:id="@+id/close_setting_btn"

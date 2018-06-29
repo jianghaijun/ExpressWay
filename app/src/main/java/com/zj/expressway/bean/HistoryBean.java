@@ -14,7 +14,16 @@ public class HistoryBean extends DataSupport implements Serializable {
     private String nodeName;
     private long actionTime;
     private String doTimeShow;
+    private String historyFlag;
     private String processId;
+
+    public String getHistoryFlag() {
+        return historyFlag;
+    }
+
+    public void setHistoryFlag(String historyFlag) {
+        this.historyFlag = historyFlag;
+    }
 
     public String getProcessId() {
         return processId;

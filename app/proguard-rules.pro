@@ -31,8 +31,6 @@
   public *;
 }
 
-# for DexGuard only
-#-keep resource xml elements manifest/application/meta-data@value=GlideModule
 #okhttputils
 -dontwarn com.zhy.http.**
 -keep class com.zhy.http.**{*;}
@@ -119,3 +117,25 @@
 
 -dontwarn com.github.**
 -keep class com.github.mikephil.charting.** { *; }
+
+-dontwarn com.gyf.**
+-keep class com.gyf.barlibrary.* {*;}
+
+-dontwarn com.scwang.**
+-keep class com.scwang.* {*;}
+
+#腾讯bugly
+-dontwarn com.tencent.bugly.**
+-keep class com.tencent.bugly.**{*;}
+
+#-dontwarn com.mcxtzhang.**
+#-keep class com.mcxtzhang.**{*;}
+
+#-dontwarn com.ashokvarma.**
+#-keep class com.ashokvarma.**{*;}
+
+#-dontwarn jp.wasabeef.**
+#-keep class jp.wasabeef.**{*;}
+
+
+

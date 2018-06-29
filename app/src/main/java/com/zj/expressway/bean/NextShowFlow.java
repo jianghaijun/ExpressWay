@@ -7,8 +7,18 @@ package com.zj.expressway.bean;
 public class NextShowFlow {
     private String nextNodeId;
     private String nextNodeName;
+    private boolean edit;
     private String nextAuthorMapkey;
     private boolean nextDoneNode;
+
+
+    public boolean isEdit() {
+        return edit;
+    }
+
+    public void setEdit(boolean edit) {
+        this.edit = edit;
+    }
 
     public String getNextNodeId() {
         return nextNodeId;

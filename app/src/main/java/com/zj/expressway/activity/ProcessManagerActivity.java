@@ -1,24 +1,22 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.Button;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.mancj.materialsearchbar.MaterialSearchBar;
-import com.mancj.materialsearchbar.adapter.SuggestionsAdapter;
 import com.zj.expressway.R;
-import com.zj.expressway.adapter.TreeNodeAdapter;
+import com.zj.expressway.adapter.ProcessManagerAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.ContractorBean;
-import com.zj.expressway.bean.SearchRecordBean;
+import com.zj.expressway.dialog.SlippingHintDialog;
 import com.zj.expressway.listener.ContractorListener;
 import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.tree.Node;
@@ -28,11 +26,9 @@ import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.ScreenManagerUtil;
-import com.zj.expressway.utils.SetListHeight;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.litepal.crud.DataSupport;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -41,7 +37,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -52,29 +47,24 @@ import okhttp3.Response;
  * Created by HaiJun on 2018/6/11 16:59
  * 工序树形图
  */
-public class ContractorTreeActivity extends BaseActivity {
+public class ProcessManagerActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
-    @ViewInject(R.id.imgBtnRight)
-    private ImageButton imgBtnRight;
-    @ViewInject(R.id.btnRight)
-    private Button btnRight;
-    @ViewInject(R.id.searchBar)
-    private MaterialSearchBar searchBar;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
-    @ViewInject(R.id.lvContractorList)
-    private ListView lvContractorList;
+    @ViewInject(R.id.rvTimeLineWaterfallFlow)
+    private RecyclerView rvTreeList;
+
+    private ProcessManagerAdapter mAdapter;
     private Activity mContext;
     private List<Node> allCache;
+    private boolean isFirstLoad = true;
     private List<Node> all;
-    private TreeNodeAdapter ta;
-    private String processType;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_contractor_tree);
+        setContentView(R.layout.layout_progress_manager);
 
         mContext = this;
         x.view().inject(this);
@@ -82,96 +72,21 @@ public class ContractorTreeActivity extends BaseActivity {
 
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
-        imgBtnRight.setVisibility(View.VISIBLE);
-        imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
-        btnRight.setVisibility(View.VISIBLE);
-        btnRight.setText("确认");
-        txtTitle.setText(R.string.app_title);
+        txtTitle.setText("工序管理");
 
-        processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
-
-        lvContractorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ((TreeNodeAdapter) parent.getAdapter()).ExpandOrCollapse(position);
-            }
-        });
-
-        initSearchRecord();
-
-        searchBar.setOnSearchActionListener(new MaterialSearchBar.OnSearchActionListener() {
-            @Override
-            public void onSearchStateChanged(boolean enabled) {
-                if (!enabled) {
-                    searchBar.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onSearchConfirmed(CharSequence text) {
-                if (StrUtil.isEmpty(text)) {
-                    ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
-                } else {
-                    searchBar.setVisibility(View.GONE);
-                    searchProcess(String.valueOf(text));
-                }
-            }
-
-            @Override
-            public void onButtonClicked(int buttonCode) {
-            }
-        });
-
-        searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
-            @Override
-            public void OnItemClickListener(int position, View v) {
-                if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
-                    ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
-                } else {
-                    searchBar.setVisibility(View.GONE);
-                    searchProcess(String.valueOf(v.getTag()));
-                }
-            }
-
-            @Override
-            public void OnItemDeleteListener(int position, View v) {
-                DataSupport.deleteAll(SearchRecordBean.class, "searchTitle=? and searchType=2", String.valueOf(searchBar.getLastSuggestions().get(position)));
-                searchBar.getLastSuggestions().remove(position);
-                searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
-            }
-        });
-
+        new SlippingHintDialog(mContext).show();
         if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
             getData();
         } else {
-            List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", "0", processType).find(ContractorBean.class);
-            setContractorNode(listBean);
-        }
-    }
-
-    /**
-     * 设置搜索历史列表
-     */
-    private void initSearchRecord() {
-        List<SearchRecordBean> searchList = DataSupport.where("searchType=2").find(SearchRecordBean.class);
-        if (searchList != null) {
-            List<String> stringList = new ArrayList<>();
-            for (SearchRecordBean bean : searchList) {
-                stringList.add(bean.getSearchTitle());
-            }
-            searchBar.setLastSuggestions(stringList);
+            ToastUtil.showShort(mContext, getString(R.string.not_network));
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (ta != null) {
-            ta.notifyDataSetChanged();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -179,18 +94,12 @@ public class ContractorTreeActivity extends BaseActivity {
      * 获取数据
      */
     private void getData() {
-        LoadingUtils.showLoading(mContext);
+        if (!isFirstLoad) {
+            LoadingUtils.showLoading(mContext);
+        }
         JSONObject obj = new JSONObject();
         obj.put("parentId", "0");
-        String url;
-        if (processType.equals("1")) {
-            url = ConstantsUtil.getZxHwGxProjectLevelList;
-        } else if (processType.equals("2")) {
-            url = ConstantsUtil.getZxHwZlProjectLevelList;
-        } else {
-            url = ConstantsUtil.getZxHwAqProjectLevelList;
-        }
-        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.getZxHwGxProjectLevelList, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(callback);
     }
 
@@ -213,13 +122,8 @@ public class ContractorTreeActivity extends BaseActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            // 将数据存储到LitePal数据库（根据LevelId添加或更新）
-                            List<ContractorBean> listBeen = model.getData();
-                            for (ContractorBean bean : listBeen) {
-                                bean.setLevelType(processType);
-                                bean.saveOrUpdate("levelId=?", bean.getLevelId());
-                            }
                             // 设置节点
+                            isFirstLoad = false;
                             setContractorNode(model.getData());
                             LoadingUtils.hideLoading();
                         }
@@ -250,13 +154,11 @@ public class ContractorTreeActivity extends BaseActivity {
                 getNode(contractorBean.get(i), root);
             }
 
-            ta = new TreeNodeAdapter(this, root, listener);
-                /* 设置展开和折叠时图标 */
-            ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
-                /* 设置默认展开级别 */
-            ta.setExpandLevel(1);
-            lvContractorList.setAdapter(ta);
-            SetListHeight.setListViewHeight(lvContractorList);
+            mAdapter = new ProcessManagerAdapter(this, root, listener);
+            /* 设置默认展开级别 */
+            mAdapter.setExpandLevel(1);
+            rvTreeList.setAdapter(mAdapter);
+            rvTreeList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
         }
     }
 
@@ -280,8 +182,6 @@ public class ContractorTreeActivity extends BaseActivity {
         n.setExpanded(false);
         n.setLoading(false);
         n.setChoice(false);
-        //n.setCanClick(contractorListBean.getCanExpand().equals("1"));
-        //n.setIsFinish(contractorListBean.getIsFinish());
         root.add(n);
         return n;
     }
@@ -295,11 +195,8 @@ public class ContractorTreeActivity extends BaseActivity {
             allCache = allCaches;
             all = allNode;
             // 没有网络并且没有加载过
-            if (JudgeNetworkIsAvailable.isNetworkAvailable(ContractorTreeActivity.this)) {
+            if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                 loadProcedureByNodeId(point, levelId);
-            } else {
-                List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", levelId, processType).find(ContractorBean.class);
-                setNodeInChildren(listBean, point);
             }
         }
     };
@@ -332,12 +229,6 @@ public class ContractorTreeActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                // 将数据存储到LitePal数据库（根据nodeId添加或更新）
-                                List<ContractorBean> listBeen = model.getData();
-                                for (ContractorBean bean : listBeen) {
-                                    bean.setLevelType(processType);
-                                    bean.saveOrUpdate("levelId=?", bean.getLevelId());
-                                }
                                 // 将数据添加到Node的子节点中
                                 setNodeInChildren(model.getData(), position);
                                 LoadingUtils.hideLoading();
@@ -393,52 +284,15 @@ public class ContractorTreeActivity extends BaseActivity {
             all.get(position).setFolderFlag("1");
             allCache.get(position).setFolderFlag("1");
         }
-
-        ta.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
     }
 
-    /**
-     * 搜索
-     *
-     * @param searchTitle
-     */
-    private void searchProcess(String searchTitle) {
-        Intent intent = new Intent(mContext, SearchProcedureActivity.class);
-        intent.putExtra("searchType", processType);
-        intent.putExtra("searchTitle", searchTitle);
-        startActivityForResult(intent, 1001);
-    }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == 1001) {
-                Intent intent = new Intent();
-                intent.putExtra("procedureName", data.getStringExtra("procedureName"));
-                intent.putExtra("levelId", data.getStringExtra("levelId"));
-                setResult(Activity.RESULT_OK, intent);
-                finish();
-            }
-        }
-    }
-
-    @Event({R.id.imgBtnLeft, R.id.btnRight, R.id.imgBtnRight})
+    @Event({R.id.imgBtnLeft})
     private void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBtnLeft:
                 this.finish();
-                break;
-            case R.id.btnRight:
-                if (ta != null) {
-                    ta.selectProcess((Integer) SpUtil.get(mContext, "selectProcess", -1));
-                } else {
-                    ToastUtil.showShort(mContext, "数据有误！");
-                }
-                break;
-            case R.id.imgBtnRight:
-                searchBar.setVisibility(View.VISIBLE);
-                searchBar.enableSearch();
                 break;
         }
     }
@@ -446,17 +300,6 @@ public class ContractorTreeActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         ScreenManagerUtil.popActivity(this);
-        SpUtil.remove(mContext, "selectProcess");
-        List<String> stringList = searchBar.getLastSuggestions();
-        if (stringList != null) {
-            DataSupport.deleteAll(SearchRecordBean.class, "searchType=2");
-            for (String str : stringList) {
-                SearchRecordBean bean = new SearchRecordBean();
-                bean.setSearchTitle(str);
-                bean.setSearchType("2");
-                bean.save();
-            }
-        }
         super.onDestroy();
     }
 }

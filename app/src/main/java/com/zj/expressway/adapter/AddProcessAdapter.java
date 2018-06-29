@@ -16,7 +16,9 @@ import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.listener.PromptListener;
+import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.DateUtils;
+import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import java.util.List;
@@ -138,11 +140,12 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
                                 PhotosBean.deleteAll("PhotosBean", "processId=?", workingBean.getProcessId());
                                 workingBean.delete();
                                 workingBeanList.remove(workingBean);
+                                ConstantsUtil.isLoading = true;
                                 AddProcessAdapter.this.notifyDataSetChanged();
                                 ToastUtil.showShort(mContext, "删除成功！");
                             }
                         }
-                    }, "提示", "确认删除该条数据？", "取消", "确认").show();
+                    }, "提示", "数据删除后无法恢复！确认删除该条数据？", "取消", "确认").show();
                     break;
             }
         }
@@ -153,8 +156,13 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
      */
     private void toDoDetailsActivity(String processId) {
         Intent intent = new Intent(mContext, ToDoDetailsActivity.class);
-        intent.putExtra("flowId", "");
-        intent.putExtra("workId", "详情");
+        intent.putExtra("workId", "details");
+        String processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "");
+        if (StrUtil.equals("2", processType)) {
+            intent.putExtra("flowId", "zxHwZlTrouble");
+        } else {
+            intent.putExtra("flowId", "zxHwAqHiddenDanger");
+        }
         intent.putExtra("processId", processId);
         intent.putExtra("isPopTakePhoto", false);
         mContext.startActivity(intent);

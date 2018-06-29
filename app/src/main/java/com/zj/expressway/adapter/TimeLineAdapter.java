@@ -1,6 +1,7 @@
 package com.zj.expressway.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -58,15 +59,25 @@ public class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLi
     @Override
     public void onBindViewHolder(TimeLineViewHolder holder, int position) {
         HistoryBean timeLineModel = mDataList.get(position);
-        if (position == 0) {
-            holder.mTimelineView.setMarker(VectorDrawableUtils.getDrawable(mContext, R.drawable.marker_inactive_point, android.R.color.darker_gray));
-        } else {
-            holder.mTimelineView.setMarker(ContextCompat.getDrawable(mContext, R.drawable.marker_poinit), ContextCompat.getColor(mContext, R.color.main_check_bg));
+        switch (timeLineModel.getHistoryFlag()) {
+            // 已完成
+            case "1":
+                holder.mTimelineView.setMarker(ContextCompat.getDrawable(mContext, R.drawable.marker_poinit), ContextCompat.getColor(mContext, R.color.gray));
+                holder.txtUserName.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
+                holder.mDate.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
+                holder.mMessage.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
+                break;
+            case "2":
+                holder.mTimelineView.setMarker(ContextCompat.getDrawable(mContext, R.drawable.marker_poinit), ContextCompat.getColor(mContext, R.color.green));
+                break;
+            case "3":
+                holder.mTimelineView.setMarker(ContextCompat.getDrawable(mContext, R.drawable.marker_poinit), ContextCompat.getColor(mContext, R.color.red));
+                break;
         }
-
-        holder.txtUserName.setText(timeLineModel.getRealName() + "  " + timeLineModel.getNodeName());
-        holder.mDate.setText("到达时间：" + DateUtils.setDataToStr(timeLineModel.getActionTime()));
-        holder.mMessage.setText("累计时长：" + timeLineModel.getDoTimeShow());
+        holder.txtUserName.setText(timeLineModel.getNodeName());
+        holder.mDate.setText(timeLineModel.getRealName());
+        holder.mMessage.setText("到达时间：" + DateUtils.setDataToStr(timeLineModel.getActionTime()));
+        //holder.mMessage.setText("累计时长：" + timeLineModel.getDoTimeShow());
     }
 
     @Override
