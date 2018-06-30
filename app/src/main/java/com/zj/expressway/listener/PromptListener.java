@@ -6,5 +6,5 @@ package com.zj.expressway.listener;
  */
 
 public interface PromptListener {
-    void returnTrueOrFalse(boolean trueOrFalse);
+    abstract void returnTrueOrFalse(boolean trueOrFalse);
 }

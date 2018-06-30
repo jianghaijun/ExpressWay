@@ -1,17 +1,26 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.animation.OvershootInterpolator;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItem;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItemClickListener;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
+import com.yanzhenjie.recyclerview.swipe.touch.OnItemMoveListener;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.ProcessManagerAdapter;
 import com.zj.expressway.base.BaseActivity;
@@ -53,7 +62,11 @@ public class ProcessManagerActivity extends BaseActivity {
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
     @ViewInject(R.id.rvTimeLineWaterfallFlow)
-    private RecyclerView rvTreeList;
+    private SwipeMenuRecyclerView rvTreeList;
+
+    private OnItemMoveListener getItemMoveListener() {
+        return null;
+    }
 
     private ProcessManagerAdapter mAdapter;
     private Activity mContext;
@@ -154,13 +167,66 @@ public class ProcessManagerActivity extends BaseActivity {
                 getNode(contractorBean.get(i), root);
             }
 
+            rvTreeList.setSwipeMenuItemClickListener(mMenuItemClickListener); // Item的Menu点击。
+            rvTreeList.setSwipeMenuCreator(mSwipeMenuCreator); // 菜单创建器。
             mAdapter = new ProcessManagerAdapter(this, root, listener);
+            rvTreeList.setOnItemMoveListener(getItemMoveListener());// 监听拖拽和侧滑删除，更新UI和数据源。
             /* 设置默认展开级别 */
             mAdapter.setExpandLevel(1);
             rvTreeList.setAdapter(mAdapter);
             rvTreeList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
         }
     }
+
+    /**
+     * RecyclerView的Item的Menu点击监听。
+     */
+    private SwipeMenuItemClickListener mMenuItemClickListener = new SwipeMenuItemClickListener() {
+        @Override
+        public void onItemClick(SwipeMenuBridge menuBridge) {
+            menuBridge.closeMenu();
+            int direction = menuBridge.getDirection(); // 左侧还是右侧菜单。
+            int adapterPosition = menuBridge.getAdapterPosition(); // RecyclerView的Item的position。
+            int menuPosition = menuBridge.getPosition(); // 菜单在RecyclerView的Item中的Position。
+            if (direction == SwipeMenuRecyclerView.RIGHT_DIRECTION) {
+                if (menuPosition == 0) {
+                    mAdapter.addBtn(adapterPosition);
+                } else {
+                    mAdapter.deleteBtn(adapterPosition);
+                }
+            }
+        }
+    };
+
+    /**
+     * 菜单创建器。
+     */
+    private SwipeMenuCreator mSwipeMenuCreator = new SwipeMenuCreator() {
+        @Override
+        public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int viewType) {
+            int width = getResources().getDimensionPixelSize(R.dimen.fifty_dp);
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+
+            // 添加右侧的，如果不添加，则右侧不会出现菜单。
+            SwipeMenuItem deleteItem = new SwipeMenuItem(mContext)
+                    .setBackground(R.color.colorAccent)
+                    .setText(getString(R.string.add))
+                    .setTextColor(Color.WHITE)
+                    .setTextSize(14)
+                    .setWidth(width)
+                    .setHeight(height);
+            swipeRightMenu.addMenuItem(deleteItem);// 添加一个按钮到右侧侧菜单。
+
+            SwipeMenuItem closeItem = new SwipeMenuItem(mContext)
+                    .setBackground(R.color.main_bg)
+                    .setText(getString(R.string.delete))
+                    .setTextColor(Color.WHITE)
+                    .setTextSize(14)
+                    .setWidth(width)
+                    .setHeight(height);
+            swipeRightMenu.addMenuItem(closeItem); // 添加一个按钮到右侧菜单。
+        }
+    };
 
     /**
      * 子节点

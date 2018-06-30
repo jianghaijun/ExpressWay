@@ -38,8 +38,8 @@ android {
         }
     }
 
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
     defaultConfig {
         applicationId "com.zj.expressway"
 
@@ -56,7 +56,7 @@ android {
         ]
 
         minSdkVersion 17
-        targetSdkVersion 26
+        targetSdkVersion 25
         versionCode 1
         versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -64,12 +64,8 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (keyFile.exists()) {
-                signingConfig signingConfigs.release
-            }
-            debuggable true
+            minifyEnabled false
+
         }
 
         release {
@@ -108,7 +104,7 @@ dependencies {
     })
 
     // 系统jar
-    compile 'com.android.support:support-v4:27.1.0'
+    compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
@@ -174,8 +170,7 @@ dependencies {
     compile 'com.tencent.bugly:crashreport:2.6.6'
     compile 'com.tencent.bugly:nativecrashreport:3.3.1'
     // 侧滑删除
-    //compile 'com.github.mcxtzhang:SwipeDelMenuLayout:V1.3.0'
-    //compile 'jp.wasabeef:recyclerview-animators:2.3.0'
+    compile 'com.yanzhenjie:recyclerview-swipe:1.1.4'
 
     testCompile 'junit:junit:4.12'
 }

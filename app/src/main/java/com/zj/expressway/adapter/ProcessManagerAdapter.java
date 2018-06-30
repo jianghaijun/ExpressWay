@@ -201,7 +201,6 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
                     new RejectDialog(mActivity, new ReportListener() {
                         @Override
                         public void returnUserId(String userId) {
-                            //((SwipeMenuLayout) holder.itemView).quickClose();
                             add(node, point, userId);
                         }
                     }, "提示", "请输入层级名称", "取消", "添加").show();
@@ -211,7 +210,6 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
                         @Override
                         public void returnTrueOrFalse(boolean trueOrFalse) {
                             if (trueOrFalse) {
-                                //((SwipeMenuLayout) holder.itemView).quickClose();
                                 delete(node, point);
                             }
                         }
@@ -222,6 +220,34 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
                     break;
             }
         }
+    }
+
+    /**
+     * 添加
+     * @param point
+     */
+    public void addBtn(final int point) {
+        new RejectDialog(mActivity, new ReportListener() {
+            @Override
+            public void returnUserId(String userId) {
+                add(all.get(point), point, userId);
+            }
+        }, "提示", "请输入层级名称", "取消", "添加").show();
+    }
+
+    /**
+     * 删除
+     * @param point
+     */
+    public void deleteBtn(final int point) {
+        new PromptDialog(mActivity, new PromptListener() {
+            @Override
+            public void returnTrueOrFalse(boolean trueOrFalse) {
+                if (trueOrFalse) {
+                    delete(all.get(point), point);
+                }
+            }
+        }, "提示", "数据删除无法恢复，您确认删除么？", "取消", "确认").show();
     }
 
     /**
@@ -287,7 +313,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
                                     allCache.add(point + 1, n);
                                     all.add(point + 1, n);
 
-                                    notifyItemInserted(point+1);
+                                    notifyItemInserted(point + 1);
                                 }
                                 LoadingUtils.hideLoading();
                             }
@@ -333,7 +359,6 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
                                 allCache.remove(point);
                                 all.remove(point);
                                 notifyItemRemoved(point);
-                                notifyDataSetChanged();
                                 LoadingUtils.hideLoading();
                             }
                         });
@@ -357,9 +382,9 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
 
         public AppInfoHold(View itemView) {
             super(itemView);
-            btnProcessTitle = itemView.findViewById(R.id.btnProcessTitle);
-            btnAddProcess = itemView.findViewById(R.id.btnAddProcess);
-            btnDeleteProcess = itemView.findViewById(R.id.btnDeleteProcess);
+            btnProcessTitle = (Button) itemView.findViewById(R.id.btnProcessTitle);
+            btnAddProcess = (Button) itemView.findViewById(R.id.btnAddProcess);
+            btnDeleteProcess = (Button) itemView.findViewById(R.id.btnDeleteProcess);
         }
     }
 

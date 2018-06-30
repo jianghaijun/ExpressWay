@@ -80,14 +80,14 @@ public class RejectDialog extends Dialog implements View.OnClickListener {
 
         TextView txtTitle = (TextView) findViewById(R.id.txtTitle);
         edtContext = (EditText) findViewById(R.id.edtContext);
-        radioGroup = findViewById(R.id.radioGroup);
+        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
         edtContext.setHint(hint);
 
         // 隐患级别点击事件
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-                RadioButton radioButton = findViewById(checkedId);
+                RadioButton radioButton = (RadioButton) findViewById(checkedId);
                 if (radioButton.getText().toString().equals(context.getString(R.string.sameLevelAdd))) {
                     isSelect = true;
                 } else {

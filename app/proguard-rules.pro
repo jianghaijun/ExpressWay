@@ -128,14 +128,9 @@
 -dontwarn com.tencent.bugly.**
 -keep class com.tencent.bugly.**{*;}
 
-#-dontwarn com.mcxtzhang.**
-#-keep class com.mcxtzhang.**{*;}
-
-#-dontwarn com.ashokvarma.**
-#-keep class com.ashokvarma.**{*;}
-
-#-dontwarn jp.wasabeef.**
-#-keep class jp.wasabeef.**{*;}
+-keepclasseswithmembers class android.support.v7.widget.RecyclerView$ViewHolder {
+   public final View *;
+}
 
 
 

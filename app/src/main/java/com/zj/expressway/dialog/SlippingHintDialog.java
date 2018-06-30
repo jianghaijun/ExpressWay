@@ -28,8 +28,8 @@ public class SlippingHintDialog extends Dialog implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_slipping_hint);
 
-        RelativeLayout rlTop = findViewById(R.id.rlTop);
-        Button btnPrompt = findViewById(R.id.btnPrompt);
+        RelativeLayout rlTop = (RelativeLayout) findViewById(R.id.rlTop);
+        Button btnPrompt = (Button) findViewById(R.id.btnPrompt);
 
         rlTop.setOnClickListener(this);
         btnPrompt.setOnClickListener(this);
