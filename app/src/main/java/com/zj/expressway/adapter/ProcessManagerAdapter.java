@@ -143,9 +143,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
         // 得到当前节点
         Node n = all.get(position);
         if (n != null) {
-            holder.btnAddProcess.setOnClickListener(new onClick(holder, position, n));
-            holder.btnDeleteProcess.setOnClickListener(new onClick(holder, position, n));
-            holder.btnProcessTitle.setOnClickListener(new onClick(holder, position, n));
+            holder.btnProcessTitle.setOnClickListener(new onClick(position));
 
             // 显示文本
             holder.btnProcessTitle.setText(n.getLevelName());
@@ -184,37 +182,15 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
      * 点击事件
      */
     private class onClick implements View.OnClickListener {
-        private Node node;
         private int point;
-        private AppInfoHold holder;
 
-        public onClick(AppInfoHold holder, int point, Node node) {
-            this.node = node;
+        public onClick(int point) {
             this.point = point;
-            this.holder = holder;
         }
 
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.btnAddProcess:
-                    new RejectDialog(mActivity, new ReportListener() {
-                        @Override
-                        public void returnUserId(String userId) {
-                            add(node, point, userId);
-                        }
-                    }, "提示", "请输入层级名称", "取消", "添加").show();
-                    break;
-                case R.id.btnDeleteProcess:
-                    new PromptDialog(mActivity, new PromptListener() {
-                        @Override
-                        public void returnTrueOrFalse(boolean trueOrFalse) {
-                            if (trueOrFalse) {
-                                delete(node, point);
-                            }
-                        }
-                    }, "提示", "数据删除无法恢复，您确认删除么？", "取消", "确认").show();
-                    break;
                 case R.id.btnProcessTitle:
                     ExpandOrCollapse(point);
                     break;
@@ -263,8 +239,14 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
         obj.put("levelName", str[1]);
         if (StrUtil.equals("0", str[0])) {
             obj.put("parentId", node.getParentId());
+            if (node.getParent().isRoot()) {
+                obj.put("parentIdAll", "");
+            } else {
+                obj.put("parentIdAll", node.getParent().getParentIdAll());
+            }
         } else {
             obj.put("parentId", node.getLevelId());
+            obj.put("parentIdAll", node.getParentIdAll());
         }
         Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.addLevel, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
@@ -377,14 +359,10 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
      */
     public class AppInfoHold extends RecyclerView.ViewHolder {
         private Button btnProcessTitle;
-        private Button btnAddProcess;
-        private Button btnDeleteProcess;
 
         public AppInfoHold(View itemView) {
             super(itemView);
             btnProcessTitle = (Button) itemView.findViewById(R.id.btnProcessTitle);
-            btnAddProcess = (Button) itemView.findViewById(R.id.btnAddProcess);
-            btnDeleteProcess = (Button) itemView.findViewById(R.id.btnDeleteProcess);
         }
     }
 

@@ -40,6 +40,7 @@ import com.zj.expressway.utils.AppInfoUtil;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.DateUtils;
+import com.zj.expressway.utils.FileUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
@@ -956,6 +957,8 @@ public class ToDoDetailsActivity extends BaseActivity {
                     addPhotoBean.save();
                     photosList.add(addPhotoBean);
                     photosAdapter.notifyDataSetChanged();
+                    // 删除拍摄的照片
+                    FileUtil.deleteFile(strFilePath + fileUrlName);
                     break;
                 // 选人
                 case selectPersonal:
@@ -1024,6 +1027,8 @@ public class ToDoDetailsActivity extends BaseActivity {
                                 }
                             }
                         }, "提示", "您已添加数据是否保存至本地？", "否", "是").show();
+                    } else {
+                        mContext.finish();
                     }
                 } else {
                     mContext.finish();

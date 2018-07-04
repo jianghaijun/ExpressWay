@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/five_dp"
+    android:layout_marginRight="@dimen/five_dp"
+    android:background="@drawable/no_stroke_white_solid_bg"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@null">
+
+        <ImageButton
+            android:id="@+id/txtSelect"
+            android:layout_width="@dimen/fifty_dp"
+            android:layout_height="@dimen/fifty_dp"
+            android:layout_centerVertical="true"
+            android:background="@null"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+
+        <TextView
+            android:id="@+id/txtMoreInfo"
+            android:layout_width="@dimen/sevenTy_dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:layout_marginRight="@dimen/ten_dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/txtMoreInfo"
+            android:layout_toRightOf="@+id/txtSelect"
+            android:background="@drawable/no_stroke_white_solid_bg"
+            android:gravity="center"
+            android:paddingLeft="@dimen/ten_dp"
+            android:textColor="@color/black"
+            android:textSize="@dimen/twelve_sp" />
+    </RelativeLayout>
+</LinearLayout>

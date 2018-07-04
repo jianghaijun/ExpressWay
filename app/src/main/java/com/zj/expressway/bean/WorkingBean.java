@@ -79,6 +79,15 @@ public class WorkingBean extends DataSupport implements Serializable {
     private long deadline; // 整改期限
     private String troubleRequire; // 整改内容
     private String dangerRequire;
+    private int isLocalAdd;     // 是否是本地添加 1：是 2：否
+
+    public int getIsLocalAdd() {
+        return isLocalAdd;
+    }
+
+    public void setIsLocalAdd(int isLocalAdd) {
+        this.isLocalAdd = isLocalAdd;
+    }
 
     public String getFlowStatus() {
         return flowStatus;

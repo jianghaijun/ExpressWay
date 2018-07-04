@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/fifty_dp"
-    android:clickable="true">
+    android:layout_height="@dimen/fifty_one_dp"
+    android:background="@drawable/touch_bg"
+    android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/rlItemTree"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/fifty_one_dp"
-        android:background="@drawable/touch_bg">
+        android:layout_height="@dimen/fifty_one_dp">
 
         <Button
             android:id="@+id/btnProcessTitle"
@@ -27,24 +27,5 @@
             android:layout_alignParentBottom="true"
             android:background="@color/gray" />
     </RelativeLayout>
-
-    <!-- 以下都是侧滑菜单的内容依序排列 -->
-    <Button
-        android:id="@+id/btnAddProcess"
-        android:layout_width="@dimen/fifty_dp"
-        android:layout_height="match_parent"
-        android:background="@color/colorAccent"
-        android:text="@string/add"
-        android:textColor="@color/white"
-        android:textSize="@dimen/fourteen_sp" />
-
-    <Button
-        android:id="@+id/btnDeleteProcess"
-        android:layout_width="@dimen/fifty_dp"
-        android:layout_height="match_parent"
-        android:background="@color/main_bg"
-        android:text="@string/delete"
-        android:textColor="@color/white"
-        android:textSize="@dimen/fourteen_sp" />
 
 </LinearLayout>

@@ -18,8 +18,13 @@ import com.zj.expressway.R;
 import com.zj.expressway.adapter.TreeNodeAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.ContractorBean;
+import com.zj.expressway.bean.ProcessDictionaryBean;
 import com.zj.expressway.bean.SearchRecordBean;
+import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.dialog.PromptDialog;
+import com.zj.expressway.dialog.SlippingHintDialog;
 import com.zj.expressway.listener.ContractorListener;
+import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.tree.Node;
 import com.zj.expressway.utils.ChildThreadUtil;
@@ -41,6 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONObject;
 import okhttp3.Call;
@@ -66,8 +72,8 @@ public class ContractorTreeActivity extends BaseActivity {
     @ViewInject(R.id.lvContractorList)
     private ListView lvContractorList;
     private Activity mContext;
-    private List<Node> allCache;
-    private List<Node> all;
+    private List<Node> allCache = new ArrayList<>();
+    private List<Node> all = new ArrayList<>();
     private TreeNodeAdapter ta;
     private String processType;
 
@@ -90,10 +96,37 @@ public class ContractorTreeActivity extends BaseActivity {
 
         processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
 
+        boolean isPrompt = (boolean) SpUtil.get(this, ConstantsUtil.Long_press, false);
+        if (!isPrompt) {
+            new SlippingHintDialog(mContext, R.drawable.cloud, ConstantsUtil.Long_press, "长按层级进行添加！").show();
+        }
+
         lvContractorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((TreeNodeAdapter) parent.getAdapter()).ExpandOrCollapse(position);
+            }
+        });
+
+        lvContractorList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+                new PromptDialog(mContext, new PromptListener() {
+                    @Override
+                    public void returnTrueOrFalse(boolean trueOrFalse) {
+                        if (trueOrFalse) {
+                            boolean isSync = (boolean) SpUtil.get(mContext, "isSync", false);
+                            if (isSync) {
+                                Intent intent = new Intent(mContext, AddProcessActivity.class);
+                                intent.putExtra("position", position);
+                                startActivityForResult(intent, 1005);
+                            } else {
+                                ToastUtil.showShort(mContext, "请先到个人中心中同步工序字典！");
+                            }
+                        }
+                    }
+                }, "提示", "是否添加新层级？", "否", "是").show();
+                return true;
             }
         });
 
@@ -150,6 +183,23 @@ public class ContractorTreeActivity extends BaseActivity {
         } else {
             List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", "0", processType).find(ContractorBean.class);
             setContractorNode(listBean);
+        }
+    }
+
+    /**
+     * 添加节点
+     *
+     * @param node
+     */
+    private void addNode(Node node) {
+        if (node.getParent() != null) {
+            all.add(node);
+            allCache.add(node);
+        }
+        if (node.isLeaf())
+            return;
+        for (int i = 0; i < node.getChildren().size(); i++) {
+            addNode(node.getChildren().get(i));
         }
     }
 
@@ -217,6 +267,7 @@ public class ContractorTreeActivity extends BaseActivity {
                             List<ContractorBean> listBeen = model.getData();
                             for (ContractorBean bean : listBeen) {
                                 bean.setLevelType(processType);
+                                bean.setIsLocalAdd(2);
                                 bean.saveOrUpdate("levelId=?", bean.getLevelId());
                             }
                             // 设置节点
@@ -250,6 +301,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 getNode(contractorBean.get(i), root);
             }
 
+            addNode(root);
             ta = new TreeNodeAdapter(this, root, listener);
                 /* 设置展开和折叠时图标 */
             ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
@@ -257,6 +309,9 @@ public class ContractorTreeActivity extends BaseActivity {
             ta.setExpandLevel(1);
             lvContractorList.setAdapter(ta);
             SetListHeight.setListViewHeight(lvContractorList);
+
+            allCache = ta.allCache;
+            all = ta.all;
         }
     }
 
@@ -276,6 +331,8 @@ public class ContractorTreeActivity extends BaseActivity {
         n.setLevelId(levelId);
         n.setLevelName(levelName);
         n.setParentId(contractorListBean.getParentId());
+        n.setParentIdAll(contractorListBean.getParentIdAll());
+        n.setParentNameAll(contractorListBean.getParentNameAll());
         n.setFolderFlag(contractorListBean.getCanExpand());
         n.setExpanded(false);
         n.setLoading(false);
@@ -299,7 +356,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 loadProcedureByNodeId(point, levelId);
             } else {
                 List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", levelId, processType).find(ContractorBean.class);
-                setNodeInChildren(listBean, point);
+                setNodeInChildren(listBean, point, true);
             }
         }
     };
@@ -314,7 +371,7 @@ public class ContractorTreeActivity extends BaseActivity {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
         obj.put("parentId", parentId);
-        obj.put("levelType", SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
+        obj.put("levelType", processType);
         Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.getZxHwGxProjectLevelList, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -336,10 +393,16 @@ public class ContractorTreeActivity extends BaseActivity {
                                 List<ContractorBean> listBeen = model.getData();
                                 for (ContractorBean bean : listBeen) {
                                     bean.setLevelType(processType);
+                                    bean.setIsLocalAdd(2);
                                     bean.saveOrUpdate("levelId=?", bean.getLevelId());
                                 }
+                                // 查询本地保存的数据
+                                List<ContractorBean> beanList = DataSupport.where("parentId=? and levelType=? and isLocalAdd=?", parentId, processType, "1").find(ContractorBean.class);
+                                if (beanList != null) {
+                                    model.getData().addAll(beanList);
+                                }
                                 // 将数据添加到Node的子节点中
-                                setNodeInChildren(model.getData(), position);
+                                setNodeInChildren(model.getData(), position, true);
                                 LoadingUtils.hideLoading();
                             }
                         });
@@ -359,7 +422,7 @@ public class ContractorTreeActivity extends BaseActivity {
      * @param data
      * @param position
      */
-    private void setNodeInChildren(List<ContractorBean> data, final int position) {
+    private void setNodeInChildren(List<ContractorBean> data, int position, boolean isLoading) {
         List<Node> nodes = new ArrayList<>();
         for (ContractorBean contractor : data) {
             String levelId = contractor.getLevelId();
@@ -370,6 +433,8 @@ public class ContractorTreeActivity extends BaseActivity {
             n.setLevelId(levelId);
             n.setLevelName(levelName);
             n.setParentId(contractor.getParentId());
+            n.setParentIdAll(contractor.getParentIdAll());
+            n.setParentNameAll(contractor.getParentNameAll());
             n.setFolderFlag(contractor.getCanExpand());
             n.setExpanded(false);
             n.setLoading(false);
@@ -385,9 +450,9 @@ public class ContractorTreeActivity extends BaseActivity {
         allCache.addAll(point + 1, nodes);
 
         all.get(position).setChildren(nodes);
-        all.get(position).setLoading(true);
+        all.get(position).setLoading(isLoading);
         allCache.get(position).setChildren(nodes);
-        allCache.get(position).setLoading(true);
+        allCache.get(position).setLoading(isLoading);
 
         if (data == null || data.size() == 0) {
             all.get(position).setFolderFlag("1");
@@ -419,8 +484,102 @@ public class ContractorTreeActivity extends BaseActivity {
                 intent.putExtra("levelId", data.getStringExtra("levelId"));
                 setResult(Activity.RESULT_OK, intent);
                 finish();
+            } else if (requestCode == 1005) {
+                // 子级新增
+                String pileNo = data.getStringExtra("pileNo");
+                int position = data.getIntExtra("position", 0);
+                ArrayList<String> dictId = data.getStringArrayListExtra("dictIdList");
+
+                List<ContractorBean> beanList = new ArrayList<>();
+                String parentLevelId = RandomUtil.randomUUID().replaceAll("-", "");
+                // 1、向节点下添加桩号
+                String parentIdAll = all.get(position).getParentIdAll()+","+parentLevelId;
+                String parentNameAll = all.get(position).getParentNameAll()+","+pileNo;
+
+                ContractorBean newPileNo = addLocalLevel(parentLevelId, pileNo, all.get(position).getLevelId(), "1", "0", "", parentIdAll, parentNameAll);
+                beanList.add(newPileNo);
+                // 向桩号下添加层级
+                for (String str : dictId) {
+                    // 查询层级
+                    List<ProcessDictionaryBean> proList = DataSupport.where("dictId=?", str).find(ProcessDictionaryBean.class);
+                    if (proList != null) {
+                        for (ProcessDictionaryBean proBean : proList) {
+                            String levelId = RandomUtil.randomUUID().replaceAll("-", "");
+                            parentIdAll+="," + levelId;
+                            parentNameAll+="," + proBean.getDictName();
+                            addLocalLevel(levelId, proBean.getDictName(), parentLevelId, "0", "1", proBean.getDictCode(), parentIdAll, parentNameAll);
+                            List<ProcessDictionaryBean> list = DataSupport.where("parentId=?", str).find(ProcessDictionaryBean.class);
+                            for (ProcessDictionaryBean bean : list) {
+                                addLocalProcess(bean, position, pileNo + "," + proBean.getDictName(), levelId, parentIdAll);
+                            }
+                        }
+                    }
+                }
+                all.get(position).setExpanded(true);
+                allCache.get(position).setExpanded(true);
+                setNodeInChildren(beanList, position, false);
             }
         }
+    }
+
+    /**
+     * 本地添加层级
+     *
+     * @param levelId
+     * @param levelName
+     * @param parentId
+     * @param isFolder
+     * @param canExpand
+     */
+    private ContractorBean addLocalLevel(String levelId, String levelName, String parentId, String isFolder, String canExpand, String levelCode, String parentIdAll, String parentNameAll) {
+        ContractorBean newPileNo = new ContractorBean();
+        newPileNo.setLevelId(levelId);// 层级ID
+        newPileNo.setLevelName(levelName);// 层级名称
+        newPileNo.setLevelCode(levelCode);
+        newPileNo.setParentId(parentId);// 父ID
+        newPileNo.setParentIdAll(parentIdAll);// 父ID
+        newPileNo.setParentNameAll(parentNameAll);
+        newPileNo.setFolderFlag(isFolder);// 是否是文件夹flag 0:不是文件夹 1：是文件夹
+        newPileNo.setProcessNum(0);// 工序数量
+        newPileNo.setFinishedNum(0); // 已完成工序数量
+        newPileNo.setSelect(false); // 是否被选中
+        newPileNo.setLevelType(processType);// 质量或安全
+        newPileNo.setCanExpand(canExpand);// 是否有子工序 1:有 0：无
+        newPileNo.setIsLocalAdd(1);
+        newPileNo.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
+        newPileNo.saveOrUpdate("levelId=?", levelId);
+        return newPileNo;
+    }
+
+    /**
+     * 保存工序
+     *
+     * @param processBean
+     * @param point
+     * @return
+     */
+    private WorkingBean addLocalProcess(ProcessDictionaryBean processBean, int point, String levelName, String levelId, String parentNameAll) {
+        WorkingBean workingBean = new WorkingBean();
+        String processId = RandomUtil.randomUUID().replaceAll("-", "");
+        workingBean.setProcessId(processId);
+        workingBean.setProcessName(processBean.getDictName());
+        workingBean.setProcessCode(processBean.getDictCode());
+        workingBean.setPhotoContent(processBean.getPhotoContent());
+        workingBean.setPhotoDistance(processBean.getPhotoDistance());
+        workingBean.setPhotoNumber(processBean.getPhotoNumber() + "");
+        workingBean.setLevelId(levelId);
+        workingBean.setLevelIdAll(parentNameAll);
+        String levelNameAll = ta.getProcessPath(point).replaceAll("→", ",") + "," + levelName;
+        workingBean.setLevelNameAll(levelNameAll);
+        workingBean.setEnterTime(processBean.getCreateTime());
+        workingBean.setWorkId(processId);
+        workingBean.setCheckNameAll("未审核");
+        workingBean.setType("1");
+        workingBean.setIsLocalAdd(1);
+        workingBean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
+        workingBean.setFileOperationFlag("1");
+        workingBean.saveOrUpdate("processId=?", processBean.getDictId());
+        return workingBean;
     }
 
     @Event({R.id.imgBtnLeft, R.id.btnRight, R.id.imgBtnRight})

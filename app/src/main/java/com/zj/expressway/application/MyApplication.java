@@ -51,7 +51,7 @@ public class MyApplication extends LitePalApplication {
         LitePal.initialize(this);
         instance = this;
 
-        CrashReport.initCrashReport(getApplicationContext(), "5934a4f038", true);
+        CrashReport.initCrashReport(getApplicationContext(), "5934a4f038", false);
 
         /**
          * 必须在 Application 的 onCreate 方法中执行 BGASwipeBackHelper.init 来初始化滑动返回

@@ -66,6 +66,10 @@ public class ConstantsUtil {
     public static String SELECT_USER_ID = "SELECT_USER_ID";
     // 工序列表类型（0：工序 1：质量 2：安全）
     public static String PROCESS_LIST_TYPE = "PROCESS_LIST_TYPE";
+    // 滑动
+    public static String slide = "SLIDE";
+    // 长按
+    public static String Long_press = "Long_press";
 
     /**
      * OkHttpClient
@@ -94,6 +98,7 @@ public class ConstantsUtil {
 
     public static final String addLevel = prefix + "addZxHwGxProjectLevel";
     public static final String deleteLevel = prefix + "batchDeleteUpdateZxHwGxProjectLevel";
+
     /**
      * 图片上传
      */
@@ -107,6 +112,12 @@ public class ConstantsUtil {
      * 版本检查
      */
     public static final String CHECK_VERSION = prefix + "version/checkVersion";
+    // 同步工序字典
+    public static final String appGetTwoinoneDictList = prefix + "appGetTwoinoneDictList";
+    // 同步三级联动菜单
+    public static final String getFirSecThiLevelSelect = prefix + "getFirSecThiLevelSelect";
+    // 同步到服务器
+    public static final String syncDataToServer = prefix + "appSyncProjectLevelAndProcess";
     /**
      * 下载APK
      */

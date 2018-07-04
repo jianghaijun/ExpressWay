@@ -44,26 +44,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- * _ooOoo_
- * o8888888o
- * 88" . "88
- * (| -_- |)
- * O\  =  /O
- * ____/`---'\____
- * .'  \\|     |//  `.
- * /  \\|||  :  |||//  \
- * /  _||||| -:- |||||-  \
- * |   | \\\  -  /// |   |
- * | \_|  ''\---/''  |   |
- * \  .-\__  `-`  ___/-. /
- * ___`. .'  /--.--\  `. . __
- * ."" '<  `.___\_<|>_/___.'  >'"".
- * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- * \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- * `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 佛祖保佑       永无BUG
  * Created by HaiJun on 2018/6/11 17:01
  * 工序列表
  */
@@ -275,6 +255,15 @@ public class ProcessListActivity extends BaseActivity {
                                             bean.saveOrUpdate("processId=? and nodeName=?", bean.getWorkId(), bean.getNodeName());
                                         }
                                     }
+
+                                    if (viewType == 1) {
+                                        List<WorkingBean> workingBeenList = DataSupport.where("userId=? and type=1 and isLocalAdd=1", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(WorkingBean.class);
+                                        if (workingBeenList != null && workingBeenList.size() > 0) {
+                                            workingBeanList.addAll(workingBeenList);
+                                            processSum+=workingBeenList.size();
+                                        }
+                                    }
+
                                     workingBeanList.addAll(model.getData());
                                 }
                                 initProcessListData();
@@ -380,12 +369,12 @@ public class ProcessListActivity extends BaseActivity {
             }
         } else {
             if (viewType == 1) {
-                workingBeen = DataSupport.where("userId=? and type=? and levelNameAll=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                workingBeen = DataSupport.where("userId=? and type=? and (processName=? or levelId=?) order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, searchContext, start, end).find(WorkingBean.class);
             } else if (viewType == 2) {
                 if (str.equals("2")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and troubleTitle=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and (troubleTitle=? or levelId=?) order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, searchContext, start, end).find(WorkingBean.class);
                 } else {
-                    workingBeen = DataSupport.where("userId=? and type=? and dangerTitle=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and (dangerTitle=? or levelId=?) order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, searchContext, start, end).find(WorkingBean.class);
                 }
             } else {
                 if (str.equals("1")) {

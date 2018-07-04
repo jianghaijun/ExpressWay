@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="@dimen/five_dp">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/five_dp"
+        android:background="@color/main_bg"
+        android:padding="@dimen/one_dp"
+        android:stretchColumns="1">
+
+        <TableRow android:layout_marginBottom="@dimen/one_dp">
+
+            <TextView
+                android:id="@+id/txtNo"
+                android:layout_width="39dp"
+                android:layout_height="@dimen/thirty"
+                android:layout_marginRight="@dimen/one_dp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:text="@string/no"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <TextView
+                android:id="@+id/txtName"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/thirty"
+                android:layout_marginRight="@dimen/one_dp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:text="@string/workingName"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <TextView
+                android:id="@+id/txtTakePhotoRequirement"
+                android:layout_width="79dp"
+                android:layout_height="@dimen/thirty"
+                android:layout_marginRight="@dimen/one_dp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:text="@string/take_photo_requirement"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <TextView
+                android:id="@+id/txtTakePhotoNum"
+                android:layout_width="79dp"
+                android:layout_height="@dimen/thirty"
+                android:layout_marginRight="@dimen/one_dp"
+                android:background="@color/white"
+                android:gravity="center"
+                android:text="@string/takePhotoNum"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+        </TableRow>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:scrollbars="none">
+
+            <TableLayout
+                android:id="@+id/tabLay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/main_bg" />
+        </ScrollView>
+    </TableLayout>
+</com.zhy.android.percent.support.PercentLinearLayout>

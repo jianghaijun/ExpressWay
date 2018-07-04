@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.zhy.android.percent.support.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/actionBar"
+        layout="@layout/navigation_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/zero_dp"
+        android:layout_alignParentTop="true"
+        app:layout_heightPercent="8%" />
+
+    <LinearLayout
+        android:id="@+id/llButtons"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:layout_below="@+id/actionBar"
+        android:background="@null"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/five_dp"
+            android:layout_weight="1"
+            android:background="@drawable/gray_stroke_white_solid_bg">
+
+            <Button
+                android:id="@+id/btnCondition1"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/one_dp"
+                android:background="@drawable/touch_bg"
+                android:drawableRight="@drawable/drop_down"
+                android:paddingRight="@dimen/ten_dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/five_dp"
+            android:layout_weight="1"
+            android:background="@drawable/gray_stroke_white_solid_bg">
+
+            <Button
+                android:id="@+id/btnCondition2"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/one_dp"
+                android:background="@drawable/touch_bg"
+                android:drawableRight="@drawable/drop_down"
+                android:paddingRight="@dimen/ten_dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/five_dp"
+            android:layout_weight="1"
+            android:background="@drawable/gray_stroke_white_solid_bg">
+
+            <Button
+                android:id="@+id/btnCondition3"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/one_dp"
+                android:background="@drawable/touch_bg"
+                android:drawableRight="@drawable/drop_down"
+                android:paddingRight="@dimen/ten_dp" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/llButtons"
+        android:layout_marginBottom="@dimen/five_dp"
+        android:layout_marginTop="@dimen/five_dp"
+        android:background="@null">
+
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/refreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/rlInput"
+            app:srlEnableLoadMoreWhenContentNotFull="true">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rvProcessList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:paddingBottom="@dimen/five_dp"
+                android:scrollbars="none" />
+
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+        <RelativeLayout
+            android:id="@+id/rlInput"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/fifty_dp"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/btnQueryAdd"
+                android:layout_width="@dimen/seventy_five_dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_margin="@dimen/five_dp"
+                android:background="@drawable/btn_blue"
+                android:text="@string/queryAdd"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+
+            <EditText
+                android:id="@+id/edtProcessNum"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/five_dp"
+                android:layout_toLeftOf="@+id/btnQueryAdd"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:hint="@string/inputPileNo"
+                android:paddingLeft="@dimen/ten_dp"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/llSearchData"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/txtMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_msg"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sixteen_sp" />
+
+            <TextView
+                android:id="@+id/txtClear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清空条件"
+                android:textColor="@color/main_bg"
+                android:textSize="@dimen/sixteen_sp" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <com.mancj.materialsearchbar.MaterialSearchBar
+        android:id="@+id/searchBar"
+        style="@style/MaterialSearchBarLight"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/action_bar"
+        android:visibility="gone"
+        app:mt_hint="@string/input_working_name"
+        app:mt_maxSuggestionsCount="10"
+        app:mt_speechMode="false" />
+</com.zhy.android.percent.support.PercentRelativeLayout>

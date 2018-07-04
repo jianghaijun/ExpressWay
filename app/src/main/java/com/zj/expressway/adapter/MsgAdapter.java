@@ -93,6 +93,7 @@ public class MsgAdapter extends BaseAdapter<List<WorkingBean>> {
                     intent.putExtra("processState", data.getProcessState());
                     intent.putExtra("processPath", data.getLevelNameAll());
                     intent.putExtra("taskId", data.getTaskId());
+                    intent.putExtra("isLocalAdd", data.getIsLocalAdd());
                     intent.putExtra("canCheck", data.getCanCheck());
                     intent.putExtra("isPopTakePhoto", data);
                     mContext.startActivity(intent);

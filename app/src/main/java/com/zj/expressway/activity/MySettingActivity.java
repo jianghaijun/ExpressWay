@@ -11,19 +11,30 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.Logger;
 import com.yuyh.library.imgsel.ISNav;
 import com.yuyh.library.imgsel.common.ImageLoader;
 import com.yuyh.library.imgsel.config.ISCameraConfig;
 import com.yuyh.library.imgsel.config.ISListConfig;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.ContractorBean;
+import com.zj.expressway.bean.ProcessDicBaseBean;
+import com.zj.expressway.bean.ProcessDictionaryBean;
+import com.zj.expressway.bean.SyncLinkageMenuBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.dialog.DownloadApkDialog;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.SelectPhotoWayDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.CheckVersionModel;
+import com.zj.expressway.model.ContractorModel;
+import com.zj.expressway.model.ProcessDictionaryModel;
+import com.zj.expressway.model.SyncLinkageMenuModel;
+import com.zj.expressway.model.SyncLinkageMenuSecondModel;
+import com.zj.expressway.model.SyncLinkageMenuThirdModel;
 import com.zj.expressway.utils.AppInfoUtil;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -40,7 +51,12 @@ import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import cn.hutool.core.util.ObjectUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
@@ -72,20 +88,18 @@ import okhttp3.Response;
  */
 public class MySettingActivity extends BaseActivity {
     private MyHolder myHolder;
-    private Context mContext;
     private Activity mActivity;
     private PromptListener checkListener;
     private Long fileLength;
 
-    public MySettingActivity(Context mContext, View layoutMy, PromptListener checkListener) {
-        this.mContext = mContext;
-        this.mActivity = (Activity) mContext;
+    public MySettingActivity(Context mActivity, View layoutMy, PromptListener checkListener) {
+        this.mActivity = (Activity) mActivity;
         myHolder = new MyHolder();
         x.view().inject(myHolder, layoutMy);
         this.checkListener = checkListener;
 
-        myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mContext));
-        myHolder.txtUserName.setText((String) SpUtil.get(mContext, "UserName", ""));
+        myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mActivity));
+        myHolder.txtUserName.setText((String) SpUtil.get(mActivity, "UserName", ""));
         myHolder.btnCleanUpCaching.setText("清理缓存：" + GlideCatchUtil.getCacheSize());
 
         // 自定义图片加载器
@@ -103,7 +117,7 @@ public class MySettingActivity extends BaseActivity {
      * 设置版本号
      */
     public void setVersion() {
-        myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mContext));
+        myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mActivity));
     }
 
     /**
@@ -122,6 +136,10 @@ public class MySettingActivity extends BaseActivity {
         myHolder.imgViewUserAvatar.setOnClickListener(new OnClick());
         // 清理缓存
         myHolder.btnCleanUpCaching.setOnClickListener(new OnClick());
+        // 同步工序字典
+        myHolder.btnSyncProcessDictionary.setOnClickListener(new OnClick());
+        // 同步工序到服务器
+        myHolder.btnSyncLevel.setOnClickListener(new OnClick());
     }
 
     /**
@@ -133,24 +151,24 @@ public class MySettingActivity extends BaseActivity {
             switch (v.getId()) {
                 // 注销
                 case R.id.btnSignOut:
-                    SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
+                    SpUtil.put(mActivity, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
                     ScreenManagerUtil.popAllActivityExceptOne();
-                    mContext.startActivity(new Intent(mContext, LoginActivity.class));
+                    mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
                     break;
                 // 修改密码
                 case R.id.btnUpdatePassword:
-                    mContext.startActivity(new Intent(mContext, UpdatePassWordActivity.class));
+                    mActivity.startActivity(new Intent(mActivity, UpdatePassWordActivity.class));
                     break;
                 // 设置ip
                 case R.id.btnChangeIp:
-                    mContext.startActivity(new Intent(mContext, ChangeIpActivity.class));
+                    mActivity.startActivity(new Intent(mActivity, ChangeIpActivity.class));
                     break;
                 // 版本检查
                 case R.id.btnVersion:
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
                         checkVersion();
                     } else {
-                        ToastUtil.showShort(mContext, mActivity.getString(R.string.not_network));
+                        ToastUtil.showShort(mActivity, mActivity.getString(R.string.not_network));
                     }
                     break;
                 // 更换头像
@@ -159,7 +177,7 @@ public class MySettingActivity extends BaseActivity {
                     break;
                 // 清除缓存
                 case R.id.btnCleanUpCaching:
-                    LoadingUtils.showLoading(mContext);
+                    LoadingUtils.showLoading(mActivity);
                     // 清除已加载层级列表
                     DataSupport.deleteAll(ContractorBean.class);
                     // 清除工序下的图片
@@ -173,9 +191,25 @@ public class MySettingActivity extends BaseActivity {
                     myHolder.btnCleanUpCaching.setText("清理缓存：" + GlideCatchUtil.getCacheSize());
                     LoadingUtils.hideLoading();
                     if (isClean) {
-                        ToastUtil.showShort(mContext, "清理成功");
+                        ToastUtil.showShort(mActivity, "清理成功");
                     } else {
-                        ToastUtil.showShort(mContext, "清理失败");
+                        ToastUtil.showShort(mActivity, "清理失败");
+                    }
+                    break;
+                // 同步工序字典
+                case R.id.btnSyncProcessDictionary:
+                    if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
+                        syncProcessDictionary();
+                    } else {
+                        ToastUtil.showShort(mActivity, mActivity.getString(R.string.not_network));
+                    }
+                    break;
+                // 同步工序到服务器
+                case R.id.btnSyncLevel:
+                    if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
+                        syncToTheServer();
+                    } else {
+                        ToastUtil.showShort(mActivity, mActivity.getString(R.string.not_network));
                     }
                     break;
             }
@@ -187,7 +221,7 @@ public class MySettingActivity extends BaseActivity {
      */
     private void uploadUserAvatar() {
         if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
-            SelectPhotoWayDialog selectPhotoWayDialog = new SelectPhotoWayDialog(mContext, new PromptListener() {
+            SelectPhotoWayDialog selectPhotoWayDialog = new SelectPhotoWayDialog(mActivity, new PromptListener() {
                 @Override
                 public void returnTrueOrFalse(boolean trueOrFalse) {
                     if (trueOrFalse) {
@@ -227,7 +261,7 @@ public class MySettingActivity extends BaseActivity {
             });
             selectPhotoWayDialog.show();
         } else {
-            ToastUtil.showShort(mContext, mActivity.getString(R.string.not_network));
+            ToastUtil.showShort(mActivity, mActivity.getString(R.string.not_network));
         }
     }
 
@@ -249,14 +283,14 @@ public class MySettingActivity extends BaseActivity {
                     Gson gson = new Gson();
                     final CheckVersionModel model = gson.fromJson(data, CheckVersionModel.class);
                     if (model.isSuccess()) {
-                        int version = AppInfoUtil.compareVersion(model.getVersion(), AppInfoUtil.getVersion(mContext));
+                        int version = AppInfoUtil.compareVersion(model.getVersion(), AppInfoUtil.getVersion(mActivity));
                         if (version == 1) {
                             // 发现新版本
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     fileLength = model.getFileLength();
-                                    PromptDialog promptDialog = new PromptDialog(mContext, choiceListener, "发现新版本", "是否更新？", "否", "是");
+                                    PromptDialog promptDialog = new PromptDialog(mActivity, choiceListener, "发现新版本", "是否更新？", "否", "是");
                                     promptDialog.show();
                                 }
                             });
@@ -274,6 +308,257 @@ public class MySettingActivity extends BaseActivity {
                     }
                 } else {
                     ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                }
+            }
+        });
+    }
+
+    /**
+     * 同步服务器字典表
+     */
+    private void syncProcessDictionary() {
+        LoadingUtils.showLoading(mActivity);
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.appGetTwoinoneDictList, "");
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String data = response.body().string();
+                if (JsonUtils.isGoodJson(data)) {
+                    Gson gson = new Gson();
+                    final ProcessDictionaryModel model = gson.fromJson(data, ProcessDictionaryModel.class);
+                    if (model.isSuccess()) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (ObjectUtil.isNotNull(model)) {
+                                    syncLinkageMenu();
+                                    for (ProcessDicBaseBean processBean : model.getData()) {
+                                        // 保存工序字典
+                                        ProcessDictionaryBean dictBean = new ProcessDictionaryBean();
+                                        dictBean.setDelFlag(processBean.getDelFlag());
+                                        dictBean.setCreateTime(processBean.getCreateTime());
+                                        dictBean.setCreateUser(processBean.getCreateUser());
+                                        dictBean.setCreateUserName(processBean.getCreateUserName());
+                                        dictBean.setModifyTime(processBean.getModifyTime());
+                                        dictBean.setModifyUser(processBean.getModifyUser());
+                                        dictBean.setCreateUserName(processBean.getModifyUserName());
+                                        dictBean.setDictId(processBean.getDictId());
+                                        dictBean.setDictName(processBean.getDictName());
+                                        dictBean.setDictCode(processBean.getDictCode());
+                                        dictBean.setParentId(processBean.getParentId());
+                                        dictBean.setPhotoContent(processBean.getPhotoContent());
+                                        dictBean.setPhotoDistance(processBean.getPhotoDistance());
+                                        dictBean.setPhotoNumber(processBean.getPhotoNumber());
+                                        dictBean.setFirstLevelId(processBean.getFirstLevelId());
+                                        dictBean.setFirstLevelName(processBean.getFirstLevelName());
+                                        dictBean.setSecondLevelId(processBean.getSecondLevelId());
+                                        dictBean.setSecondLevelName(processBean.getSecondLevelName());
+                                        dictBean.setThirdLevelId(processBean.getThirdLevelId());
+                                        dictBean.setThirdLevelName(processBean.getThirdLevelName());
+                                        dictBean.setType("1");
+                                        dictBean.saveOrUpdate("dictId=?", processBean.getDictId());
+                                        if (ObjectUtil.isNotNull(processBean.getGxDictionaryList())) {
+                                            for (ProcessDictionaryBean bean : processBean.getGxDictionaryList()) {
+                                                bean.setType("2");
+                                                bean.saveOrUpdate("dictId=?", bean.getDictId());
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                }
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                }
+            }
+        });
+    }
+
+    /**
+     * 同步三级联动菜单
+     */
+    private void syncLinkageMenu() {
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.getFirSecThiLevelSelect, "");
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String data = response.body().string();
+                if (JsonUtils.isGoodJson(data)) {
+                    Gson gson = new Gson();
+                    final SyncLinkageMenuModel model = gson.fromJson(data, SyncLinkageMenuModel.class);
+                    if (model.isSuccess()) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (ObjectUtil.isNotNull(model)) {
+                                    for (SyncLinkageMenuSecondModel secondModel : model.getData()) {
+                                        SyncLinkageMenuBean firstBean = new SyncLinkageMenuBean();
+                                        firstBean.setDelFlag(secondModel.getDelFlag());
+                                        firstBean.setCreateTime(secondModel.getCreateTime());
+                                        firstBean.setCreateUser(secondModel.getCreateUser());
+                                        firstBean.setCreateUserName(secondModel.getCreateUserName());
+                                        firstBean.setModifyTime(secondModel.getModifyTime());
+                                        firstBean.setModifyUser(secondModel.getModifyUser());
+                                        firstBean.setModifyUserName(secondModel.getModifyUserName());
+                                        firstBean.setFirstLevelId(secondModel.getFirstLevelId());
+                                        firstBean.setFirstLevelName(secondModel.getFirstLevelName());
+                                        firstBean.setFirstLevelCode(secondModel.getFirstLevelCode());
+                                        firstBean.setSortFlag(secondModel.getSortFlag());
+                                        firstBean.setSelectFlag(secondModel.getSelectFlag());
+                                        firstBean.setType("1");
+                                        firstBean.saveOrUpdate("firstLevelId=?", secondModel.getFirstLevelId());
+                                        if (ObjectUtil.isNotNull(secondModel.getSecondLevelList())) {
+                                            for (SyncLinkageMenuThirdModel thirdBean : secondModel.getSecondLevelList()) {
+                                                SyncLinkageMenuBean secondBean = new SyncLinkageMenuBean();
+                                                secondBean.setDelFlag(thirdBean.getDelFlag());
+                                                secondBean.setCreateTime(thirdBean.getCreateTime());
+                                                secondBean.setCreateUser(thirdBean.getCreateUser());
+                                                secondBean.setCreateUserName(thirdBean.getCreateUserName());
+                                                secondBean.setModifyTime(thirdBean.getModifyTime());
+                                                secondBean.setModifyUser(thirdBean.getModifyUser());
+                                                secondBean.setModifyUserName(thirdBean.getModifyUserName());
+                                                secondBean.setFirstLevelId(thirdBean.getFirstLevelId());
+                                                secondBean.setSecondLevelId(thirdBean.getSecondLevelId());
+                                                secondBean.setSecondLevelName(thirdBean.getSecondLevelName());
+                                                secondBean.setSecondLevelCode(thirdBean.getSecondLevelCode());
+                                                secondBean.setSortFlag(thirdBean.getSortFlag());
+                                                secondBean.setType("2");
+                                                secondBean.saveOrUpdate("secondLevelId=?", thirdBean.getSecondLevelId());
+                                                if (ObjectUtil.isNotNull(thirdBean.getThirdLevelList())) {
+                                                    for (SyncLinkageMenuBean bean : thirdBean.getThirdLevelList()) {
+                                                        bean.setType("3");
+                                                        bean.saveOrUpdate("thirdLevelId=?", bean.getThirdLevelId());
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    SpUtil.put(mActivity, "isSync", true);
+                                    ChildThreadUtil.toastMsgHidden(mActivity, "同步成功！");
+                                } else {
+                                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                }
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                }
+            }
+        });
+    }
+
+    /**
+     * 同步数据到服务器
+     */
+    private void syncToTheServer() {
+        List<ContractorBean> contractBeenList = DataSupport.where("userId=? and isLocalAdd=1", String.valueOf(SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""))).find(ContractorBean.class);
+        if (contractBeenList == null || contractBeenList.size() == 0) {
+            ToastUtil.showShort(mActivity, "没有可同步的数据！");
+        } else {
+            // 层级
+            List<Map<String, Object>> levelMap = new ArrayList<>();
+            for (ContractorBean contractorbean : contractBeenList) {
+                // 添加层级
+                Map<String, Object> level = new HashMap<>();
+                level.put("levelId", contractorbean.getLevelId());
+                level.put("levelName", contractorbean.getLevelName());
+                level.put("levelCode", contractorbean.getLevelCode());
+                level.put("parentId", contractorbean.getParentId());
+                level.put("parentIdAll", contractorbean.getParentIdAll());
+                level.put("parentNameAll", contractorbean.getParentNameAll());
+                level.put("totalNum", contractorbean.getProcessNum());
+                level.put("finishedNum", 0);
+                level.put("canExpand", contractorbean.getCanExpand());
+                level.put("delFlag", 0);
+                level.put("createTime", System.currentTimeMillis());
+                level.put("createUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
+                level.put("createUserName",SpUtil.get(mActivity, "UserName", ""));
+                level.put("modifyTime", System.currentTimeMillis());
+                level.put("modifyUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
+                level.put("modifyUserName", SpUtil.get(mActivity, "UserName", ""));
+                levelMap.add(level);
+            }
+
+            List<WorkingBean> workingBeenList = DataSupport.where("userId=? and type=1 and isLocalAdd=1", String.valueOf(SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""))).find(WorkingBean.class);
+            // 工序
+            List<Map<String, Object>> processMap = new ArrayList<>();
+            for (WorkingBean workingBean : workingBeenList) {
+                // 添加层级
+                Map<String, Object> process = new HashMap<>();
+                process.put("processId", workingBean.getProcessId());
+                process.put("processName", workingBean.getProcessName());
+                process.put("processCode", workingBean.getProcessCode());
+                process.put("photoContent", workingBean.getPhotoContent());
+                process.put("photoDistance", workingBean.getPhotoDistance());
+                process.put("photoNumber", workingBean.getPhotoNumber());
+                process.put("levelId", workingBean.getLevelId());
+                process.put("levelNameAll", workingBean.getLevelNameAll() + "," + workingBean.getProcessName());
+                process.put("levelIdAll", workingBean.getLevelIdAll() + "," + workingBean.getProcessId());
+                process.put("enterTime", workingBean.getEnterTime());
+                process.put("workId", workingBean.getWorkId());
+                process.put("flowStatus", "0");
+                process.put("delFlag", 0);
+                process.put("createTime", System.currentTimeMillis());
+                process.put("createUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
+                process.put("createUserName",SpUtil.get(mActivity, "UserName", ""));
+                process.put("modifyTime", System.currentTimeMillis());
+                process.put("modifyUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
+                process.put("modifyUserName", SpUtil.get(mActivity, "UserName", ""));
+                processMap.add(process);
+            }
+            Map<String, Object> dataMap = new HashMap<>();
+            dataMap.put("gxProjectLevelList", levelMap);
+            dataMap.put("gxProcessList", processMap);
+            syncDataToServer(new Gson().toJson(dataMap));
+        }
+    }
+
+    /**
+     * 同步数据到服务器
+     * @param jsonData
+     */
+    private void syncDataToServer(String jsonData) {
+        LoadingUtils.showLoading(mActivity);
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.syncDataToServer, jsonData);
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mActivity, getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    Gson gson = new Gson();
+                    final BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        DataSupport.deleteAll(ContractorBean.class, "userId=? and isLocalAdd=1", String.valueOf(SpUtil.get(mActivity, ConstantsUtil.USER_ID, "")));
+                        DataSupport.deleteAll(WorkingBean.class, "userId=? and isLocalAdd=1", String.valueOf(SpUtil.get(mActivity, ConstantsUtil.USER_ID, "")));
+                        ChildThreadUtil.toastMsgHidden(mActivity, model.getMessage());
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mActivity, getString(R.string.json_error));
                 }
             }
         });
@@ -298,7 +583,7 @@ public class MySettingActivity extends BaseActivity {
      * 下载APK
      */
     public void downloadApk() {
-        DownloadApkDialog downloadApkDialog = new DownloadApkDialog(mContext, fileLength);
+        DownloadApkDialog downloadApkDialog = new DownloadApkDialog(mActivity, fileLength);
         downloadApkDialog.setCanceledOnTouchOutside(false);
         downloadApkDialog.show();
     }
@@ -321,6 +606,10 @@ public class MySettingActivity extends BaseActivity {
         private Button btnVersion;
         @ViewInject(R.id.btnCleanUpCaching)
         private Button btnCleanUpCaching;
+        @ViewInject(R.id.btnSyncProcessDictionary)
+        private Button btnSyncProcessDictionary;
+        @ViewInject(R.id.btnSyncLevel)
+        private Button btnSyncLevel;
     }
 
 }

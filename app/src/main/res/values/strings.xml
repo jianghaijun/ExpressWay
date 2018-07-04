@@ -26,6 +26,7 @@
     <string name="input_file_name">请输入文件名称</string>
     <string name="input_file_description">请描述文件</string>
     <string name="query">确认</string>
+    <string name="queryAdd">确认添加</string>
     <string name="queryPhoto">确认拍照</string>
     <string name="file_info">描述文件</string>
     <string name="data_error">服务器返回数据有误!</string>
@@ -50,6 +51,7 @@
     <string name="new_pswd_can_not_be_the_same_as_old_pswd">新密码不能与原始密码一样!</string>
     <string name="edit_node">节点编辑</string>
     <string name="add_node">增加节点</string>
+    <string name="noLongerPrompt">不再提示！</string>
     <string name="delete_node">删除节点</string>
     <string name="delete">删除</string>
     <string name="update_node">修改节点名称</string>
@@ -67,6 +69,8 @@
     <string name="department">部门：</string>
     <string name="real_name">姓名：</string>
     <string name="clean_up_caching">清理缓存</string>
+    <string name="sync_process_dictionary">同步工序字典至本地</string>
+    <string name="sync_level">同步工序至服务端</string>
     <string name="msg">消息</string>
     <string name="application">应用</string>
     <string name="project">项目</string>
@@ -77,10 +81,10 @@
     <string name="mail_list">通讯录</string>
     <string name="qr_code">二维码扫描</string>
     <string name="qr_code_generate">二维码生成</string>
-    <string name="process_inspection">工序检查</string>
+    <string name="process_inspection">隐蔽工程</string>
     <string name="hidden_danger">安全隐患</string>
-    <string name="qualityPatrol">质量巡查</string>
-    <string name="securityPatrol">安全巡查</string>
+    <string name="qualityPatrol">质量检查</string>
+    <string name="securityPatrol">隐患排查</string>
     <string name="video_surveillance">视频监控</string>
     <string name="group_management">班组管理</string>
     <string name="drawing_inquiry">图纸查询</string>
@@ -96,6 +100,7 @@
     <string name="no">NO.</string>
     <string name="choice">选择</string>
     <string name="working_name">工序名称：</string>
+    <string name="workingName">工序名称</string>
     <string name="photos_num">照片数量</string>
     <string name="photosNum">照片数量：</string>
     <string name="photographers">拍照者</string>
@@ -114,6 +119,7 @@
     <string name="local">位置：</string>
     <string name="locationPosition">参考位置</string>
     <string name="take_photo_num">拍照数量：</string>
+    <string name="takePhotoNum">拍照数量</string>
     <string name="take_photo_requirement">拍照要求</string>
     <string name="takePhotoRequirement">拍照要求：</string>
     <string name="fixedPoint">层厚定\n点位置</string>
@@ -170,6 +176,7 @@
     <string name="rectificationRequirements">整改要求：</string>
     <string name="noSearchContext">无搜索内容！</string>
     <string name="add">添加</string>
+    <string name="inputPileNo">请输入桩号</string>
     <string name="prompt">向左滑动可删除或添加层级！</string>
     <string name="sameLevelAdd">同级新增</string>
     <string name="childLevelAdd">子级新增</string>

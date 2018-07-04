@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <litepal>
     <dbname value="ZJ_EXPRESSWAY"/>
-    <version value="3"/>
+    <version value="1"/>
 
     <list>
         <mapping class="com.zj.expressway.bean.PhotosBean"/>
@@ -11,5 +11,7 @@
         <mapping class="com.zj.expressway.bean.UserInfo"/>
         <mapping class="com.zj.expressway.bean.UserLevelBean"/>
         <mapping class="com.zj.expressway.bean.SearchRecordBean"/>
+        <mapping class="com.zj.expressway.bean.ProcessDictionaryBean"/>
+        <mapping class="com.zj.expressway.bean.SyncLinkageMenuBean"/>
     </list>
 </litepal>

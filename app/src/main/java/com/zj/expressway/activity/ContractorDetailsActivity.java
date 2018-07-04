@@ -2,13 +2,11 @@ package com.zj.expressway.activity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,7 +18,6 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +38,6 @@ import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.dialog.HorizontalScreenHintDialog;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.UpLoadPhotosDialog;
 import com.zj.expressway.listener.GPSLocationListener;
@@ -138,7 +134,6 @@ public class ContractorDetailsActivity extends BaseActivity {
     private final int SDK_PERMISSION_REQUEST = 127;
     private GPSLocationManager gpsLocationManager;
     // 拍照
-    private Uri uri = null;
     private String fileUrlName, strFilePath;
     private PhotosBean addPhotoBean;
     private File imgFile;
@@ -148,7 +143,7 @@ public class ContractorDetailsActivity extends BaseActivity {
     private Gson gson = new Gson();
     private WorkModel model;
     private boolean isToDo;
-    private int leastTakePhotoNum; // 最少拍照数量
+    private int leastTakePhotoNum, isLocalAdd; // 最少拍照数量
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,14 +164,15 @@ public class ContractorDetailsActivity extends BaseActivity {
         processId = getIntent().getStringExtra("processId");
         mainTablePrimaryId = getIntent().getStringExtra("mainTablePrimaryId");
         isToDo = getIntent().getBooleanExtra("isToDo", false);
+        isLocalAdd = getIntent().getIntExtra("isLocalAdd", 2);
 
         initFilePath();
         getPermissions();
 
-        if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
+        if (JudgeNetworkIsAvailable.isNetworkAvailable(this) && isLocalAdd != 1) {
             getData(isToDo);
         } else {
-            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc",  isToDo ? workId : processId).find(WorkingBean.class);
+            List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", isToDo ? workId : processId).find(WorkingBean.class);
             WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? new WorkingBean() : workingBeanList.get(0);
             setTableData(workingBean);
             setImgData(new ArrayList<PhotosBean>());
@@ -210,6 +206,7 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 设置列表方向
+     *
      * @return
      */
     private LinearLayoutManager getLinearLayoutManager() {
@@ -218,6 +215,7 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 初始化时间轴
+     *
      * @param flowHistoryList
      */
     private void initTimeLineView(List<HistoryBean> flowHistoryList) {
@@ -227,7 +225,7 @@ public class ContractorDetailsActivity extends BaseActivity {
 
         for (HistoryBean history : flowHistoryList) {
             history.setProcessId(isToDo ? workId : processId);
-            history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime()+"", isToDo ? workId : processId);
+            history.saveOrUpdate("actionTime=? and processId=?", history.getActionTime() + "", isToDo ? workId : processId);
         }
 
         rvTimeMarker.setLayoutManager(getLinearLayoutManager());
@@ -250,7 +248,8 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 获取表单数据
-     * @param isToDo    待办已办？
+     *
+     * @param isToDo 待办已办？
      */
     private void getData(boolean isToDo) {
         LoadingUtils.showLoading(mContext);
@@ -258,11 +257,11 @@ public class ContractorDetailsActivity extends BaseActivity {
         String url = "";
         if (isToDo) {
             obj.put("workId", workId);
-            url+=ConstantsUtil.FLOW_DETAILS;
+            url += ConstantsUtil.FLOW_DETAILS;
         } else {
             obj.put("flowId", flowId);
             obj.put("mainTablePrimaryId", mainTablePrimaryId);
-            url+=ConstantsUtil.openPageFlow;
+            url += ConstantsUtil.openPageFlow;
         }
         Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
@@ -304,6 +303,7 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 设置工序信息
+     *
      * @param flowBean
      */
     private void setTableData(WorkingBean flowBean) {
@@ -321,17 +321,18 @@ public class ContractorDetailsActivity extends BaseActivity {
         txtRejectPhoto.setText(flowBean.getDismissal()); // 驳回原因
         processPath = flowBean.getLevelNameAll().replace(",", "→") + "→" + flowBean.getProcessName();
         // 控制拍照按钮是否显示
-        if (!StrUtil.equals("1",flowBean.getFileOperationFlag())) {
+        if (!StrUtil.equals("1", flowBean.getFileOperationFlag())) {
             imgBtnAdd.setVisibility(View.GONE);
         }
         // 控制意见栏是否显示
-        if (!StrUtil.equals("1",flowBean.getOpinionShowFlag())) {
+        if (!StrUtil.equals("1", flowBean.getOpinionShowFlag())) {
             rlRemarks.setVisibility(View.GONE);
         }
     }
 
     /**
      * 设置照片信息
+     *
      * @param subTableObject
      */
     private void setImgData(List<PhotosBean> subTableObject) {
@@ -357,6 +358,7 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 设置显示按钮
+     *
      * @param buttons
      */
     private void setShowButton(List<ButtonListModel> buttons) {
@@ -403,18 +405,6 @@ public class ContractorDetailsActivity extends BaseActivity {
                 ConstantsUtil.buttonModel = buttonModel;
                 intent.putExtra("isEdit", isEdit);
                 startActivityForResult(intent, 201);
-
-                /*if (isEdit) {
-                    Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                    ConstantsUtil.buttonModel = buttonModel;
-                    startActivityForResult(intent, 201);
-                } else {
-                    JSONObject object = new JSONObject(jsonData);
-                    object.getJSONObject("data").put("buttonId", buttonId);
-                    object.getJSONObject("data").put("reviewNodeId", buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
-                    jsonData = object.toString();
-                    submitData(true);
-                }*/
             } else if (buttonModel.getButtonId().contains("save")) {
                 ToastUtil.showShort(mContext, "保存成功！");
             } else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
@@ -427,19 +417,8 @@ public class ContractorDetailsActivity extends BaseActivity {
                     ConstantsUtil.buttonModel = buttonModel;
                     intent.putExtra("isEdit", isEdit);
                     startActivityForResult(intent, 201);
-                    /*if (isEdit) {
-                        Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                        ConstantsUtil.buttonModel = buttonModel;
-                        startActivityForResult(intent, 201);
-                    } else {
-                        JSONObject object = new JSONObject(jsonData);
-                        object.getJSONObject("data").put("buttonId", buttonId);
-                        object.getJSONObject("data").put("reviewNodeId", buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
-                        jsonData = object.toString();
-                        submitData(true);
-                    }*/
                 }
-            } else if(buttonModel.getButtonId().contains("getback")) {
+            } else if (buttonModel.getButtonId().contains("getback")) {
                 ToastUtil.showShort(mContext, "未知功能按钮");
             } else {
                 ToastUtil.showShort(mContext, "未知按钮");
@@ -556,9 +535,11 @@ public class ContractorDetailsActivity extends BaseActivity {
                 permissions.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
             }
             // 读写权限
-            if (addPermission(permissions, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {}
+            if (addPermission(permissions, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            }
             // 读取电话状态权限
-            if (addPermission(permissions, android.Manifest.permission.READ_PHONE_STATE)) {}
+            if (addPermission(permissions, android.Manifest.permission.READ_PHONE_STATE)) {
+            }
 
             if (permissions.size() > 0) {
                 requestPermissions(permissions.toArray(new String[permissions.size()]), SDK_PERMISSION_REQUEST);
@@ -650,10 +631,12 @@ public class ContractorDetailsActivity extends BaseActivity {
         }
 
         @Override
-        public void UpdateStatus(String provider, int status, Bundle extras) {}
+        public void UpdateStatus(String provider, int status, Bundle extras) {
+        }
 
         @Override
-        public void UpdateGPSProviderStatus(int gpsStatus) {}
+        public void UpdateGPSProviderStatus(int gpsStatus) {
+        }
     }
 
     /**
@@ -710,17 +693,6 @@ public class ContractorDetailsActivity extends BaseActivity {
                             Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                             intent.putExtra("isEdit", isEdit);
                             startActivityForResult(intent, 201);
-
-                            /*if (isEdit) {
-                                Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                                startActivityForResult(intent, 201);
-                            } else {
-                                JSONObject object = new JSONObject(jsonData);
-                                object.getJSONObject("data").put("buttonId", buttonId);
-                                object.getJSONObject("data").put("reviewNodeId", ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
-                                jsonData = object.toString();
-                                submitData(isToDoType);
-                            }*/
                         } else {
                             submitData(isToDoType);
                         }
@@ -735,16 +707,6 @@ public class ContractorDetailsActivity extends BaseActivity {
                 Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                 intent.putExtra("isEdit", isEdit);
                 startActivityForResult(intent, 201);
-                /*if (isEdit) {
-                    Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
-                    startActivityForResult(intent, 201);
-                } else {
-                    JSONObject object = new JSONObject(jsonData);
-                    object.getJSONObject("data").put("buttonId", buttonId);
-                    object.getJSONObject("data").put("reviewNodeId", ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).getNextNodeId());
-                    jsonData = object.toString();
-                    submitData(isToDoType);
-                }*/
             } else {
                 submitData(isToDoType);
             }
@@ -823,14 +785,12 @@ public class ContractorDetailsActivity extends BaseActivity {
         @Override
         protected Void doInBackground(String... params) {
             Bitmap bitmap = BitmapFactory.decodeFile(strFilePath + fileUrlName);
-            // 压缩图片
-            //bitmap = FileUtil.compressBitmap(bitmap);
             // 在图片上添加水印
             bitmap = ImageUtil.createWaterMaskLeftTop(mContext, bitmap, params[0], addPhotoBean);
             // 保存到SD卡指定文件夹下
             saveBitmapFile(bitmap, fileUrlName);
             // 删除拍摄的照片
-            //FileUtil.deleteFile(strFilePath + fileUrlName);
+            FileUtil.deleteFile(strFilePath + fileUrlName);
             return null;
         }
 
@@ -921,6 +881,7 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 回调
+     *
      * @param requestCode
      * @param resultCode
      * @param data
@@ -931,7 +892,6 @@ public class ContractorDetailsActivity extends BaseActivity {
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case 1:
-                    uri = Uri.parse("file://" + ConstantsUtil.SAVE_PATH + fileUrlName);
                     saveLocalFile();
                     break;
                 case 201:
@@ -940,9 +900,9 @@ public class ContractorDetailsActivity extends BaseActivity {
                     object.getJSONObject("data").put("reviewNodeId", data.getStringExtra("reviewNodeId"));
                     object.getJSONObject("data").put("opinionContent", edtRemarks.getText().toString().trim());
                     JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("value",  data.getStringExtra("userId"));
-                    jsonObject.put("label",  data.getStringExtra("userName"));
-                    jsonObject.put("type",  data.getStringExtra("type"));
+                    jsonObject.put("value", data.getStringExtra("userId"));
+                    jsonObject.put("label", data.getStringExtra("userName"));
+                    jsonObject.put("type", data.getStringExtra("type"));
                     JSONArray jsonArray = new JSONArray();
                     jsonArray.add(jsonObject);
                     object.getJSONObject("data").put("reviewUserObjectList", jsonArray);
@@ -957,9 +917,10 @@ public class ContractorDetailsActivity extends BaseActivity {
 
     /**
      * 点击事件
+     *
      * @param v
      */
-    @Event({R.id.imgBtnLeft,  R.id.imgBtnAdd, R.id.btnRight })
+    @Event({R.id.imgBtnLeft, R.id.imgBtnAdd, R.id.btnRight})
     private void onClick(View v) {
         switch (v.getId()) {
             // 返回
@@ -968,7 +929,9 @@ public class ContractorDetailsActivity extends BaseActivity {
                 break;
             // 提交审核
             case R.id.btnRight:
-                if (photosList.size() < leastTakePhotoNum) {
+                if (isLocalAdd == 1) {
+                    ToastUtil.showShort(mContext, "请先将工序同步至服务器后再进行提交！");
+                } else if (photosList.size() < leastTakePhotoNum) {
                     ToastUtil.showShort(mContext, "拍照数量不能小于最少拍照张数！");
                 } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
                     ToastUtil.showShort(mContext, getString(R.string.not_network));
@@ -994,7 +957,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                 if (Integer.valueOf(sdCardSize) < 10) {
                     ToastUtil.showShort(mContext, "当前手机内存卡已无可用空间，请清理后再进行拍照！");
                 } else {
-                    if (sLocation.length() < 7 || sLocation.contains("正在定位")) {
+                    if (sLocation == null || sLocation.length() < 7 || sLocation.contains("正在定位")) {
                         PromptDialog promptDialog = new PromptDialog(mContext, new PromptListener() {
                             @Override
                             public void returnTrueOrFalse(boolean trueOrFalse) {

@@ -50,7 +50,7 @@ import java.util.List;
  */
 public class TreeNodeAdapter extends BaseAdapter {
     private LayoutInflater lif;
-    private List<Node> allCache = new ArrayList<>();
+    public List<Node> allCache = new ArrayList<>();
     public List<Node> all = new ArrayList<>();
     private int expandedIcon = -1;
     private int collapsedIcon = -1;
@@ -182,26 +182,12 @@ public class TreeNodeAdapter extends BaseAdapter {
                     }
                 }
             } else {
-                nodeName.clear();
-                nodeName.add(n.getLevelName());
-                getNodeRootNode(n);
-                StringBuffer sb = new StringBuffer();
-                int len = nodeName.size() - 1;
-                for (int i = len; i >= 0; i--) {
-                    String name = nodeName.get(i);
-                    if (name.contains("(")) {
-                        name = name.substring(0, name.lastIndexOf("("));
-                    }
-                    if (i != 0) {
-                        sb.append(name.trim() + "→");
-                    } else {
-                        sb.append(name.trim());
-                    }
+                for (Node node : all) {
+                    node.setChoice(false);
                 }
-                Intent intent = new Intent();
-                intent.putExtra("procedureName", n.getLevelName());
-                mContext.setResult(Activity.RESULT_OK, intent);
-                mContext.finish();
+                n.setChoice(true);
+                SpUtil.put(mContext, "selectProcess", position);
+                TreeNodeAdapter.this.notifyDataSetChanged();
             }
         }
     }
@@ -238,6 +224,35 @@ public class TreeNodeAdapter extends BaseAdapter {
         intent.putExtra("levelId", n.getLevelId());
         mContext.setResult(Activity.RESULT_OK, intent);
         mContext.finish();
+    }
+
+    /**
+     * 选中工序--->确认
+     * @param position
+     */
+    public String getProcessPath(int position) {
+        if (position == -1) {
+            return "";
+        }
+
+        Node n = all.get(position);
+        nodeName.clear();
+        nodeName.add(n.getLevelName());
+        getNodeRootNode(n);
+        StringBuffer sb = new StringBuffer();
+        int len = nodeName.size() - 1;
+        for (int i = len; i >= 0; i--) {
+            String name = nodeName.get(i);
+            if (name.contains("(")) {
+                name = name.substring(0, name.lastIndexOf("("));
+            }
+            if (i != 0) {
+                sb.append(name.trim() + "→");
+            } else {
+                sb.append(name.trim());
+            }
+        }
+        return sb.toString();
     }
 
     @Override
@@ -312,20 +327,6 @@ public class TreeNodeAdapter extends BaseAdapter {
                     TreeNodeAdapter.this.notifyDataSetChanged();
                 }
             });
-
-            /*holder.rlNodeState.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ExpandOrCollapse(position);
-                }
-            });*/
-
-            /*holder.txtTitle.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    CheckIsHave(position);
-                }
-            });*/
 
             // 控制缩进
             if (n.getLevel() != 1) {

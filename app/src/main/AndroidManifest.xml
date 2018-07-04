@@ -182,6 +182,16 @@
             android:name=".activity.PersonnelSelectionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
+        <!--本地添加工序-->
+        <activity
+            android:name=".activity.AddProcessActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
+        <!--二维码扫描-->
+        <activity
+            android:name=".activity.QrCodeScanActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".activity.QualityInspectionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

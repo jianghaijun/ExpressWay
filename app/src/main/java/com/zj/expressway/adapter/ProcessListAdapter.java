@@ -174,6 +174,7 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
         Intent intent = new Intent(mContext, ContractorDetailsActivity.class);
         intent.putExtra("flowId", ConstantsUtil.flowId);
         intent.putExtra("workId", bean.getWorkId());
+        intent.putExtra("isLocalAdd", bean.getIsLocalAdd());
         intent.putExtra("mainTablePrimaryId", bean.getProcessId());
         intent.putExtra("processId", bean.getProcessId());
         intent.putExtra("isToDo", false);

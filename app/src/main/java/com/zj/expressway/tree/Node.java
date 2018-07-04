@@ -14,6 +14,8 @@ public class Node {
     private String levelName;                           // 层级名称
     private String levelId;                             // 层级ID
     private String parentId;                            // 父ID
+    private String parentIdAll;                            // 父ID
+    private String parentNameAll;                            // 父ID
     private String folderFlag;                          // 是否是文件夹flag 0:不是文件夹 1：是文件夹
     private String isFinish;                            // 是否已完成
     private boolean isCanClick;                         // 是否有子工序
@@ -75,6 +77,22 @@ public class Node {
 
     public void setParentId(String parentId) {
         this.parentId = parentId;
+    }
+
+    public String getParentIdAll() {
+        return parentIdAll;
+    }
+
+    public void setParentIdAll(String parentIdAll) {
+        this.parentIdAll = parentIdAll;
+    }
+
+    public String getParentNameAll() {
+        return parentNameAll;
+    }
+
+    public void setParentNameAll(String parentNameAll) {
+        this.parentNameAll = parentNameAll;
     }
 
     /**

@@ -5,41 +5,57 @@ import org.litepal.crud.DataSupport;
 import java.io.Serializable;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:47
- *       工序bean
+ * Created by HaiJun on 2018/6/11 17:47
+ * 层级bean
  */
 public class ContractorBean extends DataSupport implements Serializable {
     private String levelId;         // 层级ID
     private String levelName;       // 层级名称
+    private String LevelCode;       // 层级code
     private String parentNameAll;   // 名称
     private String parentId;        // 父ID
+    private String parentIdAll;        // 父ID
     private String folderFlag;      // 是否是文件夹flag 0:不是文件夹 1：是文件夹
+    private String userId;
     private int processNum;         // 工序数量
     private int finishedNum;        // 已完成工序数量
     private boolean isSelect;
     private String isFinish;        // 是否已审核完
     private String levelType;       // 质量或安全
     private String canExpand;     // 是否有子工序 1:有 0：无
+    private int isLocalAdd;     // 是否是本地添加 1：是 2：否
+
+    public String getParentIdAll() {
+        return parentIdAll;
+    }
+
+    public void setParentIdAll(String parentIdAll) {
+        this.parentIdAll = parentIdAll;
+    }
+
+    public String getLevelCode() {
+        return LevelCode;
+    }
+
+    public void setLevelCode(String levelCode) {
+        LevelCode = levelCode;
+    }
+
+    public int getIsLocalAdd() {
+        return isLocalAdd;
+    }
+
+    public void setIsLocalAdd(int isLocalAdd) {
+        this.isLocalAdd = isLocalAdd;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public String getParentNameAll() {
         return parentNameAll;
@@ -56,6 +72,7 @@ public class ContractorBean extends DataSupport implements Serializable {
     public void setSelect(boolean select) {
         isSelect = select;
     }
+
     public String getCanExpand() {
         return canExpand;
     }

@@ -87,8 +87,11 @@ public class ProcessManagerActivity extends BaseActivity {
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         txtTitle.setText("工序管理");
 
-        new SlippingHintDialog(mContext).show();
         if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
+            boolean isPrompt = (boolean) SpUtil.get(this, ConstantsUtil.slide, false);
+            if (!isPrompt) {
+                new SlippingHintDialog(mContext, R.drawable.cloud, ConstantsUtil.slide, "向左滑动可删除或添加层级！").show();
+            }
             getData();
         } else {
             ToastUtil.showShort(mContext, getString(R.string.not_network));
@@ -244,6 +247,7 @@ public class ProcessManagerActivity extends BaseActivity {
         n.setLevelId(levelId);
         n.setLevelName(levelName);
         n.setParentId(contractorListBean.getParentId());
+        n.setParentIdAll(contractorListBean.getParentIdAll());
         n.setFolderFlag(contractorListBean.getCanExpand());
         n.setExpanded(false);
         n.setLoading(false);

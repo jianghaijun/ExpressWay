@@ -143,6 +143,7 @@ public class ToDoWorkingAdapter extends BaseAdapter<List<WorkingBean>> {
         }
         intent.putExtra("flowId", bean.getFlowId());
         intent.putExtra("workId", bean.getWorkId());
+        intent.putExtra("isLocalAdd", bean.getIsLocalAdd());
         intent.putExtra("mainTablePrimaryId", bean.getMainTablePrimaryId());
         intent.putExtra("isToDo", true);
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);

@@ -57,7 +57,7 @@
         android:paddingRight="@dimen/ten_dp"
         android:text="@string/update_password"
         android:textColor="@color/dark_grey"
-        android:textSize="@dimen/twenty_sp" />
+        android:textSize="@dimen/sixteen_sp" />
 
     <View
         android:layout_width="match_parent"
@@ -76,7 +76,7 @@
         android:paddingRight="@dimen/ten_dp"
         android:text="@string/changeIp"
         android:textColor="@color/dark_grey"
-        android:textSize="@dimen/twenty_sp" />
+        android:textSize="@dimen/sixteen_sp" />
 
     <View
         android:layout_width="match_parent"
@@ -93,7 +93,7 @@
         android:paddingLeft="@dimen/ten_dp"
         android:text="@string/version_check"
         android:textColor="@color/dark_grey"
-        android:textSize="@dimen/twenty_sp" />
+        android:textSize="@dimen/sixteen_sp" />
 
     <View
         android:layout_width="match_parent"
@@ -110,7 +110,41 @@
         android:paddingLeft="@dimen/ten_dp"
         android:text="@string/clean_up_caching"
         android:textColor="@color/dark_grey"
-        android:textSize="@dimen/twenty_sp" />
+        android:textSize="@dimen/sixteen_sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
+
+    <Button
+        android:id="@+id/btnSyncProcessDictionary"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@drawable/touch_bg"
+        android:gravity="left|center"
+        android:paddingLeft="@dimen/ten_dp"
+        android:text="@string/sync_process_dictionary"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/sixteen_sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="@color/gray" />
+
+    <Button
+        android:id="@+id/btnSyncLevel"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/fifty_dp"
+        android:background="@drawable/touch_bg"
+        android:gravity="left|center"
+        android:paddingLeft="@dimen/ten_dp"
+        android:text="@string/sync_level"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/sixteen_sp" />
 
     <View
         android:layout_width="match_parent"

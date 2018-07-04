@@ -17,6 +17,7 @@ import com.zj.expressway.R;
 import com.zj.expressway.activity.AuditManagementActivity;
 import com.zj.expressway.activity.ProcessManagerActivity;
 import com.zj.expressway.activity.ProcessReportActivity;
+import com.zj.expressway.activity.QrCodeScanActivity;
 import com.zj.expressway.activity.QualityInspectionActivity;
 import com.zj.expressway.activity.WorkingProcedureActivity;
 import com.zj.expressway.bean.AppInfoBean;
@@ -124,8 +125,13 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         }
                         break;
                     // 工序管理
-                    case 5:
+                    /*case 5:
                         intent = new Intent(mContext, ProcessManagerActivity.class);
+                        mContext.startActivity(intent);
+                        break;*/
+                    // 二维码扫描
+                    case 6:
+                        intent = new Intent(mContext, QrCodeScanActivity.class);
                         mContext.startActivity(intent);
                         break;
                     default:

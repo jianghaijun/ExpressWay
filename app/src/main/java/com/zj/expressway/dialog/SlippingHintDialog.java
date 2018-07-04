@@ -4,22 +4,30 @@ import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.view.Gravity;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 
 import com.zj.expressway.R;
-
-import org.xutils.common.util.DensityUtil;
+import com.zj.expressway.utils.SpUtil;
 
 public class SlippingHintDialog extends Dialog implements View.OnClickListener {
+    private Context mContext;
+    private int btnBg;
+    private String type;
+    private String btnText;
 
-    public SlippingHintDialog(@NonNull Context context) {
+    public SlippingHintDialog(@NonNull Context context, int btnBg, String type, String btnText) {
         super(context, R.style.dialog);
+        this.mContext = context;
+        this.btnBg = btnBg;
+        this.type = type;
+        this.btnText = btnText;
     }
 
     @Override
@@ -30,6 +38,16 @@ public class SlippingHintDialog extends Dialog implements View.OnClickListener {
 
         RelativeLayout rlTop = (RelativeLayout) findViewById(R.id.rlTop);
         Button btnPrompt = (Button) findViewById(R.id.btnPrompt);
+        final CheckBox btnNoLongerPrompt = (CheckBox) findViewById(R.id.btnNoLongerPrompt);
+        btnPrompt.setBackground(ContextCompat.getDrawable(mContext, btnBg));
+        btnPrompt.setText(btnText);
+
+        btnNoLongerPrompt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SpUtil.put(mContext, type, btnNoLongerPrompt.isChecked());
+            }
+        });
 
         rlTop.setOnClickListener(this);
         btnPrompt.setOnClickListener(this);

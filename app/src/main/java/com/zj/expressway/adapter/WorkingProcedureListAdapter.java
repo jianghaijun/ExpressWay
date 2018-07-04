@@ -143,6 +143,7 @@ public class WorkingProcedureListAdapter extends BaseAdapter<List<WorkingBean>> 
         intent.putExtra("workId", bean.getWorkId());
         intent.putExtra("mainTablePrimaryId", bean.getProcessId());
         intent.putExtra("processId", bean.getProcessId());
+        intent.putExtra("isLocalAdd", bean.getIsLocalAdd());
         intent.putExtra("isToDo", false);
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);
         mContext.startActivity(intent);

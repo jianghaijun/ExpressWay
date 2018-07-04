@@ -171,6 +171,8 @@ dependencies {
     compile 'com.tencent.bugly:nativecrashreport:3.3.1'
     // 侧滑删除
     compile 'com.yanzhenjie:recyclerview-swipe:1.1.4'
+    //功能库（Zxing扫描与生成二维码条形码）
+    compile 'cn.bingoogolapple:bga-qrcode-zxing:1.2.5'
 
     testCompile 'junit:junit:4.12'
 }

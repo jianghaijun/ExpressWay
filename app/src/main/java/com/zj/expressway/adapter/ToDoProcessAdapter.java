@@ -179,6 +179,7 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         intent.putExtra("workId", bean.getWorkId() == null ? "" : bean.getWorkId());
         intent.putExtra("mainTablePrimaryId", bean.getMainTablePrimaryId() == null ? "" : bean.getMainTablePrimaryId());
         intent.putExtra("isToDo", true);
+        intent.putExtra("isLocalAdd", bean.getIsLocalAdd());
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);
         mContext.startActivity(intent);
     }
