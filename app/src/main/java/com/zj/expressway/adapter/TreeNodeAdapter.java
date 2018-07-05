@@ -222,6 +222,7 @@ public class TreeNodeAdapter extends BaseAdapter {
         Intent intent = new Intent();
         intent.putExtra("procedureName", sb.toString());
         intent.putExtra("levelId", n.getLevelId());
+        intent.putExtra("levelIdAll", n.getParentIdAll());
         mContext.setResult(Activity.RESULT_OK, intent);
         mContext.finish();
     }

@@ -32,6 +32,8 @@ public class ChangeIpActivity extends BaseActivity {
     private TextView txtTitle;
     @ViewInject(R.id.edtNewIp)
     private EditText edtNewIp;
+    @ViewInject(R.id.edtNewAccountId)
+    private EditText edtNewAccountId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,9 +45,10 @@ public class ChangeIpActivity extends BaseActivity {
 
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
-        txtTitle.setText("设置IP");
+        txtTitle.setText("设置IP、AccountId");
 
         edtNewIp.setText(ConstantsUtil.BASE_URL);
+        edtNewAccountId.setText(ConstantsUtil.ACCOUNT_ID);
     }
 
     @Event({R.id.imgBtnLeft, R.id.btnQuery})
@@ -55,15 +58,19 @@ public class ChangeIpActivity extends BaseActivity {
                 this.finish();
                 break;
             case R.id.btnQuery:
-                if (StrUtil.isNotEmpty(edtNewIp.getText().toString())) {
-                    ToastUtil.showShort(this, "新IP设置成功，请重新登录！");
+                if (StrUtil.isEmpty(edtNewIp.getText().toString())) {
+                    ToastUtil.showShort(this, "请输入IP地址！");
+                } else if (StrUtil.isEmpty(edtNewAccountId.getText().toString())) {
+                    ToastUtil.showShort(this, "请输入AccountId！");
+                } else {
+                    ToastUtil.showShort(this, "设置成功，请重新登录！");
                     SpUtil.put(this, "BASE_URL", edtNewIp.getText().toString());
+                    SpUtil.put(this, "ACCOUNT_ID", edtNewAccountId.getText().toString());
                     ConstantsUtil.BASE_URL = edtNewIp.getText().toString();
+                    ConstantsUtil.ACCOUNT_ID = edtNewAccountId.getText().toString();
                     SpUtil.put(this, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
                     ScreenManagerUtil.popAllActivityExceptOne();
                     startActivity(new Intent(this, LoginActivity.class));
-                } else {
-                    ToastUtil.showShort(this, "IP地址不能为空！");
                 }
                 break;
         }

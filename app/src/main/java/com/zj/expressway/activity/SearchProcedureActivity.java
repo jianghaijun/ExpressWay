@@ -158,6 +158,7 @@ public class SearchProcedureActivity extends BaseActivity {
                     Intent intent = new Intent();
                     intent.putExtra("procedureName", workingBeanList.get(selectPoint).getParentNameAll());
                     intent.putExtra("levelId", workingBeanList.get(selectPoint).getLevelId());
+                    intent.putExtra("levelIdAll", workingBeanList.get(selectPoint).getParentIdAll());
                     setResult(Activity.RESULT_OK, intent);
                     finish();
                 }

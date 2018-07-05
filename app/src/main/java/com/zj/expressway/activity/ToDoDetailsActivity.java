@@ -1048,6 +1048,8 @@ public class ToDoDetailsActivity extends BaseActivity {
                 String sdCardSize = AppInfoUtil.getSDAvailableSize();
                 if (Integer.valueOf(sdCardSize) < 10) {
                     ToastUtil.showShort(mContext, "当前手机内存卡已无可用空间，请清理后再进行拍照！");
+                } else if (StrUtil.isEmpty(txtPressLocal.getText().toString())) {
+                    ToastUtil.showShort(mContext, "请先选择工序位置！");
                 } else {
                     checkPhotosPermission();
                 }

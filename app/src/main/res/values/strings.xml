@@ -44,6 +44,7 @@
     <string name="old_password">原始密码</string>
     <string name="new_password">新密码</string>
     <string name="new_ip">新IP:</string>
+    <string name="accountId">AccountId:</string>
     <string name="query_password">确认密码</string>
     <string name="old_pswd_can_not_be_empty">原始密码不能为空!</string>
     <string name="new_pswd_can_not_be_empty">新密码不能为空!</string>
@@ -148,7 +149,7 @@
     <string name="submit_yun">上传云端</string>
     <string name="reject_photo">驳回原因：</string>
     <string name="remarks">审核意见：</string>
-    <string name="hiddenTroubleHeadline">隐患标题：</string>
+    <string name="hiddenTroubleHeadline">具体段落和部位：</string>
     <string name="hiddenTroubleLevel">隐患级别：</string>
     <string name="reject">驳回</string>
     <string name="examine">审核</string>

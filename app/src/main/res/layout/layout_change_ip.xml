@@ -49,6 +49,32 @@
                 android:paddingLeft="@dimen/ten_dp" />
         </RelativeLayout>
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/forty_five_dp"
+            android:layout_marginBottom="@dimen/ten_dp"
+            android:background="@null">
+
+            <TextView
+                android:id="@+id/txtNewAccountId"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/ten_dp"
+                android:gravity="center"
+                android:text="@string/accountId"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/twenty_sp" />
+
+            <EditText
+                android:id="@+id/edtNewAccountId"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@+id/txtNewAccountId"
+                android:background="@drawable/gray_stroke_white_solid_bg"
+                android:inputType="text"
+                android:paddingLeft="@dimen/ten_dp" />
+        </RelativeLayout>
+
         <Button
             android:id="@+id/btnQuery"
             android:layout_width="match_parent"

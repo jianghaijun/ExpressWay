@@ -192,6 +192,7 @@
             android:name=".activity.QrCodeScanActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
+        <!--质量、安全检查主界面-->
         <activity
             android:name=".activity.QualityInspectionActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

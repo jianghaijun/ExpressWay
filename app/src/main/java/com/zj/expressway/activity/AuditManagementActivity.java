@@ -352,7 +352,7 @@ public class AuditManagementActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == 10002) {
-                searchProcessData(data.getStringExtra("levelId"));
+                searchProcessData(data.getStringExtra("levelIdAll"));
             }
         }
     }

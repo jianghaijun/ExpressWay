@@ -172,13 +172,13 @@ public class ProcessListActivity extends BaseActivity {
      *
      * @param searchContext
      */
-    private void getData(String searchContext) {
+    private void getData(final String searchContext) {
         JSONObject obj = new JSONObject();
         obj.put("page", pagePosition);
         obj.put("limit", 10);
         if (!StrUtil.isEmpty(searchContext)) {
             if (viewType == 1) {
-                obj.put("levelId", searchContext);
+                obj.put("levelIdAll", searchContext);
             } else {
                 obj.put("title", searchContext);
             }
@@ -257,7 +257,13 @@ public class ProcessListActivity extends BaseActivity {
                                     }
 
                                     if (viewType == 1) {
-                                        List<WorkingBean> workingBeenList = DataSupport.where("userId=? and type=1 and isLocalAdd=1", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(WorkingBean.class);
+                                        List<WorkingBean> workingBeenList;
+                                        if (StrUtil.isEmpty(searchContext)) {
+                                            workingBeenList = DataSupport.where("userId=? and type=1 and isLocalAdd=1", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(WorkingBean.class);
+                                        } else {
+                                            workingBeenList = DataSupport.where("userId=? and type=1 and isLocalAdd=1 and levelIdAll like ?", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")), "%" + searchContext + "%").find(WorkingBean.class);
+                                        }
+
                                         if (workingBeenList != null && workingBeenList.size() > 0) {
                                             workingBeanList.addAll(workingBeenList);
                                             processSum+=workingBeenList.size();
@@ -369,22 +375,22 @@ public class ProcessListActivity extends BaseActivity {
             }
         } else {
             if (viewType == 1) {
-                workingBeen = DataSupport.where("userId=? and type=? and (processName=? or levelId=?) order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, searchContext, start, end).find(WorkingBean.class);
+                workingBeen = DataSupport.where("userId=? and type=? and levelIdAll like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
             } else if (viewType == 2) {
                 if (str.equals("2")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and (troubleTitle=? or levelId=?) order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, searchContext, start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and troubleTitle like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
                 } else {
-                    workingBeen = DataSupport.where("userId=? and type=? and (dangerTitle=? or levelId=?) order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, searchContext, start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and dangerTitle like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
                 }
             } else {
                 if (str.equals("1")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and title=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, "sxdehzl", start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "sxdehzl", start, end).find(WorkingBean.class);
                 } else if (str.equals("2")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and title=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, "zxHwZlTrouble", start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "zxHwZlTrouble", start, end).find(WorkingBean.class);
                 } else if (str.equals("3")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and title=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, "zxHwAqHiddenDanger", start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "zxHwAqHiddenDanger", start, end).find(WorkingBean.class);
                 } else {
-                    workingBeen = DataSupport.where("userId=? and type=? and title=? order by enterTime desc limit ?, ?", userId, viewType + "", searchContext, start, end).find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and title like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
                 }
             }
         }

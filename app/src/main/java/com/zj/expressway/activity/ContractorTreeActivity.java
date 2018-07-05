@@ -144,8 +144,6 @@ public class ContractorTreeActivity extends BaseActivity {
             public void onSearchConfirmed(CharSequence text) {
                 if (StrUtil.isEmpty(text)) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
                 } else {
                     searchBar.setVisibility(View.GONE);
                     searchProcess(String.valueOf(text));
@@ -162,8 +160,6 @@ public class ContractorTreeActivity extends BaseActivity {
             public void OnItemClickListener(int position, View v) {
                 if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
                 } else {
                     searchBar.setVisibility(View.GONE);
                     searchProcess(String.valueOf(v.getTag()));

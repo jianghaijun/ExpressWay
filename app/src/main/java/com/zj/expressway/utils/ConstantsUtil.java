@@ -14,26 +14,14 @@ import okhttp3.OkHttpClient;
  */
 
 public class ConstantsUtil {
-    /**
-     * 中交路径
-     */
+    // 中交路径
     public static String BASE_URL = "http://114.116.12.219:8012/tongren/";
-//    public static String BASE_URL = "http://192.168.1.119:8080/web/";
-
-    /**
-     * 前缀
-     */
+    // 前缀
     public static String prefix = "";
-//    public static String prefix = "";
-    /**
-     * accountId
-     */
-//    public static String ACCOUNT_ID = "zj_qyh_app_id";
-    public static String ACCOUNT_ID = "sjz_qyh_woa_id";
+    // accountId
+    public static String ACCOUNT_ID = "tongren_qyh_app_id";
 
-    /**
-     * 参数格式
-     */
+    // 参数格式
     public static SameDayBean sameDayBean;
     public static boolean isDownloadApk = false;
     public static ButtonListModel buttonModel;
