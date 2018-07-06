@@ -63,7 +63,7 @@ public class TimeLineAdapter extends RecyclerView.Adapter<TimeLineAdapter.TimeLi
             // 已完成
             case "1":
                 holder.mTimelineView.setMarker(ContextCompat.getDrawable(mContext, R.drawable.marker_poinit), ContextCompat.getColor(mContext, R.color.gray));
-                holder.txtUserName.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
+                holder.txtUserName.setTextColor(ContextCompat.getColor(mContext, R.color.black));
                 holder.mDate.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
                 holder.mMessage.setTextColor(ContextCompat.getColor(mContext, R.color.gray));
                 break;

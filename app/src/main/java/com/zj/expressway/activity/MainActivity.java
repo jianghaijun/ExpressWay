@@ -14,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.ashokvarma.bottomnavigation.BottomNavigationBar;
 import com.ashokvarma.bottomnavigation.BottomNavigationItem;
@@ -27,7 +28,6 @@ import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.UserInfo;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.listener.PromptListener;
-import com.zj.expressway.model.WorkingModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
@@ -41,13 +41,10 @@ import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Request;
 import okhttp3.Response;
 
 /**
@@ -57,6 +54,8 @@ import okhttp3.Response;
 public class MainActivity extends BaseActivity {
     @ViewInject(R.id.vpMain)
     private ViewPager vpMain;
+    @ViewInject(R.id.rlMsg)
+    private RelativeLayout rlMsg;
     @ViewInject(R.id.bottom_navigation_bar)
     private BottomNavigationBar bottomNavigationBar;
     private ImageView imgViewUserAvatar;
@@ -64,8 +63,7 @@ public class MainActivity extends BaseActivity {
     private List<String> urlList;
 
     // 子布局
-    private View layoutMsg, layoutApp, layoutFriends, layoutMe;
-    private MsgMainActivity msgMainActivity;
+    private View layoutApp, layoutFriends, layoutMap, layoutMe;
     private AppActivity appActivity;
     private MySettingActivity mySettingActivity;
     // View列表
@@ -80,11 +78,13 @@ public class MainActivity extends BaseActivity {
 
         mContext = this;
 
+        rlMsg.setVisibility(View.VISIBLE);
+
         //将要分页显示的View装入数组中
         LayoutInflater viewLI = LayoutInflater.from(this);
-        layoutMsg = viewLI.inflate(R.layout.layout_msg_main, null);
         layoutApp = viewLI.inflate(R.layout.layout_app, null);
         layoutFriends = viewLI.inflate(R.layout.layout_empty, null);
+        layoutMap = viewLI.inflate(R.layout.layout_empty, null);
         layoutMe = viewLI.inflate(R.layout.layout_my_setting, null);
         // 用户头像
         imgViewUserAvatar = (ImageView) layoutMe.findViewById(R.id.imgViewUserAvatar);
@@ -110,8 +110,6 @@ public class MainActivity extends BaseActivity {
         // 获取屏幕高度
         SpUtil.put(mContext, ConstantsUtil.SCREEN_HEIGHT, screenHeight);
 
-        // 消息
-        msgMainActivity = new MsgMainActivity(mContext, layoutMsg);
         // 应用
         appActivity = new AppActivity(this, layoutApp);
         // 我的
@@ -124,20 +122,21 @@ public class MainActivity extends BaseActivity {
 
         //每个页面的view数据
         views = new ArrayList<>();
-        views.add(layoutMsg);
         views.add(layoutApp);
         views.add(layoutFriends);
+        views.add(layoutMap);
         views.add(layoutMe);
 
-        bottomNavigationBar.addItem(new BottomNavigationItem(R.drawable.msg_select, "消息").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.msg_un_select)))
+        bottomNavigationBar
                 .addItem(new BottomNavigationItem(R.drawable.application_select, "应用").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.application_un_select)))
-                .addItem(new BottomNavigationItem(R.drawable.friend_select, "联系人").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.friend_un_select)))
+                .addItem(new BottomNavigationItem(R.drawable.friend_select, "通讯录").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.friend_un_select)))
+                .addItem(new BottomNavigationItem(R.drawable.msg_select, "地图").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.msg_un_select)))
                 .addItem(new BottomNavigationItem(R.drawable.me_select, "个人中心").setInactiveIcon(ContextCompat.getDrawable(this, R.drawable.me_un_select)))
                 .setMode(BottomNavigationBar.MODE_FIXED)
                 .setActiveColor("#13227A")
                 .setInActiveColor("#F78E62")
                 .setBackgroundStyle(BottomNavigationBar.BACKGROUND_STYLE_STATIC)
-                .setFirstSelectedPosition(1)
+                .setFirstSelectedPosition(0)
                 .initialise();
 
         bottomNavigationBar.setTabSelectedListener(new BottomNavigationBar.SimpleOnTabSelectedListener() {
@@ -165,50 +164,7 @@ public class MainActivity extends BaseActivity {
 
         vpMain.setOnPageChangeListener(new MyOnPageChangeListener());
         vpMain.setAdapter(mPagerAdapter);
-        vpMain.setCurrentItem(1);
-    }
-
-    /**
-     * 获取滚动信息
-     */
-    private void getData() {
-        LoadingUtils.showLoading(mContext);
-        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.GET_SCROLL_INFO, "");
-        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String jsonData = response.body().string().toString();
-                if (JsonUtils.isGoodJson(jsonData)) {
-                    Gson gson = new Gson();
-                    final WorkingModel model = gson.fromJson(jsonData, WorkingModel.class);
-                    if (model.isSuccess()) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                LoadingUtils.hideLoading();
-                                // 保存最新上传照片工序位置
-                                WorkingBean workingBean = model.getData() == null ? new WorkingBean() : model.getData();
-                                workingBean.setFlowType("1");
-                                workingBean.setCreateTime(System.currentTimeMillis());
-                                appActivity.setDate(urlList, workingBean);
-                                mySettingActivity.checkVersion();
-                                msgMainActivity.setDate(workingBean);
-                                workingBean.saveOrUpdate();
-                            }
-                        });
-                    } else {
-                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
-                    }
-                } else {
-                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
-                }
-            }
-        });
+        vpMain.setCurrentItem(0);
     }
 
     @Override
@@ -231,9 +187,7 @@ public class MainActivity extends BaseActivity {
         if (!ConstantsUtil.isDownloadApk) {
             if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
                 if (!isUploadHead) {
-                    //getData();
                     appActivity.setDate(urlList, new WorkingBean());
-                    //msgMainActivity.setDate(null);
                 }
             } else {
                 List<WorkingBean> beanList = DataSupport.where("flowType=1 order by createTime").find(WorkingBean.class);
@@ -274,6 +228,11 @@ public class MainActivity extends BaseActivity {
     private class MyOnPageChangeListener implements ViewPager.OnPageChangeListener {
         @Override
         public void onPageSelected(int arg0) {
+            if (arg0 == 0) {
+                rlMsg.setVisibility(View.VISIBLE);
+            } else {
+                rlMsg.setVisibility(View.GONE);
+            }
             bottomNavigationBar.selectTab(arg0);
         }
 

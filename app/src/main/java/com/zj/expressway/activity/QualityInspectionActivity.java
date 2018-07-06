@@ -65,23 +65,29 @@ public class QualityInspectionActivity extends BaseActivity {
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
     @ViewInject(R.id.btnTakePicture)
-    private Button btnTakePicture;
+    private TextView btnTakePicture;
     @ViewInject(R.id.searchBar)
     private MaterialSearchBar searchBar;
     @ViewInject(R.id.vTakePicture)
     private View vTakePicture;
     @ViewInject(R.id.btnToBeAudited)
-    private Button btnToBeAudited;
+    private TextView btnToBeAudited;
     @ViewInject(R.id.vToBeAudited)
     private View vToBeAudited;
     @ViewInject(R.id.btnFinish)
-    private Button btnFinish;
+    private TextView btnFinish;
     @ViewInject(R.id.vFinish)
     private View vFinish;
     @ViewInject(R.id.vpWorkingProcedure)
     private ViewPager vpWorkingProcedure;
     @ViewInject(R.id.llButtons)
     private LinearLayout llButtons;
+    @ViewInject(R.id.txtTakePhoto)
+    private TextView txtTakePhoto;
+    @ViewInject(R.id.txtUnSubmit)
+    private TextView txtUnSubmit;
+    @ViewInject(R.id.txtSubmit)
+    private TextView txtSubmit;
 
     // viewPage
     private View layQuality, layToDo, layHasToDo;
@@ -124,9 +130,7 @@ public class QualityInspectionActivity extends BaseActivity {
             public void onSearchConfirmed(CharSequence text) {
                 if (StrUtil.isEmpty(text)) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
-                }*/ else {
+                } else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(text));
                 }
@@ -141,9 +145,7 @@ public class QualityInspectionActivity extends BaseActivity {
             public void OnItemClickListener(int position, View v) {
                 if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
-                }*/ else {
+                } else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(v.getTag()));
                 }
@@ -221,9 +223,9 @@ public class QualityInspectionActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        qualityActivity.initData(2, btnTakePicture, null);
-        toDoActivity.initData(4, btnToBeAudited, null);
-        hasToDoActivity.initData(5, btnFinish, null);
+        qualityActivity.initData(2, txtTakePhoto, null);
+        toDoActivity.initData(4, txtUnSubmit, null);
+        hasToDoActivity.initData(5, txtSubmit, null);
     }
 
     /**
@@ -282,27 +284,27 @@ public class QualityInspectionActivity extends BaseActivity {
      */
     private void setStates(int option) {
         // 待拍照
-        btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
         // 待审核
-        btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
         // 已完成
-        btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
 
         switch (option) {
             case 0:
-                btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_1));
                 break;
             case 1:
-                btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_2));
                 break;
             case 2:
-                btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_3));
                 break;
         }
     }
@@ -316,10 +318,10 @@ public class QualityInspectionActivity extends BaseActivity {
             case 0:
                 break;
             case 1:
-                toDoActivity.initData(4, btnToBeAudited, searchContext);
+                toDoActivity.initData(4, txtUnSubmit, searchContext);
                 break;
             case 2:
-                hasToDoActivity.initData(5, btnFinish, searchContext);
+                hasToDoActivity.initData(5, txtSubmit, searchContext);
                 break;
         }
     }
@@ -329,7 +331,7 @@ public class QualityInspectionActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({ R.id.imgBtnLeft, R.id.imgBtnRight, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish })
+    @Event({ R.id.imgBtnLeft, R.id.imgBtnRight, R.id.rlPhoto, R.id.rlUnSubmit, R.id.rlSubmitting })
     private void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgBtnLeft:
@@ -339,13 +341,13 @@ public class QualityInspectionActivity extends BaseActivity {
                 searchBar.setVisibility(View.VISIBLE);
                 searchBar.enableSearch();
                 break;
-            case R.id.btnTakePicture:
+            case R.id.rlPhoto:
                 vpWorkingProcedure.setCurrentItem(0);
                 break;
-            case R.id.btnToBeAudited:
+            case R.id.rlUnSubmit:
                 vpWorkingProcedure.setCurrentItem(1);
                 break;
-            case R.id.btnFinish:
+            case R.id.rlSubmitting:
                 vpWorkingProcedure.setCurrentItem(2);
                 break;
         }

@@ -51,5 +51,37 @@
             android:textSize="@dimen/fourteen_sp"
             android:visibility="gone"
             app:layout_widthPercent="100%h" />
+
+        <RelativeLayout
+            android:id="@+id/rlMsg"
+            android:layout_width="@dimen/zero_dp"
+            android:layout_height="match_parent"
+            android:background="@null"
+            android:visibility="gone"
+            app:layout_widthPercent="100%h">
+
+            <ImageButton
+                android:id="@+id/imgBtnMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@null"
+                android:src="@drawable/message" />
+
+            <TextView
+                android:id="@+id/txtSubmitPhoneNum"
+                android:layout_width="@dimen/fifteen_dp"
+                android:layout_height="@dimen/fifteen_dp"
+                android:layout_alignRight="@+id/imgBtnMsg"
+                android:layout_alignTop="@+id/imgBtnMsg"
+                android:layout_marginRight="-7.5dp"
+                android:layout_marginTop="-7.5dp"
+                android:background="@drawable/design_point_red"
+                android:gravity="center"
+                android:text="12"
+                android:textColor="@color/white"
+                android:textSize="@dimen/eight_sp" />
+        </RelativeLayout>
+
     </com.zhy.android.percent.support.PercentLinearLayout>
 </com.zhy.android.percent.support.PercentRelativeLayout>

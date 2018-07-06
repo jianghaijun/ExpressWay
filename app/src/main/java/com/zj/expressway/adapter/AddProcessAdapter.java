@@ -21,6 +21,8 @@ import com.zj.expressway.utils.DateUtils;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
+import org.litepal.crud.DataSupport;
+
 import java.util.List;
 
 import cn.hutool.core.util.StrUtil;
@@ -51,6 +53,7 @@ import cn.hutool.core.util.StrUtil;
  */
 public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.ProcessHolder> {
     private Activity mContext;
+    private Button btn;
     private List<WorkingBean> workingBeanList;
 
     /**
@@ -59,7 +62,8 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
      * @param mContext
      * @param workingBeanList
      */
-    public AddProcessAdapter(Context mContext, List<WorkingBean> workingBeanList) {
+    public AddProcessAdapter(Context mContext, List<WorkingBean> workingBeanList, Button btn) {
+        this.btn = btn;
         this.mContext = (Activity) mContext;
         this.workingBeanList = workingBeanList;
     }
@@ -137,9 +141,12 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
                         @Override
                         public void returnTrueOrFalse(boolean trueOrFalse) {
                             if (trueOrFalse) {
-                                PhotosBean.deleteAll("PhotosBean", "processId=?", workingBean.getProcessId());
+                                DataSupport.deleteAll(PhotosBean.class, "processId=?", workingBean.getProcessId());
                                 workingBean.delete();
                                 workingBeanList.remove(workingBean);
+                                if (workingBeanList.size() == 0) {
+                                    btn.setVisibility(View.VISIBLE);
+                                }
                                 ConstantsUtil.isLoading = true;
                                 AddProcessAdapter.this.notifyDataSetChanged();
                                 ToastUtil.showShort(mContext, "删除成功！");

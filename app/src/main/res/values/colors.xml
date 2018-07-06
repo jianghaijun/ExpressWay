@@ -20,6 +20,10 @@
     <color name="report_bg">#00315B</color>
     <color name="supervision">#FC9603</color>
 
+    <color name="tab_1">#1296DB</color>
+    <color name="tab_2">#34A68C</color>
+    <color name="tab_3">#F16452</color>
+
     <color name="contractor_list">#FAF0FA</color>
     <color name="upload_photos">#226F89</color>
 

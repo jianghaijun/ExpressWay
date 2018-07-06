@@ -7,17 +7,18 @@
     android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_width="@dimen/sevenTy_dp"
-        android:layout_height="@dimen/fifty_five_dp"
-        android:layout_marginTop="@dimen/ten_dp">
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/forty_five_dp"
+        android:layout_marginTop="@dimen/five_dp">
 
         <com.zj.expressway.view.TouchHighlightImageButton
             android:id="@+id/imgInfo"
-            android:layout_width="@dimen/forty_five_dp"
-            android:layout_height="@dimen/forty_five_dp"
+            android:layout_width="@dimen/forty"
+            android:layout_height="@dimen/forty"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:scaleType="fitXY" />
+            android:scaleType="fitXY"
+            android:src="@drawable/group_management" />
 
         <TextView
             android:id="@+id/txtSubmitPhoneNum"

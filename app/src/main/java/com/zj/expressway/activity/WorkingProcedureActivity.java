@@ -8,7 +8,6 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -20,7 +19,6 @@ import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.utils.ConstantsUtil;
-import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.ToastUtil;
 
@@ -35,28 +33,28 @@ import java.util.List;
 import cn.hutool.core.util.StrUtil;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
+ * _ooOoo_
+ * o8888888o
+ * 88" . "88
+ * (| -_- |)
+ * O\  =  /O
+ * ____/`---'\____
+ * .'  \\|     |//  `.
+ * /  \\|||  :  |||//  \
+ * /  _||||| -:- |||||-  \
+ * |   | \\\  -  /// |   |
+ * | \_|  ''\---/''  |   |
+ * \  .-\__  `-`  ___/-. /
+ * ___`. .'  /--.--\  `. . __
+ * ."" '<  `.___\_<|>_/___.'  >'"".
+ * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
+ * \  \ `-.   \_ __\ /__ _/   .-` /  /
  * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
+ * `=---='
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:00
- *       工序列表主界面
+ * 佛祖保佑       永无BUG
+ * Created by HaiJun on 2018/6/11 17:00
+ * 工序列表主界面
  */
 public class WorkingProcedureActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
@@ -68,7 +66,7 @@ public class WorkingProcedureActivity extends BaseActivity {
     @ViewInject(R.id.searchBar)
     private MaterialSearchBar searchBar;
     @ViewInject(R.id.btnToBeAudited)
-    private Button btnToBeAudited;
+    private TextView btnToBeAudited;
     @ViewInject(R.id.rlPhoto)
     private RelativeLayout rlPhoto;
     @ViewInject(R.id.llButtons)
@@ -76,11 +74,16 @@ public class WorkingProcedureActivity extends BaseActivity {
     @ViewInject(R.id.vToBeAudited)
     private View vToBeAudited;
     @ViewInject(R.id.btnFinish)
-    private Button btnFinish;
+    private TextView btnFinish;
     @ViewInject(R.id.vFinish)
     private View vFinish;
     @ViewInject(R.id.vpWorkingProcedure)
     private ViewPager vpWorkingProcedure;
+    @ViewInject(R.id.txtUnSubmit)
+    private TextView txtUnSubmit;
+    @ViewInject(R.id.txtSubmit)
+    private TextView txtSubmit;
+
     // viewPage
     private View layToBeAudited, layFinish;
     private ProcessListActivity toBeAuditedActivity;
@@ -104,7 +107,6 @@ public class WorkingProcedureActivity extends BaseActivity {
 
         llButtons.setVisibility(View.GONE);
         rlPhoto.setVisibility(View.GONE);
-        btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
         vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
 
         initViewPageData();
@@ -126,16 +128,15 @@ public class WorkingProcedureActivity extends BaseActivity {
             public void onSearchConfirmed(CharSequence text) {
                 if (StrUtil.isEmpty(text)) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
-                }*/ else {
+                } else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(text));
                 }
             }
 
             @Override
-            public void onButtonClicked(int buttonCode) {}
+            public void onButtonClicked(int buttonCode) {
+            }
         });
 
         searchBar.setSuggstionsClickListener(new SuggestionsAdapter.OnItemViewClickListener() {
@@ -143,9 +144,7 @@ public class WorkingProcedureActivity extends BaseActivity {
             public void OnItemClickListener(int position, View v) {
                 if (StrUtil.isEmpty(String.valueOf(v.getTag()))) {
                     ToastUtil.showShort(mContext, "请输入搜索关键字");
-                }/* else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    ToastUtil.showShort(mContext, "请连接您的网络！");
-                }*/ else {
+                } else {
                     searchBar.setVisibility(View.GONE);
                     searchProcessData(String.valueOf(v.getTag()));
                 }
@@ -212,21 +211,22 @@ public class WorkingProcedureActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        toBeAuditedActivity.initData(4, btnToBeAudited, null);
-        finishActivity.initData(5, btnFinish, null);
+        toBeAuditedActivity.initData(4, txtUnSubmit, null);
+        finishActivity.initData(5, txtSubmit, null);
     }
 
     /**
      * 搜索
+     *
      * @param levelId
      */
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
             case 0:
-                toBeAuditedActivity.initData(4, btnToBeAudited, levelId);
+                toBeAuditedActivity.initData(4, txtUnSubmit, levelId);
                 break;
             case 1:
-                finishActivity.initData(5, btnFinish, levelId);
+                finishActivity.initData(5, txtSubmit, levelId);
                 break;
         }
     }
@@ -282,20 +282,20 @@ public class WorkingProcedureActivity extends BaseActivity {
      */
     private void setStates(int option) {
         // 待审核
-        btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
         // 已完成
-        btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
 
         switch (option) {
             case 0:
-                btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_2));
                 break;
             case 1:
-                btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_3));
                 break;
         }
     }
@@ -315,7 +315,7 @@ public class WorkingProcedureActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.imgBtnRight, R.id.btnToBeAudited, R.id.btnFinish })
+    @Event({R.id.imgBtnLeft, R.id.imgBtnRight, R.id.rlUnSubmit, R.id.rlSubmitting})
     private void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgBtnLeft:
@@ -325,10 +325,10 @@ public class WorkingProcedureActivity extends BaseActivity {
                 searchBar.setVisibility(View.VISIBLE);
                 searchBar.enableSearch();
                 break;
-            case R.id.btnToBeAudited:
+            case R.id.rlUnSubmit:
                 vpWorkingProcedure.setCurrentItem(0);
                 break;
-            case R.id.btnFinish:
+            case R.id.rlSubmitting:
                 vpWorkingProcedure.setCurrentItem(1);
                 break;
         }

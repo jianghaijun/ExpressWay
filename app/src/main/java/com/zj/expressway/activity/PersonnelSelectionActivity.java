@@ -13,7 +13,6 @@ import android.text.style.ClickableSpan;
 import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -37,8 +36,6 @@ import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -52,7 +49,6 @@ import cn.qqtheme.framework.widget.WheelView;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
@@ -61,8 +57,6 @@ import okhttp3.Response;
 public class PersonnelSelectionActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
-    @ViewInject(R.id.btnRight)
-    private Button btnRight;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
     @ViewInject(R.id.txtNode)
@@ -101,8 +95,6 @@ public class PersonnelSelectionActivity extends BaseActivity {
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.back_btn));
         txtTitle.setText("人员选择");
-        btnRight.setVisibility(View.VISIBLE);
-        btnRight.setText("确认");
 
         lvPersonnelList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -391,6 +383,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
 
     /**
      * 设置子级节点
+     *
      * @param personnelNode
      * @param root
      */
@@ -419,7 +412,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
     }
 
 
-    @Event({R.id.imgBtnLeft, R.id.ivDelete, R.id.btnRight, R.id.txtSelect})
+    @Event({R.id.imgBtnLeft, R.id.ivDelete, R.id.btnQuerySelect, R.id.txtSelect})
     private void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBtnLeft:
@@ -431,7 +424,7 @@ public class PersonnelSelectionActivity extends BaseActivity {
                 txtNoPerson.setVisibility(View.VISIBLE);
                 llPersonal.setVisibility(View.GONE);
                 break;
-            case R.id.btnRight:
+            case R.id.btnQuerySelect:
                 if (selectNode == null && isEdit) {
                     ToastUtil.showShort(mContext, "请先选择人员");
                 } else if (selectNode == null && !isEdit) {

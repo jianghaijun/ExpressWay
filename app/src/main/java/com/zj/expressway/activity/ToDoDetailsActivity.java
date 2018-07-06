@@ -131,7 +131,7 @@ public class ToDoDetailsActivity extends BaseActivity {
     private String checkType; // 质量or安全
     private String selectLevelId = ""; // 选中层级id
     private String userId; // 用户Id
-    private String uuid = RandomUtil.randomUUID();
+    private String uuid = RandomUtil.randomUUID().replaceAll("-", "");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -415,6 +415,7 @@ public class ToDoDetailsActivity extends BaseActivity {
      * @param buttons
      */
     private void setShowButton(List<ButtonListModel> buttons) {
+        llButtons.removeAllViews();
         if (buttons == null || buttons.size() == 0) {
             llButtons.setVisibility(View.GONE);
             return;
@@ -511,7 +512,7 @@ public class ToDoDetailsActivity extends BaseActivity {
      * 清除数据
      */
     private void clearData() {
-        uuid = RandomUtil.randomUUID();
+        uuid = RandomUtil.randomUUID().replaceAll("-", "");
         workId = "add";
         txtPressLocal.setText("");
         txtPressLocal.setFocusable(true);
@@ -631,11 +632,21 @@ public class ToDoDetailsActivity extends BaseActivity {
                     Gson gson = new Gson();
                     final WorkModel model = gson.fromJson(jsonData, WorkModel.class);
                     if (model.isSuccess()) {
-                        ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
                         mContext.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 isSubmit = true;
+                                // 清空操作按钮
+                                setShowButton(null);
+                                btnChoice.setVisibility(View.GONE);
+                                ConstantsUtil.isLoading = true;
+                                if (StrUtil.equals(workId, "details")) {
+                                    DataSupport.deleteAll(PhotosBean.class, "processId=?", processId);
+                                    if (deleteWorkingBean != null) {
+                                        deleteWorkingBean.delete();
+                                    }
+                                }
+
                                 List<ButtonListModel> buttonList = model.getData().getButtonList();
                                 for (ButtonListModel buttonListModel : buttonList) {
                                     if (StrUtil.equals(buttonListModel.getButtonId(), "submit")) {
@@ -832,7 +843,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                             public void run() {
                                 if (isSubmit) {
                                     if (StrUtil.equals(workId, "details")) {
-                                        PhotosBean.deleteAll("PhotosBean", "processId=?", processId);
+                                        DataSupport.deleteAll(PhotosBean.class, "processId=?", processId);
                                         if (deleteWorkingBean != null) {
                                             deleteWorkingBean.delete();
                                         }
@@ -1022,7 +1033,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                                     ConstantsUtil.isLoading = true;
                                     mContext.finish();
                                 } else {
-                                    PhotosBean.deleteAll("processId=?", uuid);
+                                    DataSupport.deleteAll(PhotosBean.class, "processId=?", uuid);
                                     mContext.finish();
                                 }
                             }

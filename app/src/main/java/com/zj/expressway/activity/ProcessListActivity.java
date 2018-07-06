@@ -7,7 +7,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -29,6 +31,7 @@ import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
+import org.w3c.dom.Text;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
@@ -53,7 +56,7 @@ public class ProcessListActivity extends BaseActivity {
     private AddProcessAdapter addProcessAdapter;
     private ToDoProcessAdapter toDoProcessAdapter;
     private Activity mContext;
-    private Button btnProcessNum;
+    private TextView btnProcessNum;
     private String userId;
     private boolean isFirstLoad = true;
     private int viewType, pagePosition = 1, processSum = 0, loadType = 0;
@@ -79,7 +82,7 @@ public class ProcessListActivity extends BaseActivity {
      * @param btnProcessNum 工序数量
      * @param searchContext 搜索文字
      */
-    public void initData(int viewType, Button btnProcessNum, final String searchContext) {
+    public void initData(int viewType, TextView btnProcessNum, final String searchContext) {
         this.viewType = viewType;
         this.btnProcessNum = btnProcessNum;
         loadType = 0;
@@ -135,21 +138,14 @@ public class ProcessListActivity extends BaseActivity {
             List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType + "", userId, String.valueOf(SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2"))).find(WorkingBean.class);
             if (beanList == null || beanList.size() == 0) {
                 holder.btnNoProcessAdd.setVisibility(View.VISIBLE);
+                holder.ivLogo.setVisibility(View.VISIBLE);
                 holder.btnAddProcess.setVisibility(View.GONE);
-                String str = btnProcessNum.getText().toString();
-                if (str.contains("（")) {
-                    btnProcessNum.setText(str.substring(0, str.indexOf("（")) + "（" + 0 + "）");
-                } else {
-                    if (str.length() <= 3) {
-                        btnProcessNum.setText(str + "（" + 0 + "）");
-                    } else {
-                        btnProcessNum.setText(str.substring(0, 3) + "（" + 0 + "）");
-                    }
-                }
+                btnProcessNum.setText("0");
             } else {
                 processSum = beanList.size();
                 workingBeanList.addAll(beanList);
                 holder.btnNoProcessAdd.setVisibility(View.GONE);
+                holder.ivLogo.setVisibility(View.GONE);
                 holder.btnAddProcess.setVisibility(View.VISIBLE);
                 initProcessListData();
                 holder.refreshLayout.finishLoadMoreWithNoMoreData();
@@ -328,12 +324,14 @@ public class ProcessListActivity extends BaseActivity {
         List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType + "", userId, String.valueOf(SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2"))).find(WorkingBean.class);
         if (beanList == null || beanList.size() == 0) {
             holder.btnNoProcessAdd.setVisibility(View.VISIBLE);
+            holder.ivLogo.setVisibility(View.VISIBLE);
             holder.btnAddProcess.setVisibility(View.GONE);
         } else {
             processSum = beanList.size();
             workingBeanList.clear();
             workingBeanList.addAll(beanList);
             holder.btnNoProcessAdd.setVisibility(View.GONE);
+            holder.ivLogo.setVisibility(View.GONE);
             holder.btnAddProcess.setVisibility(View.VISIBLE);
             initProcessListData();
             holder.refreshLayout.finishLoadMoreWithNoMoreData();
@@ -423,23 +421,14 @@ public class ProcessListActivity extends BaseActivity {
         // 设置tab显示工序数量
         if (isFirstLoad) {
             isFirstLoad = false;
-            String str = btnProcessNum.getText().toString();
-            if (str.contains("（")) {
-                btnProcessNum.setText(str.substring(0, str.indexOf("（")) + "（" + processSum + "）");
-            } else {
-                if (str.length() <= 3) {
-                    btnProcessNum.setText(str + "（" + processSum + "）");
-                } else {
-                    btnProcessNum.setText(str.substring(0, 3) + "（" + processSum + "）");
-                }
-            }
         }
+        btnProcessNum.setText("" + processSum);
 
         // 数据处理
         if (viewType == 1) {
             processAdapter = new ProcessListAdapter(mContext, workingBeanList);
         } else if (viewType == 2) {
-            addProcessAdapter = new AddProcessAdapter(mContext, workingBeanList);
+            addProcessAdapter = new AddProcessAdapter(mContext, workingBeanList, holder.ivLogo);
         } else {
             toDoProcessAdapter = new ToDoProcessAdapter(mContext, workingBeanList);
         }
@@ -461,10 +450,14 @@ public class ProcessListActivity extends BaseActivity {
         private Button btnAddProcess;
         @ViewInject(R.id.btnNoProcessAdd)
         private Button btnNoProcessAdd;
+        @ViewInject(R.id.ivLogo)
+        private Button ivLogo;
         @ViewInject(R.id.txtClear)
         private TextView txtClear;
         @ViewInject(R.id.llSearchData)
-        private LinearLayout llSearchData;
+        private RelativeLayout llSearchData;
+
+
 
     }
 }

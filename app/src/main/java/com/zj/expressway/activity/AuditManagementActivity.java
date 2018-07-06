@@ -50,23 +50,29 @@ public class AuditManagementActivity extends BaseActivity {
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
     @ViewInject(R.id.btnTakePicture)
-    private Button btnTakePicture;
+    private TextView btnTakePicture;
     @ViewInject(R.id.searchBar)
     private MaterialSearchBar searchBar;
     @ViewInject(R.id.vTakePicture)
     private View vTakePicture;
     @ViewInject(R.id.btnToBeAudited)
-    private Button btnToBeAudited;
+    private TextView btnToBeAudited;
     @ViewInject(R.id.vToBeAudited)
     private View vToBeAudited;
     @ViewInject(R.id.btnFinish)
-    private Button btnFinish;
+    private TextView btnFinish;
     @ViewInject(R.id.vFinish)
     private View vFinish;
     @ViewInject(R.id.vpWorkingProcedure)
     private ViewPager vpWorkingProcedure;
     @ViewInject(R.id.llButtons)
     private LinearLayout llButtons;
+    @ViewInject(R.id.txtTakePhoto)
+    private TextView txtTakePhoto;
+    @ViewInject(R.id.txtUnSubmit)
+    private TextView txtUnSubmit;
+    @ViewInject(R.id.txtSubmit)
+    private TextView txtSubmit;
     // viewPage
     private View layTakePicture, layToBeAudited, layFinish;
     private ProcessListActivity takePictureActivity;
@@ -136,7 +142,11 @@ public class AuditManagementActivity extends BaseActivity {
             public void OnItemDeleteListener(int position, View v) {
                 DataSupport.deleteAll(SearchRecordBean.class, "searchTitle=? and searchType=2", String.valueOf(searchBar.getLastSuggestions().get(position)));
                 searchBar.getLastSuggestions().remove(position);
-                searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
+                if (searchBar.getLastSuggestions().size() == 0) {
+                    searchBar.clearSuggestions();
+                } else {
+                    searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
+                }
             }
         });
     }
@@ -172,7 +182,8 @@ public class AuditManagementActivity extends BaseActivity {
         btnToBeAudited.setText("未提交");
         List<WorkingBean> beanSize = DataSupport.where("userId=? and type=? order by enterTime desc ", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, "")), "5").find(WorkingBean.class);
         int sum = beanSize == null ? 0 : beanSize.size();
-        btnFinish.setText("已提交（" + sum + "）");
+        btnFinish.setText("已提交");
+        txtSubmit.setText(sum + "");
     }
 
     /**
@@ -184,7 +195,7 @@ public class AuditManagementActivity extends BaseActivity {
         imgBtn.setTextColor(ContextCompat.getColor(this, R.color.white));
         imgBtn.setTextSize(10);
         imgBtn.setElevation(50f);
-        imgBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.all_tree));
+        imgBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.fab_tree));
         imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -225,7 +236,7 @@ public class AuditManagementActivity extends BaseActivity {
         txtClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                takePictureActivity.initData(1, btnTakePicture, null);
+                takePictureActivity.initData(1, txtTakePhoto, null);
             }
         });
 
@@ -244,9 +255,9 @@ public class AuditManagementActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        takePictureActivity.initData(1, btnTakePicture, null);
-        toBeAuditedActivity.initData(4, btnToBeAudited, null);
-        finishActivity.initData(5, btnFinish, null);
+        takePictureActivity.initData(1, txtTakePhoto, null);
+        toBeAuditedActivity.initData(4, txtUnSubmit, null);
+        finishActivity.initData(5, txtSubmit, null);
     }
 
     /**
@@ -257,13 +268,13 @@ public class AuditManagementActivity extends BaseActivity {
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
             case 0:
-                takePictureActivity.initData(1, btnTakePicture, levelId);
+                takePictureActivity.initData(1, txtTakePhoto, levelId);
                 break;
             case 1:
-                toBeAuditedActivity.initData(4, btnToBeAudited, levelId);
+                toBeAuditedActivity.initData(4, txtUnSubmit, levelId);
                 break;
             case 2:
-                finishActivity.initData(5, btnFinish, levelId);
+                finishActivity.initData(5, txtSubmit, levelId);
                 break;
         }
     }
@@ -319,29 +330,29 @@ public class AuditManagementActivity extends BaseActivity {
      */
     private void setStates(int option) {
         // 待拍照
-        btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
         // 待审核
-        btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
         // 已完成
-        btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.black));
+        //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
 
         switch (option) {
             case 0:
-                btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_1));
                 dragView.getDragView().setVisibility(View.VISIBLE);
                 break;
             case 1:
-                btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_2));
                 dragView.getDragView().setVisibility(View.GONE);
                 break;
             case 2:
-                btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
-                vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
+                vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_3));
                 dragView.getDragView().setVisibility(View.GONE);
                 break;
         }
@@ -362,7 +373,7 @@ public class AuditManagementActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.btnTakePicture, R.id.btnToBeAudited, R.id.btnFinish, R.id.imgBtnRight})
+    @Event({R.id.imgBtnLeft, R.id.rlPhoto, R.id.rlUnSubmit, R.id.rlSubmitting, R.id.imgBtnRight})
     private void onClick(View v) {
         switch (v.getId()) {
             case R.id.imgBtnLeft:
@@ -382,13 +393,13 @@ public class AuditManagementActivity extends BaseActivity {
                         break;
                 }
                 break;
-            case R.id.btnTakePicture:
+            case R.id.rlPhoto:
                 vpWorkingProcedure.setCurrentItem(0);
                 break;
-            case R.id.btnToBeAudited:
+            case R.id.rlUnSubmit:
                 vpWorkingProcedure.setCurrentItem(1);
                 break;
-            case R.id.btnFinish:
+            case R.id.rlSubmitting:
                 vpWorkingProcedure.setCurrentItem(2);
                 break;
         }

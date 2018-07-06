@@ -17,6 +17,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/btnQuerySelect"
         android:layout_below="@+id/actionBar"
         android:background="@null"
         android:scrollbars="none">
@@ -36,6 +37,7 @@
         android:id="@+id/rlSearch"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@+id/btnQuerySelect"
         android:layout_below="@+id/actionBar"
         android:background="@null"
         android:visibility="gone">
@@ -64,4 +66,15 @@
         app:mt_hint="@string/input_working_name"
         app:mt_maxSuggestionsCount="10"
         app:mt_speechMode="false" />
+
+    <Button
+        android:id="@+id/btnQuerySelect"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/forty"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="@dimen/five_dp"
+        android:background="@drawable/btn_blue"
+        android:text="@string/query"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp" />
 </com.zhy.android.percent.support.PercentRelativeLayout>

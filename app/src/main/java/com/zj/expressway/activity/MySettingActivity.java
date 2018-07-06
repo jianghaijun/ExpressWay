@@ -100,7 +100,7 @@ public class MySettingActivity extends BaseActivity {
 
         myHolder.btnVersion.setText("版本检测：当前版本" + AppInfoUtil.getVersion(mActivity));
         myHolder.txtUserName.setText((String) SpUtil.get(mActivity, "UserName", ""));
-        myHolder.btnCleanUpCaching.setText("清理缓存：" + GlideCatchUtil.getCacheSize());
+        myHolder.btnCleanUpCaching.setText("清理网络图片缓存：" + GlideCatchUtil.getCacheSize());
 
         // 自定义图片加载器
         ISNav.getInstance().init(new ImageLoader() {
@@ -134,8 +134,10 @@ public class MySettingActivity extends BaseActivity {
         myHolder.btnVersion.setOnClickListener(new OnClick());
         // 更换头像
         myHolder.imgViewUserAvatar.setOnClickListener(new OnClick());
-        // 清理缓存
+        // 清理缓存图片
         myHolder.btnCleanUpCaching.setOnClickListener(new OnClick());
+        // 清理本地缓存
+        myHolder.btnCleanLocalCaching.setOnClickListener(new OnClick());
         // 同步工序字典
         myHolder.btnSyncProcessDictionary.setOnClickListener(new OnClick());
         // 同步工序到服务器
@@ -175,26 +177,37 @@ public class MySettingActivity extends BaseActivity {
                 case R.id.imgViewUserAvatar:
                     uploadUserAvatar();
                     break;
-                // 清除缓存
+                // 清除网络图片缓存
                 case R.id.btnCleanUpCaching:
                     LoadingUtils.showLoading(mActivity);
-                    // 清除已加载层级列表
-                    DataSupport.deleteAll(ContractorBean.class);
-                    // 清除工序下的图片
-                    // DataSupport.deleteAll(PhotosBean.class);
-                    // 清除已加载工序列表
-                    DataSupport.deleteAll(WorkingBean.class);
-                    // 清除用户信息
-                    // DataSupport.deleteAll(UserInfo.class);
                     // 清理图片缓存
                     boolean isClean = GlideCatchUtil.cleanCatchDisk();
-                    myHolder.btnCleanUpCaching.setText("清理缓存：" + GlideCatchUtil.getCacheSize());
+                    myHolder.btnCleanUpCaching.setText("清理网络图片缓存：" + GlideCatchUtil.getCacheSize());
                     LoadingUtils.hideLoading();
                     if (isClean) {
-                        ToastUtil.showShort(mActivity, "清理成功");
+                        ToastUtil.showShort(mActivity, "清理网络图片缓存成功");
                     } else {
-                        ToastUtil.showShort(mActivity, "清理失败");
+                        ToastUtil.showShort(mActivity, "清理网络图片缓存失败");
                     }
+                    break;
+                // 清除本地缓存
+                case R.id.btnCleanLocalCaching:
+                    new PromptDialog(mActivity, new PromptListener() {
+                        @Override
+                        public void returnTrueOrFalse(boolean trueOrFalse) {
+                            if (trueOrFalse) {
+                                // 清除已加载层级列表
+                                DataSupport.deleteAll(ContractorBean.class);
+                                // 清除工序下的图片
+                                // DataSupport.deleteAll(PhotosBean.class);
+                                // 清除已加载工序列表
+                                DataSupport.deleteAll(WorkingBean.class);
+                                // 清除用户信息
+                                // DataSupport.deleteAll(UserInfo.class);
+                                ToastUtil.showShort(mActivity, "清理本地缓存成功");
+                            }
+                        }
+                    }, "提示", "清理后本地存储的数据无法恢复，是否继续清理？", "否", "是").show();
                     break;
                 // 同步工序字典
                 case R.id.btnSyncProcessDictionary:
@@ -610,6 +623,8 @@ public class MySettingActivity extends BaseActivity {
         private Button btnSyncProcessDictionary;
         @ViewInject(R.id.btnSyncLevel)
         private Button btnSyncLevel;
+        @ViewInject(R.id.btnCleanLocalCaching)
+        private Button btnCleanLocalCaching;
     }
 
 }

@@ -92,7 +92,7 @@ public class SearchAdapter extends BaseAdapter {
         drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
         selectAuditorsHandler.txtAuditors.setCompoundDrawables(null, null, drawable, null);
 
-        selectAuditorsHandler.txtAuditors.setText(contractorBeenList.get(position).getLevelName());
+        selectAuditorsHandler.txtAuditors.setText(contractorBeenList.get(position).getParentNameAll().replaceAll(",", "→"));
 
         return view;
     }

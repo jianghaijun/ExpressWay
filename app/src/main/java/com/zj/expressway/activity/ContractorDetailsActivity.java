@@ -93,8 +93,6 @@ public class ContractorDetailsActivity extends BaseActivity {
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
-    @ViewInject(R.id.btnRight)
-    private Button btnRight;
     /*数据信息*/
     @ViewInject(R.id.txtWorkingNo)
     private TextView txtWorkingNo;
@@ -112,6 +110,8 @@ public class ContractorDetailsActivity extends BaseActivity {
     private TextView txtTakePhotoRequirement;
     @ViewInject(R.id.txtRejectPhoto)
     private TextView txtRejectPhoto;
+    @ViewInject(R.id.txtBidsPath)
+    private TextView txtBidsPath;
     @ViewInject(R.id.llButtons)
     private LinearLayout llButtons;
     @ViewInject(R.id.edtRemarks)
@@ -174,6 +174,9 @@ public class ContractorDetailsActivity extends BaseActivity {
         } else {
             List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", isToDo ? workId : processId).find(WorkingBean.class);
             WorkingBean workingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? new WorkingBean() : workingBeanList.get(0);
+            if (!isToDo) {
+                workingBean.setFileOperationFlag("1");
+            }
             setTableData(workingBean);
             setImgData(new ArrayList<PhotosBean>());
             List<ButtonListModel> buttons = new ArrayList<>();
@@ -251,7 +254,7 @@ public class ContractorDetailsActivity extends BaseActivity {
      *
      * @param isToDo 待办已办？
      */
-    private void getData(boolean isToDo) {
+    private void getData(final boolean isToDo) {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
         String url = "";
@@ -286,7 +289,18 @@ public class ContractorDetailsActivity extends BaseActivity {
                                 mainTableId = model.getData().getMainTablePrimaryId();
                                 setTableData(flowBean);
                                 setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
-                                setShowButton(model.getData().getButtonList());
+
+                                List<ButtonListModel> buttons = new ArrayList<>();
+                                if (!isToDo) {
+                                    ButtonListModel btnModel = new ButtonListModel();
+                                    btnModel.setButtonId("localSubmit");
+                                    btnModel.setButtonName("确认提交");
+                                    buttons.add(btnModel);
+                                } else {
+                                    buttons = model.getData().getButtonList();
+                                }
+
+                                setShowButton(buttons);
                                 initTimeLineView(model.getData().getFlowHistoryList());
                                 LoadingUtils.hideLoading();
                             }
@@ -310,6 +324,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         // 保存
         flowBean.setProcessId(isToDo ? workId : processId);
         flowBean.saveOrUpdate("processId=?", isToDo ? workId : processId);
+        txtBidsPath.setText(flowBean.getLevelNameAll().replaceAll(",", "→"));   // 工序名称
         txtWorkingName.setText(flowBean.getProcessName());   // 工序名称
         txtWorkingNo.setText(flowBean.getProcessCode());     // 工序编号
         txtTakePhotoRequirement.setText(flowBean.getPhotoContent());     // 拍照要求
@@ -362,11 +377,7 @@ public class ContractorDetailsActivity extends BaseActivity {
      * @param buttons
      */
     private void setShowButton(List<ButtonListModel> buttons) {
-        if (!isToDo) {
-            btnRight.setText("提交");
-            btnRight.setVisibility(View.VISIBLE);
-        }
-
+        llButtons.removeAllViews();
         if (buttons == null || buttons.size() == 0) {
             llButtons.setVisibility(View.GONE);
             return;
@@ -420,6 +431,28 @@ public class ContractorDetailsActivity extends BaseActivity {
                 }
             } else if (buttonModel.getButtonId().contains("getback")) {
                 ToastUtil.showShort(mContext, "未知功能按钮");
+            } else if (buttonModel.getButtonId().contains("localSubmit")) {
+                if (isLocalAdd == 1) {
+                    ToastUtil.showShort(mContext, "请先将工序同步至服务器后再进行提交！");
+                } else if (photosList.size() < leastTakePhotoNum) {
+                    ToastUtil.showShort(mContext, "拍照数量不能小于最少拍照张数！");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, getString(R.string.not_network));
+                } else if (!JudgeNetworkIsAvailable.GetNetworkType(mContext).equals("WIFI")) {
+                    PromptDialog promptDialog = new PromptDialog(mContext, new PromptListener() {
+                        @Override
+                        public void returnTrueOrFalse(boolean trueOrFalse) {
+                            if (trueOrFalse) {
+                                toExaminePhoto(false);
+                            }
+                        }
+                    }, "提示", "当前网络为移动网络,是否继续上传?", "否", "是");
+                    promptDialog.setCancelable(false);
+                    promptDialog.setCanceledOnTouchOutside(false);
+                    promptDialog.show();
+                } else {
+                    toExaminePhoto(false);
+                }
             } else {
                 ToastUtil.showShort(mContext, "未知按钮");
             }
@@ -439,7 +472,9 @@ public class ContractorDetailsActivity extends BaseActivity {
             newJsonData = String.valueOf(object.getJSONObject("data").put("subTableObject", ""));
         } else {
             url = ConstantsUtil.startFlow;
-            newJsonData = String.valueOf(object.getJSONObject("data").put("title", processPath));
+            JSONObject obj = object.getJSONObject("data").put("title", processPath);
+            obj.getJSONObject("mainTableDataObject").remove("location");
+            newJsonData = String.valueOf(obj);
         }
         Request request = ChildThreadUtil.getRequest(mContext, url, newJsonData);
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
@@ -474,6 +509,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    ConstantsUtil.isLoading = true;
                                     WorkingBean flowBean = model.getData().getMainTableObject();
                                     flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                     flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
@@ -653,7 +689,6 @@ public class ContractorDetailsActivity extends BaseActivity {
                 sLocation = sb.toString() == null || TextUtils.isEmpty(sb.toString()) || sb.toString().equals("null") ? "" : sb.toString();
             }
         }
-
     };
 
     /**
@@ -920,36 +955,12 @@ public class ContractorDetailsActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.imgBtnAdd, R.id.btnRight})
+    @Event({R.id.imgBtnLeft, R.id.imgBtnAdd})
     private void onClick(View v) {
         switch (v.getId()) {
             // 返回
             case R.id.imgBtnLeft:
                 this.finish();
-                break;
-            // 提交审核
-            case R.id.btnRight:
-                if (isLocalAdd == 1) {
-                    ToastUtil.showShort(mContext, "请先将工序同步至服务器后再进行提交！");
-                } else if (photosList.size() < leastTakePhotoNum) {
-                    ToastUtil.showShort(mContext, "拍照数量不能小于最少拍照张数！");
-                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
-                    ToastUtil.showShort(mContext, getString(R.string.not_network));
-                } else if (!JudgeNetworkIsAvailable.GetNetworkType(this).equals("WIFI")) {
-                    PromptDialog promptDialog = new PromptDialog(mContext, new PromptListener() {
-                        @Override
-                        public void returnTrueOrFalse(boolean trueOrFalse) {
-                            if (trueOrFalse) {
-                                toExaminePhoto(false);
-                            }
-                        }
-                    }, "提示", "当前网络为移动网络,是否继续上传?", "否", "是");
-                    promptDialog.setCancelable(false);
-                    promptDialog.setCanceledOnTouchOutside(false);
-                    promptDialog.show();
-                } else {
-                    toExaminePhoto(false);
-                }
                 break;
             // 拍照
             case R.id.imgBtnAdd:

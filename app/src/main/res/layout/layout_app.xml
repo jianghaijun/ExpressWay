@@ -6,45 +6,205 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:focusable="false"
-        android:focusableInTouchMode="false">
+        android:layout_height="@dimen/sevenTy_dp"
+        android:background="@color/main_bg"
+        android:orientation="horizontal">
 
-        <com.youth.banner.Banner
-            android:id="@+id/banner"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            app:indicator_margin="@dimen/two_dp"
-            app:indicator_width="@dimen/five_dp"
-            app:title_height="@dimen/twenty_five_dp"
-            app:title_textsize="@dimen/fourteen_sp" />
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:gravity="center"
+            android:orientation="vertical">
 
-        <com.dalong.marqueeview.MarqueeView
-            android:id="@+id/mMarqueeView"
+            <TextView
+                android:id="@+id/txtToBeExamined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sixteen_sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/five_dp"
+                android:text="@string/toBeExamined"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="@dimen/one_dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/ten_dp"
+            android:layout_marginTop="@dimen/ten_dp"
+            android:background="@color/white" />
+
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/twenty_five_dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="@dimen/five_dp"
-            android:layout_marginRight="@dimen/fifty_dp"
-            app:direction="left"
-            app:isRepeat="true"
-            app:speed="200"
-            app:startPoint="start"
-            app:textSize="@dimen/fourteen_sp"
-            app:textcolor="@color/white" />
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:gravity="center"
+            android:orientation="vertical">
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/txtHaveBeenApproved"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sixteen_sp"
+                android:textStyle="bold" />
 
-    <!--app:image_scale_type="fit_xy"-->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/five_dp"
+                android:text="@string/haveBeenApproved"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="@dimen/one_dp"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="@dimen/ten_dp"
+            android:layout_marginTop="@dimen/ten_dp"
+            android:background="@color/white" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/txtTodayCompletionNum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:textColor="@color/white"
+                android:textSize="@dimen/sixteen_sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/five_dp"
+                android:text="@string/todayCompletionNum"
+                android:textColor="@color/white"
+                android:textSize="@dimen/fourteen_sp" />
+        </LinearLayout>
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvAppInfo"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@null"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
         android:divider="@null"
         android:dividerHeight="@dimen/zero_dp"
+        android:paddingBottom="@dimen/ten_dp"
         android:scrollbars="none" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/five_dp"
+        android:background="#EEEEEE" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/thirty"
+        android:layout_marginLeft="@dimen/ten_dp"
+        android:layout_marginRight="@dimen/ten_dp">
+
+        <TextView
+            android:id="@+id/txtHorseRaceLamp"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thirty"
+            android:background="@color/white"
+            android:ellipsize="marquee"
+            android:gravity="left|center"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:paddingLeft="@dimen/twenty_five_dp"
+            android:singleLine="true"
+            android:textSize="@dimen/fourteen_sp" />
+
+        <ImageView
+            android:layout_width="@dimen/twenty_dp"
+            android:layout_height="@dimen/twenty_dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/five_dp"
+            android:background="@drawable/notice" />
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/one_dp"
+        android:background="#E1E1E1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/thirty_five">
+
+            <ImageView
+                android:id="@+id/ivEnterpriseInfo"
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="@dimen/ten_dp"
+                android:layout_marginLeft="@dimen/fifteen_dp"
+                android:layout_marginTop="@dimen/ten_dp"
+                android:background="@color/main_bg" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="@dimen/ten_dp"
+                android:layout_toRightOf="@+id/ivEnterpriseInfo"
+                android:gravity="center"
+                android:text="@string/enterpriseInfo"
+                android:textColor="@color/black"
+                android:textSize="@dimen/fourteen_sp" />
+        </RelativeLayout>
+
+        <com.youth.banner.Banner
+            android:id="@+id/banner"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginLeft="@dimen/ten_dp"
+            android:layout_marginRight="@dimen/ten_dp"
+            app:indicator_margin="@dimen/two_dp"
+            app:indicator_width="@dimen/five_dp" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none">
+
+            <TextView
+                android:id="@+id/txtEnterPriseInfo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="@dimen/ten_dp"
+                android:layout_marginLeft="@dimen/ten_dp"
+                android:layout_marginRight="@dimen/ten_dp"
+                android:background="@null"
+                android:padding="@dimen/five_dp" />
+        </ScrollView>
+
+    </LinearLayout>
 </com.zhy.android.percent.support.PercentLinearLayout>

@@ -93,7 +93,6 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                 switch (position) {
                     // 工序检查
                     case 0:
-                        /*CrashReport.testJavaCrash();*/
                         intent = new Intent(mContext, AuditManagementActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
                         mContext.startActivity(intent);
@@ -130,7 +129,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         mContext.startActivity(intent);
                         break;*/
                     // 二维码扫描
-                    case 6:
+                    case 5:
                         intent = new Intent(mContext, QrCodeScanActivity.class);
                         mContext.startActivity(intent);
                         break;

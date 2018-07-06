@@ -3,10 +3,12 @@ package com.zj.expressway.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -27,6 +29,7 @@ import org.litepal.crud.DataSupport;
 import java.util.List;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 
 /**
  *                     _ooOoo_
@@ -91,6 +94,7 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         private TextView txtCheckTime;      // 检查时间
         private RelativeLayout rlProcedurePath;      // 检查时间
         private RelativeLayout rlBottom;      //
+        private TextView imgViewTakePhoto;      //
 
         public ProcessHolder(View itemView) {
             super(itemView);
@@ -103,15 +107,28 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
             imgViewProgress = (ImageView) itemView.findViewById(R.id.imgViewProgress);
             rlProcedurePath = (RelativeLayout) itemView.findViewById(R.id.rlProcedurePath);
             rlBottom = (RelativeLayout) itemView.findViewById(R.id.rlBottom);
+            imgViewTakePhoto = (TextView) itemView.findViewById(R.id.imgViewTakePhoto);
         }
 
         public void bind(WorkingBean data) {
+            String title = data.getTitle().replaceAll(",", "→");
+            txtProcedureName.setText(title.substring(title.lastIndexOf("→") + 1));
             txtReviewProgress.setText(data.getFlowStatus());
-            txtProcedureName.setText(data.getNodeName());
-            txtProcedurePath.setText(data.getTitle());
-            txtProcedureState.setText(data.getFlowName());
+            txtProcedurePath.setText(title);
+            imgViewTakePhoto.setText(data.getNodeName());
             txtPersonals.setText(data.getSendUserName());
             txtCheckTime.setText(DateUtil.format(DateUtil.date(data.getSendTime() == 0 ? System.currentTimeMillis() : data.getSendTime()), "yyyy-MM-dd HH:mm:ss"));
+
+            if (StrUtil.equals(data.getFlowStatus(), "审核中")) {
+                imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.audit));
+            } else if (StrUtil.equals(data.getFlowStatus(), "已结束")) {
+                imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.finish));
+            } else if (StrUtil.equals(data.getFlowStatus(), "已驳回")) {
+                imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.reject));
+            } else {
+                imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.progress));
+            }
+                //txtProcedureState.setText(data.getFlowName());
             rlBottom.setOnClickListener(new onClick(data));
             imgViewProgress.setOnClickListener(new onClick(data));
             txtReviewProgress.setOnClickListener(new onClick(data));
@@ -132,7 +149,7 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.imgViewTakePhoto:
+                /*case R.id.imgViewTakePhoto:
                     List<PhotosBean> phoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ?", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workingBean.getProcessId()).find(PhotosBean.class);
                     boolean isHave = phoneList == null || phoneList.size() == 0 ? false : true;
                     if (!workingBean.getTrackStatus().equals("0") || isHave) {
@@ -150,13 +167,14 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
                         }, workingBean);
                         dialog.show();
                     }
-                    break;
+                    break;*/
                 case R.id.imgViewProgress:
                 case R.id.txtReviewProgress:
                     reviewProgressActivity(workingBean.getWorkId());
                     break;
                 case R.id.rlBottom:
                 case R.id.rlProcedurePath:
+                case R.id.imgViewTakePhoto:
                     takePhotoActivity(workingBean, false);
                     break;
             }

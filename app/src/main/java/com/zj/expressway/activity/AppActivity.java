@@ -1,11 +1,12 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.TextView;
 
-import com.dalong.marqueeview.MarqueeView;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
@@ -15,15 +16,12 @@ import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.AppInfoBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.loader.GlideImageLoader;
-import com.zj.expressway.utils.ConstantsUtil;
 
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import cn.hutool.core.util.StrUtil;
 
 
 /**
@@ -43,99 +41,79 @@ public class AppActivity extends BaseActivity {
 
     public void setDate(List<String> objList, final WorkingBean data) {
         //设置banner样式
-        hold.banner.setBannerStyle(BannerConfig.CIRCLE_INDICATOR_TITLE_INSIDE);
+        hold.banner.setBannerStyle(BannerConfig.CIRCLE_INDICATOR);
         //设置图片加载器
         hold.banner.setImageLoader(new GlideImageLoader());
-        List<String> strings = new ArrayList<>();
-        for (String str : objList) {
-            strings.add("");
-        }
-        hold.banner.setBannerTitles(strings);
-
         //设置banner动画效果
         hold.banner.setBannerAnimation(Transformer.DepthPage);
         //设置自动轮播，默认为true
         hold.banner.isAutoPlay(true);
         //设置轮播时间
-        hold.banner.setDelayTime(3000);
+        hold.banner.setDelayTime(5000);
         //设置指示器位置（当banner模式中有指示器时）
         hold.banner.setIndicatorGravity(BannerConfig.RIGHT);
         //设置图片集合
         hold.banner.setImages(objList);
         hold.banner.start();
-        // 跑马灯文字
-        if (data != null && StrUtil.isNotEmpty(data.getProcessId())) {
-            hold.mMarqueeView.setText(ConstantsUtil.uploadFilePath + data.getLevelNameAll().replaceAll(",", "→") + "→" + data.getProcessName());
-        }
+
+        // 开启跑马灯
+        hold.txtHorseRaceLamp.setText("中国交通建设股份有限公司成立于2006年10月8日，经国务院批准，由中国交通建设集团有限公司（国务院国资委监管的中央企业）整体重组改制并独家发起设立的股份有限公司，并于2006年12月15日在香港联合交易所主板挂牌上市交易，成为中国第一家实现境外整体上市的特大型国有基建企业。");
+        hold.txtHorseRaceLamp.setSelected(true);
+
+        final List<String> stringList = new ArrayList<>();
+        stringList.add("2005至今，公司先后获得567项自主知识产权专利，荣获20项国家科学技术进步奖，279项省部级科技进步奖，16项鲁班奖，30项詹天佑土木工程大奖，59项国家优质工程奖（其中金奖7项），242项省部级优质工程奖，35项国家级工法。");
+        stringList.add("2011年，公司名列世界500强第211位，排名较上年提升了13位；位居ENR全球最大225家国际承包商第11位，连续5年位居中国上榜企业第1名；位居中国企业500强第19位。");
+        stringList.add("2010年，公司入选“福布斯全球2000强企业”榜单，排名位列第297位，居中国内地建筑企业首位。");
+
+        hold.txtEnterPriseInfo.setText(stringList.get(0));
+
+        // 活动监听
+        hold.banner.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+            @Override
+            public void onPageSelected(int position) {
+                hold.txtEnterPriseInfo.setText(stringList.get(position));
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+        });
+
         // 添加图片、标题
         List<AppInfoBean> appInfoList = new ArrayList<>();
         AppInfoBean bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.process_inspection);
+        bean.setImgUrl(R.drawable.concealment_project);
         bean.setTitle(mContext.getString(R.string.process_inspection));
         appInfoList.add(bean);
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.hidden_danger);
+        bean.setImgUrl(R.drawable.quality_testing);
         bean.setTitle(mContext.getString(R.string.qualityPatrol));
         appInfoList.add(bean);
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.group_management);
+        bean.setImgUrl(R.drawable.hidden_trouble_investigation);
         bean.setTitle(mContext.getString(R.string.securityPatrol));
         appInfoList.add(bean);
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.bim_platform);
+        bean.setImgUrl(R.drawable.audit_management);
         bean.setTitle(mContext.getString(R.string.audit_management));
         appInfoList.add(bean);
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.mail_list);
-        bean.setTitle(mContext.getString(R.string.process_report));
-        appInfoList.add(bean);
-        /*bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.group_management);
-        bean.setTitle(mContext.getString(R.string.process_manager));
-        appInfoList.add(bean);*/
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.experimental_management);
-        bean.setTitle(mContext.getString(R.string.experimental_management));
+        bean.setImgUrl(R.drawable.data_report);
+        bean.setTitle("数据报表");
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.qr_code);
         bean.setTitle(mContext.getString(R.string.qr_code));
         appInfoList.add(bean);
         bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.video_surveillance);
-        bean.setTitle(mContext.getString(R.string.video_surveillance));
+        bean.setImgUrl(R.drawable.bid_management);
+        bean.setTitle("标段管理");
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.group_management);
-        bean.setTitle(mContext.getString(R.string.group_management));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.drawing_inquiry);
-        bean.setTitle(mContext.getString(R.string.drawing_inquiry));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.standard_query);
-        bean.setTitle(mContext.getString(R.string.standard_query));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.progress_plan);
-        bean.setTitle(mContext.getString(R.string.progress_plan));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.first_batch);
-        bean.setTitle(mContext.getString(R.string.first_batch));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.online_examination);
-        bean.setTitle(mContext.getString(R.string.online_examination));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.labor_competition);
-        bean.setTitle(mContext.getString(R.string.labor_competition));
-        appInfoList.add(bean);
-        bean = new AppInfoBean();
-        bean.setImgUrl(R.drawable.attendance_card);
-        bean.setTitle(mContext.getString(R.string.attendance_card));
+        bean.setTitle("资料库");
         appInfoList.add(bean);
 
         appInfoAdapter = new AppInfoAdapter(mContext, appInfoList);
@@ -151,9 +129,6 @@ public class AppActivity extends BaseActivity {
         if (hold != null && hold.banner != null) {
             hold.banner.startAutoPlay();
         }
-        if (hold != null && hold.mMarqueeView != null) {
-            hold.mMarqueeView.startScroll();
-        }
     }
 
     /**
@@ -162,9 +137,6 @@ public class AppActivity extends BaseActivity {
     public void stopBanner() {
         if (hold != null && hold.banner != null) {
             hold.banner.stopAutoPlay();
-        }
-        if (hold != null && hold.mMarqueeView != null) {
-            hold.mMarqueeView.stopScroll();
         }
     }
 
@@ -177,8 +149,10 @@ public class AppActivity extends BaseActivity {
 
         @ViewInject(R.id.rvAppInfo)
         private RecyclerView rvAppInfo;
+        @ViewInject(R.id.txtEnterPriseInfo)
+        private TextView txtEnterPriseInfo;
+        @ViewInject(R.id.txtHorseRaceLamp)
+        private TextView txtHorseRaceLamp;
 
-        @ViewInject(R.id.mMarqueeView)
-        private MarqueeView mMarqueeView;
     }
 }

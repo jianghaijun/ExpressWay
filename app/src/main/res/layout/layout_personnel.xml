@@ -60,7 +60,7 @@
             android:id="@+id/rlBottom"
             android:layout_width="match_parent"
             android:layout_height="@dimen/one_hundred_and_fifty_dp"
-            android:layout_alignParentBottom="true"
+            android:layout_above="@+id/btnQuerySelect"
             android:layout_marginBottom="@dimen/five_dp"
             android:layout_marginTop="@dimen/five_dp"
             android:background="@drawable/gray_stroke_white_solid_bg">
@@ -118,6 +118,17 @@
             </LinearLayout>
 
         </RelativeLayout>
+
+        <Button
+            android:id="@+id/btnQuerySelect"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/forty"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/five_dp"
+            android:background="@drawable/btn_blue"
+            android:text="@string/query"
+            android:textColor="@color/white"
+            android:textSize="@dimen/fourteen_sp" />
 
     </RelativeLayout>
 

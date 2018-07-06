@@ -63,8 +63,6 @@ public class ContractorTreeActivity extends BaseActivity {
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.imgBtnRight)
     private ImageButton imgBtnRight;
-    @ViewInject(R.id.btnRight)
-    private Button btnRight;
     @ViewInject(R.id.searchBar)
     private MaterialSearchBar searchBar;
     @ViewInject(R.id.txtTitle)
@@ -90,8 +88,6 @@ public class ContractorTreeActivity extends BaseActivity {
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         imgBtnRight.setVisibility(View.VISIBLE);
         imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
-        btnRight.setVisibility(View.VISIBLE);
-        btnRight.setText("确认");
         txtTitle.setText(R.string.app_title);
 
         processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
@@ -368,7 +364,15 @@ public class ContractorTreeActivity extends BaseActivity {
         JSONObject obj = new JSONObject();
         obj.put("parentId", parentId);
         obj.put("levelType", processType);
-        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.getZxHwGxProjectLevelList, obj.toString());
+        String url;
+        if (processType.equals("1")) {
+            url = ConstantsUtil.getZxHwGxProjectLevelList;
+        } else if (processType.equals("2")) {
+            url = ConstantsUtil.getZxHwZlProjectLevelList;
+        } else {
+            url = ConstantsUtil.getZxHwAqProjectLevelList;
+        }
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -578,13 +582,13 @@ public class ContractorTreeActivity extends BaseActivity {
         return workingBean;
     }
 
-    @Event({R.id.imgBtnLeft, R.id.btnRight, R.id.imgBtnRight})
+    @Event({R.id.imgBtnLeft, R.id.btnQuerySelect, R.id.imgBtnRight})
     private void onClick(View view) {
         switch (view.getId()) {
             case R.id.imgBtnLeft:
                 this.finish();
                 break;
-            case R.id.btnRight:
+            case R.id.btnQuerySelect:
                 if (ta != null) {
                     ta.selectProcess((Integer) SpUtil.get(mContext, "selectProcess", -1));
                 } else {

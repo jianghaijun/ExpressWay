@@ -69,7 +69,8 @@
     <string name="use_help">使用帮助</string>
     <string name="department">部门：</string>
     <string name="real_name">姓名：</string>
-    <string name="clean_up_caching">清理缓存</string>
+    <string name="clean_up_caching">清理网络图片缓存</string>
+    <string name="clean_local_caching">清理本地缓存工序</string>
     <string name="sync_process_dictionary">同步工序字典至本地</string>
     <string name="sync_level">同步工序至服务端</string>
     <string name="msg">消息</string>
@@ -101,6 +102,7 @@
     <string name="no">NO.</string>
     <string name="choice">选择</string>
     <string name="working_name">工序名称：</string>
+    <string name="bidsPath">标段位置：</string>
     <string name="workingName">工序名称</string>
     <string name="photos_num">照片数量</string>
     <string name="photosNum">照片数量：</string>
@@ -181,4 +183,11 @@
     <string name="prompt">向左滑动可删除或添加层级！</string>
     <string name="sameLevelAdd">同级新增</string>
     <string name="childLevelAdd">子级新增</string>
+    <string name="toBeExamined">待审批</string>
+    <string name="haveBeenApproved">已审批</string>
+    <string name="todayCompletionNum">今日完成量</string>
+    <string name="enterpriseInfo">企业信息</string>
+    <string name="take_picture">待拍照</string>
+    <string name="unSubmit">未提交</string>
+    <string name="submission">已提交</string>
 </resources>

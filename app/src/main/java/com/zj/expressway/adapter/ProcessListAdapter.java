@@ -7,50 +7,19 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zj.expressway.R;
 import com.zj.expressway.activity.ContractorDetailsActivity;
-import com.zj.expressway.activity.ReviewProgressActivity;
-import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.dialog.PhotoRequirementsDialog;
-import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.utils.ConstantsUtil;
-import com.zj.expressway.utils.SpUtil;
-
-import org.litepal.crud.DataSupport;
 
 import java.util.List;
 
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
-
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:11
- *       工序列表适配器
+ * Created by HaiJun on 2018/6/11 17:11
+ * 工序列表适配器
  */
 public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.ProcessHolder> {
     private Activity mContext;
@@ -58,6 +27,7 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
 
     /**
      * 重载
+     *
      * @param mContext
      * @param workingBeanList
      */
@@ -68,7 +38,7 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
 
     @Override
     public ProcessHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ProcessHolder(LayoutInflater.from(mContext).inflate(R.layout.item_working_procedure, parent, false));
+        return new ProcessHolder(LayoutInflater.from(mContext).inflate(R.layout.item_to_do_take_photo, parent, false));
     }
 
     @Override
@@ -85,40 +55,41 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
         private TextView txtReviewProgress; // 审核状态
         private TextView txtProcedureName;  // 工序名称
         private TextView txtProcedurePath;  // 工序部位
-        private ImageView imgViewProgress;  // 拍照
-        private ImageView imgViewTakePhoto; // 拍照
-        private TextView txtProcedureState; // 拍照状态
-        private TextView txtPersonals;      // 审核人员
-        private TextView txtCheckTime;      // 检查时间
+        /* private ImageView imgViewProgress;  // 拍照
+         private ImageView imgViewTakePhoto; // 拍照
+         private TextView txtProcedureState; // 拍照状态
+         private TextView txtPersonals;      // 审核人员
+         private TextView txtCheckTime;      // 检查时间*/
         private RelativeLayout rlProcedurePath;      // 检查时间
-        private RelativeLayout rlBottom;      //
+        /*private RelativeLayout rlBottom;      //*/
 
         public ProcessHolder(View itemView) {
             super(itemView);
             txtReviewProgress = (TextView) itemView.findViewById(R.id.txtReviewProgress);
             txtProcedureName = (TextView) itemView.findViewById(R.id.txtProcedureName);
             txtProcedurePath = (TextView) itemView.findViewById(R.id.txtProcedurePath);
-            txtProcedureState = (TextView) itemView.findViewById(R.id.txtProcedureState);
+            /*txtProcedureState = (TextView) itemView.findViewById(R.id.txtProcedureState);
             txtPersonals = (TextView) itemView.findViewById(R.id.txtPersonals);
             txtCheckTime = (TextView) itemView.findViewById(R.id.txtCheckTime);
             imgViewTakePhoto = (ImageView) itemView.findViewById(R.id.imgViewTakePhoto);
-            imgViewProgress = (ImageView) itemView.findViewById(R.id.imgViewProgress);
+            imgViewProgress = (ImageView) itemView.findViewById(R.id.imgViewProgress);*/
             rlProcedurePath = (RelativeLayout) itemView.findViewById(R.id.rlProcedurePath);
-            rlBottom = (RelativeLayout) itemView.findViewById(R.id.rlBottom);
+            /*rlBottom = (RelativeLayout) itemView.findViewById(R.id.rlBottom);*/
         }
 
         public void bind(WorkingBean data) {
-            txtReviewProgress.setText("未提交");
+            //txtProcedureState.setText("未提交");
             txtProcedureName.setText(data.getProcessName());
-            txtProcedurePath.setText(data.getLevelNameAll());
-            txtProcedureState.setText("待拍照");
-            txtPersonals.setText(StrUtil.isEmpty(data.getCheckNameAll()) ? "未审核" : data.getCheckNameAll());
+            txtProcedurePath.setText(data.getLevelNameAll().replaceAll(",", "→"));
+            txtReviewProgress.setText("待拍照");
+            rlProcedurePath.setOnClickListener(new onClick(data));
+
+            /*txtPersonals.setText(StrUtil.isEmpty(data.getCheckNameAll()) ? "未审核" : data.getCheckNameAll());
             txtCheckTime.setText(DateUtil.format(DateUtil.date(data.getEnterTime() == 0 ? System.currentTimeMillis() : data.getEnterTime()), "yyyy-MM-dd HH:mm:ss"));
             imgViewTakePhoto.setOnClickListener(new onClick(data));
             rlBottom.setOnClickListener(new onClick(data));
-            imgViewProgress.setOnClickListener(new onClick(data));
             txtReviewProgress.setOnClickListener(new onClick(data));
-            rlProcedurePath.setOnClickListener(new onClick(data));
+            imgViewProgress.setOnClickListener(new onClick(data));*/
         }
     }
 
@@ -135,7 +106,7 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.imgViewTakePhoto:
+                /*case R.id.imgViewTakePhoto:
                     List<PhotosBean> phoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ?", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workingBean.getProcessId()).find(PhotosBean.class);
                     boolean isHave = phoneList == null || phoneList.size() == 0 ? false : true;
                     String state = StrUtil.isEmpty(workingBean.getTrackStatus()) ? "" : workingBean.getTrackStatus();
@@ -159,7 +130,7 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
                 case R.id.txtReviewProgress:
                     reviewProgressActivity(workingBean.getProcessId());
                     break;
-                case R.id.rlBottom:
+                case R.id.rlBottom:*/
                 case R.id.rlProcedurePath:
                     takePhotoActivity(workingBean, false);
                     break;
@@ -185,10 +156,10 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
     /**
      * 跳转审核进度界面
      */
-    private void reviewProgressActivity(String processId) {
+    /*private void reviewProgressActivity(String processId) {
         Intent intent = new Intent(mContext, ReviewProgressActivity.class);
         intent.putExtra("processId", processId);
         intent.putExtra("workId", "");
         mContext.startActivity(intent);
-    }
+    }*/
 }

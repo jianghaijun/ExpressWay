@@ -30,8 +30,8 @@
         <View
             android:id="@+id/view"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/two_px"
-            android:background="@color/black" />
+            android:layout_height="@dimen/one_px"
+            android:background="#E1E1E1" />
 
         <com.ashokvarma.bottomnavigation.BottomNavigationBar
             android:id="@+id/bottom_navigation_bar"
