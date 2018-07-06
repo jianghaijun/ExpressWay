@@ -14,7 +14,15 @@
         android:layout_alignParentTop="true"
         app:layout_heightPercent="8%" />
 
-    <ScrollView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/lvContractorList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/btnQuerySelect"
+        android:layout_below="@+id/actionBar"
+        android:scrollbars="none" />
+
+    <!--<ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/btnQuerySelect"
@@ -31,7 +39,7 @@
             android:divider="@color/gray"
             android:dividerHeight="1dp"
             android:scrollbars="none" />
-    </ScrollView>
+    </ScrollView>-->
 
     <RelativeLayout
         android:id="@+id/rlSearch"
@@ -76,5 +84,16 @@
         android:background="@drawable/btn_blue"
         android:text="@string/query"
         android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp" />
+
+    <Button
+        android:id="@+id/btnNoData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@null"
+        android:visibility="gone"
+        android:drawableTop="@drawable/no_data"
+        android:text="@string/no_msg"
         android:textSize="@dimen/fourteen_sp" />
 </com.zhy.android.percent.support.PercentRelativeLayout>

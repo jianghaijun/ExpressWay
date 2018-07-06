@@ -2,6 +2,7 @@ package com.zj.expressway.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
@@ -112,6 +113,10 @@ public class QualityInspectionActivity extends BaseActivity {
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
+
+        Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.start);
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+        btnToBeAudited.setCompoundDrawables(drawable, null, null, null);
 
         initViewPageData();
         initTabName();

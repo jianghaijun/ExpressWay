@@ -4,11 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -21,10 +21,8 @@ import com.zj.expressway.bean.ContractorBean;
 import com.zj.expressway.bean.ProcessDictionaryBean;
 import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.SlippingHintDialog;
 import com.zj.expressway.listener.ContractorListener;
-import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.tree.Node;
 import com.zj.expressway.utils.ChildThreadUtil;
@@ -33,7 +31,6 @@ import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.ScreenManagerUtil;
-import com.zj.expressway.utils.SetListHeight;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
@@ -67,8 +64,10 @@ public class ContractorTreeActivity extends BaseActivity {
     private MaterialSearchBar searchBar;
     @ViewInject(R.id.txtTitle)
     private TextView txtTitle;
+    @ViewInject(R.id.btnNoData)
+    private Button btnNoData;
     @ViewInject(R.id.lvContractorList)
-    private ListView lvContractorList;
+    private RecyclerView lvContractorList;
     private Activity mContext;
     private List<Node> allCache = new ArrayList<>();
     private List<Node> all = new ArrayList<>();
@@ -93,38 +92,15 @@ public class ContractorTreeActivity extends BaseActivity {
         processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
 
         boolean isPrompt = (boolean) SpUtil.get(this, ConstantsUtil.Long_press, false);
-        if (!isPrompt) {
-            new SlippingHintDialog(mContext, R.drawable.cloud, ConstantsUtil.Long_press, "长按层级进行添加！").show();
+        if (processType.equals("1")) {
+            if (!isPrompt) {
+                new SlippingHintDialog(mContext, R.drawable.cloud, ConstantsUtil.Long_press, "长按层级进行添加！\n左滑添加、删除层级！").show();
+            }
+        } else {
+            if (!isPrompt) {
+                new SlippingHintDialog(mContext, R.drawable.cloud, ConstantsUtil.Long_press, "左滑添加、删除层级！").show();
+            }
         }
-
-        lvContractorList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ((TreeNodeAdapter) parent.getAdapter()).ExpandOrCollapse(position);
-            }
-        });
-
-        lvContractorList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                new PromptDialog(mContext, new PromptListener() {
-                    @Override
-                    public void returnTrueOrFalse(boolean trueOrFalse) {
-                        if (trueOrFalse) {
-                            boolean isSync = (boolean) SpUtil.get(mContext, "isSync", false);
-                            if (isSync) {
-                                Intent intent = new Intent(mContext, AddProcessActivity.class);
-                                intent.putExtra("position", position);
-                                startActivityForResult(intent, 1005);
-                            } else {
-                                ToastUtil.showShort(mContext, "请先到个人中心中同步工序字典！");
-                            }
-                        }
-                    }
-                }, "提示", "是否添加新层级？", "否", "是").show();
-                return true;
-            }
-        });
 
         initSearchRecord();
 
@@ -300,10 +276,12 @@ public class ContractorTreeActivity extends BaseActivity {
                 /* 设置默认展开级别 */
             ta.setExpandLevel(1);
             lvContractorList.setAdapter(ta);
-            SetListHeight.setListViewHeight(lvContractorList);
+            lvContractorList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
 
             allCache = ta.allCache;
             all = ta.all;
+        } else {
+            btnNoData.setVisibility(View.VISIBLE);
         }
     }
 
@@ -348,7 +326,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 loadProcedureByNodeId(point, levelId);
             } else {
                 List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", levelId, processType).find(ContractorBean.class);
-                setNodeInChildren(listBean, point, true);
+                setNodeInChildren(listBean, point, true, false);
             }
         }
     };
@@ -402,7 +380,7 @@ public class ContractorTreeActivity extends BaseActivity {
                                     model.getData().addAll(beanList);
                                 }
                                 // 将数据添加到Node的子节点中
-                                setNodeInChildren(model.getData(), position, true);
+                                setNodeInChildren(model.getData(), position, true, false);
                                 LoadingUtils.hideLoading();
                             }
                         });
@@ -422,7 +400,7 @@ public class ContractorTreeActivity extends BaseActivity {
      * @param data
      * @param position
      */
-    private void setNodeInChildren(List<ContractorBean> data, int position, boolean isLoading) {
+    private void setNodeInChildren(List<ContractorBean> data, int position, boolean isLoading, boolean isLocalAdd) {
         List<Node> nodes = new ArrayList<>();
         for (ContractorBean contractor : data) {
             String levelId = contractor.getLevelId();
@@ -439,6 +417,7 @@ public class ContractorTreeActivity extends BaseActivity {
             n.setExpanded(false);
             n.setLoading(false);
             n.setChoice(false);
+            n.setLocalAdd(isLocalAdd);
             nodes.add(n);
         }
 
@@ -493,8 +472,8 @@ public class ContractorTreeActivity extends BaseActivity {
                 List<ContractorBean> beanList = new ArrayList<>();
                 String parentLevelId = RandomUtil.randomUUID().replaceAll("-", "");
                 // 1、向节点下添加桩号
-                String parentIdAll = all.get(position).getParentIdAll()+","+parentLevelId;
-                String parentNameAll = all.get(position).getParentNameAll()+","+pileNo;
+                String parentIdAll = all.get(position).getParentIdAll() + "," + parentLevelId;
+                String parentNameAll = all.get(position).getParentNameAll() + "," + pileNo;
 
                 ContractorBean newPileNo = addLocalLevel(parentLevelId, pileNo, all.get(position).getLevelId(), "1", "0", "", parentIdAll, parentNameAll);
                 beanList.add(newPileNo);
@@ -505,8 +484,8 @@ public class ContractorTreeActivity extends BaseActivity {
                     if (proList != null) {
                         for (ProcessDictionaryBean proBean : proList) {
                             String levelId = RandomUtil.randomUUID().replaceAll("-", "");
-                            parentIdAll+="," + levelId;
-                            parentNameAll+="," + proBean.getDictName();
+                            parentIdAll += "," + levelId;
+                            parentNameAll += "," + proBean.getDictName();
                             addLocalLevel(levelId, proBean.getDictName(), parentLevelId, "0", "1", proBean.getDictCode(), parentIdAll, parentNameAll);
                             List<ProcessDictionaryBean> list = DataSupport.where("parentId=?", str).find(ProcessDictionaryBean.class);
                             for (ProcessDictionaryBean bean : list) {
@@ -517,7 +496,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 }
                 all.get(position).setExpanded(true);
                 allCache.get(position).setExpanded(true);
-                setNodeInChildren(beanList, position, false);
+                setNodeInChildren(beanList, position, false, true);
             }
         }
     }

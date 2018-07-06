@@ -23,6 +23,7 @@ import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.ContractorBean;
 import com.zj.expressway.bean.ProcessDicBaseBean;
 import com.zj.expressway.bean.ProcessDictionaryBean;
+import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.bean.SyncLinkageMenuBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.dialog.DownloadApkDialog;
@@ -204,6 +205,12 @@ public class MySettingActivity extends BaseActivity {
                                 DataSupport.deleteAll(WorkingBean.class);
                                 // 清除用户信息
                                 // DataSupport.deleteAll(UserInfo.class);
+                                // 清除搜索记录
+                                DataSupport.deleteAll(SearchRecordBean.class);
+                                // 清除同步至本地字典
+                                DataSupport.deleteAll(ProcessDictionaryBean.class);
+                                // 清除同步至本地三级联动菜单
+                                DataSupport.deleteAll(SyncLinkageMenuBean.class);
                                 ToastUtil.showShort(mActivity, "清理本地缓存成功");
                             }
                         }
@@ -329,13 +336,13 @@ public class MySettingActivity extends BaseActivity {
     /**
      * 同步服务器字典表
      */
-    private void syncProcessDictionary() {
-        LoadingUtils.showLoading(mActivity);
+    public void syncProcessDictionary() {
+        //LoadingUtils.showLoading(mActivity);
         Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.appGetTwoinoneDictList, "");
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
+                //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
             }
 
             @Override
@@ -383,15 +390,15 @@ public class MySettingActivity extends BaseActivity {
                                         }
                                     }
                                 } else {
-                                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
                                 }
                             }
                         });
                     } else {
-                        ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                        //ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
                     }
                 } else {
-                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
                 }
             }
         });
@@ -405,7 +412,7 @@ public class MySettingActivity extends BaseActivity {
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
+                //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
             }
 
             @Override
@@ -462,17 +469,17 @@ public class MySettingActivity extends BaseActivity {
                                         }
                                     }
                                     SpUtil.put(mActivity, "isSync", true);
-                                    ChildThreadUtil.toastMsgHidden(mActivity, "同步成功！");
+                                    //ChildThreadUtil.toastMsgHidden(mActivity, "同步成功！");
                                 } else {
-                                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
                                 }
                             }
                         });
                     } else {
-                        ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                        //ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
                     }
                 } else {
-                    ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
                 }
             }
         });

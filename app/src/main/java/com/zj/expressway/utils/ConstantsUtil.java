@@ -24,6 +24,7 @@ public class ConstantsUtil {
     // 参数格式
     public static SameDayBean sameDayBean;
     public static boolean isDownloadApk = false;
+    public static boolean jumpPersonalInfo = false;
     public static ButtonListModel buttonModel;
 
     // 参数格式
@@ -84,8 +85,12 @@ public class ConstantsUtil {
     public static final String getZxHwAqProjectLevelList = prefix + "getZxHwAqProjectLevelList";
     public static final String getZxHwZlProjectLevelList = prefix + "getZxHwZlProjectLevelList";
 
-    public static final String addLevel = prefix + "addZxHwGxProjectLevel";
-    public static final String deleteLevel = prefix + "batchDeleteUpdateZxHwGxProjectLevel";
+    public static final String addGxLevel = prefix + "addZxHwGxProjectLevel";
+    public static final String addZlLevel = prefix + "addZxHwZlProjectLevel";
+    public static final String addAqLevel = prefix + "addZxHwAqProjectLevel";
+    public static final String deleteGxLevel = prefix + "batchDeleteUpdateZxHwGxProjectLevel";
+    public static final String deleteZlLevel = prefix + "batchDeleteUpdateZxHwZlProjectLevel";
+    public static final String deleteAqLevel = prefix + "batchDeleteUpdateZxHwAqProjectLevel";
 
     /**
      * 图片上传

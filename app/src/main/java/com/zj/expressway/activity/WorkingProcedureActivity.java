@@ -2,6 +2,7 @@ package com.zj.expressway.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
@@ -33,26 +34,6 @@ import java.util.List;
 import cn.hutool.core.util.StrUtil;
 
 /**
- * _ooOoo_
- * o8888888o
- * 88" . "88
- * (| -_- |)
- * O\  =  /O
- * ____/`---'\____
- * .'  \\|     |//  `.
- * /  \\|||  :  |||//  \
- * /  _||||| -:- |||||-  \
- * |   | \\\  -  /// |   |
- * | \_|  ''\---/''  |   |
- * \  .-\__  `-`  ___/-. /
- * ___`. .'  /--.--\  `. . __
- * ."" '<  `.___\_<|>_/___.'  >'"".
- * | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- * \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- * `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 佛祖保佑       永无BUG
  * Created by HaiJun on 2018/6/11 17:00
  * 工序列表主界面
  */
@@ -110,6 +91,10 @@ public class WorkingProcedureActivity extends BaseActivity {
         vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
 
         initViewPageData();
+
+        Drawable drawable = ContextCompat.getDrawable(mContext, R.drawable.to_do);
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+        btnToBeAudited.setCompoundDrawables(drawable, null, null, null);
 
         btnToBeAudited.setText("待办");
         btnFinish.setText("已办");

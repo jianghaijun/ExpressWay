@@ -22,6 +22,15 @@ public class Node {
     private boolean isLoading = false;                  // 是否已经加载
     private boolean isExpanded = true;                  // 是否处于展开状态
     private boolean isChoice = false;                   // 是否选中
+    private boolean isLocalAdd = false;                   // 是否本地添加
+
+    public boolean isLocalAdd() {
+        return isLocalAdd;
+    }
+
+    public void setLocalAdd(boolean localAdd) {
+        isLocalAdd = localAdd;
+    }
 
     public boolean isChoice() {
         return isChoice;

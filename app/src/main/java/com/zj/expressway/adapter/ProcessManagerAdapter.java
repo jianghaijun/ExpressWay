@@ -200,6 +200,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
 
     /**
      * 添加
+     *
      * @param point
      */
     public void addBtn(final int point) {
@@ -213,6 +214,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
 
     /**
      * 删除
+     *
      * @param point
      */
     public void deleteBtn(final int point) {
@@ -228,6 +230,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
 
     /**
      * 添加
+     *
      * @param node
      * @param point
      * @param levelName
@@ -248,7 +251,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
             obj.put("parentId", node.getLevelId());
             obj.put("parentIdAll", node.getParentIdAll());
         }
-        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.addLevel, obj.toString());
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.addGxLevel, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -312,6 +315,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
 
     /**
      * 删除
+     *
      * @param node
      * @param point
      */
@@ -321,7 +325,7 @@ public class ProcessManagerAdapter extends RecyclerView.Adapter<ProcessManagerAd
         Map<String, String> map = new HashMap<>();
         map.put("levelId", node.getLevelId());
         mapList.add(map);
-        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.deleteLevel, new Gson().toJson(mapList));
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.deleteGxLevel, new Gson().toJson(mapList));
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

@@ -329,7 +329,12 @@ public class ContractorDetailsActivity extends BaseActivity {
         txtWorkingNo.setText(flowBean.getProcessCode());     // 工序编号
         txtTakePhotoRequirement.setText(flowBean.getPhotoContent());     // 拍照要求
         txtDistanceAngle.setText(flowBean.getPhotoDistance());   // 距离角度
-        txtTakePhotoNum.setText("最少拍照" + flowBean.getPhotoNumber() + "张");  // 拍照张三
+        if (StrUtil.equals("0", flowBean.getPhotoNumber())) {
+            txtTakePhotoNum.setText("无要求");
+        } else {
+            txtTakePhotoNum.setText("最少拍照" + flowBean.getPhotoNumber() + "张");  // 拍照张三
+        }
+
         leastTakePhotoNum = Integer.valueOf(StrUtil.isEmpty(flowBean.getPhotoNumber()) ? "3" : flowBean.getPhotoNumber());
         txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getEnterTime()));    // 检查时间
         txtLocation.setText(flowBean.getLocation());    // 拍照位置

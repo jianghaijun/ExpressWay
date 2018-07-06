@@ -144,12 +144,14 @@
         android:paddingLeft="@dimen/ten_dp"
         android:text="@string/sync_process_dictionary"
         android:textColor="@color/dark_grey"
-        android:textSize="@dimen/sixteen_sp" />
+        android:textSize="@dimen/sixteen_sp"
+        android:visibility="gone" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="@dimen/one_dp"
-        android:background="@color/gray" />
+        android:background="@color/gray"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/btnSyncLevel"

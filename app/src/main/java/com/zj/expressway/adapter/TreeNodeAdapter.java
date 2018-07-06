@@ -4,52 +4,55 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.zj.expressway.R;
+import com.zj.expressway.activity.AddProcessActivity;
+import com.zj.expressway.activity.MainActivity;
+import com.zj.expressway.base.BaseModel;
+import com.zj.expressway.dialog.PromptDialog;
+import com.zj.expressway.dialog.RejectDialog;
 import com.zj.expressway.listener.ContractorListener;
+import com.zj.expressway.listener.PromptListener;
+import com.zj.expressway.listener.ReportListener;
 import com.zj.expressway.tree.Node;
+import com.zj.expressway.utils.ChildThreadUtil;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.JsonUtils;
+import com.zj.expressway.utils.JudgeNetworkIsAvailable;
+import com.zj.expressway.utils.LoadingUtils;
+import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
+import com.zj.expressway.view.SwipeMenuLayout;
 
-import org.xutils.view.annotation.ViewInject;
-import org.xutils.x;
-
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONObject;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:13
- *       无限树形图适配器
+ * Created by HaiJun on 2018/6/11 17:13
+ * 无限树形图适配器
  */
-public class TreeNodeAdapter extends BaseAdapter {
-    private LayoutInflater lif;
+public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNodeHolder> {
     public List<Node> allCache = new ArrayList<>();
     public List<Node> all = new ArrayList<>();
     private int expandedIcon = -1;
@@ -58,6 +61,7 @@ public class TreeNodeAdapter extends BaseAdapter {
     private Node rootNode;
     private List<String> nodeName = new ArrayList<>();
     private ContractorListener listener;
+    private String processType;
 
     /**
      * @param mContext
@@ -66,7 +70,7 @@ public class TreeNodeAdapter extends BaseAdapter {
     public TreeNodeAdapter(Activity mContext, Node rootNode, ContractorListener listener) {
         this.mContext = mContext;
         this.listener = listener;
-        this.lif = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
         addNode(rootNode);
     }
 
@@ -131,6 +135,7 @@ public class TreeNodeAdapter extends BaseAdapter {
                 all.add(n);
             }
         }
+        //notifyItemChanged(0);
         this.notifyDataSetChanged();
     }
 
@@ -168,12 +173,14 @@ public class TreeNodeAdapter extends BaseAdapter {
                 if (n.isExpanded()) {
                     n.setExpanded(!n.isExpanded());
                     filterNode();
+                    //notifyItemChanged(position);
                     this.notifyDataSetChanged();
                 } else {
                     // 是否已加载
                     if (n.isLoading()) {
                         n.setExpanded(!n.isExpanded());
                         filterNode();
+                        //notifyItemChanged(position);
                         this.notifyDataSetChanged();
                     } else {
                         // 加载该节点下的工序 设置根节点的展开状态
@@ -187,13 +194,15 @@ public class TreeNodeAdapter extends BaseAdapter {
                 }
                 n.setChoice(true);
                 SpUtil.put(mContext, "selectProcess", position);
-                TreeNodeAdapter.this.notifyDataSetChanged();
+                //notifyItemChanged(position);
+                notifyDataSetChanged();
             }
         }
     }
 
     /**
      * 选中工序--->确认
+     *
      * @param position
      */
     public void selectProcess(int position) {
@@ -229,6 +238,7 @@ public class TreeNodeAdapter extends BaseAdapter {
 
     /**
      * 选中工序--->确认
+     *
      * @param position
      */
     public String getProcessPath(int position) {
@@ -257,32 +267,12 @@ public class TreeNodeAdapter extends BaseAdapter {
     }
 
     @Override
-    public int getCount() {
-        return all.size();
+    public TreeNodeAdapter.TreeNodeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new TreeNodeAdapter.TreeNodeHolder(LayoutInflater.from(mContext).inflate(R.layout.item_contractor, parent, false));
     }
 
     @Override
-    public Object getItem(int position) {
-        return all.get(position);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-    @Override
-    public View getView(final int position, View view, ViewGroup parent) {
-        final ViewHolder holder;
-        if (view == null) {
-            view = this.lif.inflate(R.layout.item_contractor, null);
-            holder = new ViewHolder();
-            x.view().inject(holder, view);
-            view.setTag(holder);
-        } else {
-            holder = (ViewHolder) view.getTag();
-        }
-
+    public void onBindViewHolder(final TreeNodeAdapter.TreeNodeHolder holder, final int position) {
         // 得到当前节点
         final Node n = all.get(position);
 
@@ -317,6 +307,94 @@ public class TreeNodeAdapter extends BaseAdapter {
                 holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.btn_un_check));
             }
 
+            // 展开收缩
+            holder.llMain.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ExpandOrCollapse(position);
+                }
+            });
+
+            if (processType.equals("1")) {
+                // 长按事件
+                holder.llMain.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        new PromptDialog(mContext, new PromptListener() {
+                            @Override
+                            public void returnTrueOrFalse(boolean trueOrFalse) {
+                                if (trueOrFalse) {
+                                    boolean isSync = (boolean) SpUtil.get(mContext, "isSync", false);
+                                    if (isSync) {
+                                        Intent intent = new Intent(mContext, AddProcessActivity.class);
+                                        intent.putExtra("position", position);
+                                        mContext.startActivityForResult(intent, 1005);
+                                    } else {
+                                        new PromptDialog(mContext, new PromptListener() {
+                                            @Override
+                                            public void returnTrueOrFalse(boolean trueOrFalse) {
+                                                if (trueOrFalse) {
+                                                    ConstantsUtil.jumpPersonalInfo = true;
+                                                    ScreenManagerUtil.popAllActivityExceptOne(MainActivity.class);
+                                                }
+                                            }
+                                        }, "提示", "是否跳转到个人中心页同步工序字典后再进行添加？", "否", "是").show();
+                                    }
+                                }
+                            }
+                        }, "提示", "是否添加新层级？", "否", "是").show();
+                        return true;
+                    }
+                });
+            }
+
+            // 添加工序
+            holder.btnAddLevel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((SwipeMenuLayout) holder.itemView).quickClose();
+                    if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                        ToastUtil.showShort(mContext, mContext.getString(R.string.not_network));
+                    } else if (n.isLocalAdd()) {
+                        new PromptDialog(mContext, new PromptListener() {
+                            @Override
+                            public void returnTrueOrFalse(boolean trueOrFalse) {
+                                if (trueOrFalse) {
+                                    ConstantsUtil.jumpPersonalInfo = true;
+                                    ScreenManagerUtil.popAllActivityExceptOne(MainActivity.class);
+                                }
+                            }
+                        }, "提示", "是否跳转到个人中心页将本地工序提交至服务器后再进行添加？", "否", "是").show();
+                    } else {
+                        addBtn(position);
+                    }
+                }
+            });
+
+            // 删除工序
+            holder.btnDeleteLevel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((SwipeMenuLayout) holder.itemView).quickClose();
+                    if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                        ToastUtil.showShort(mContext, mContext.getString(R.string.not_network));
+                    } else if (n.isLocalAdd()) {
+                        new PromptDialog(mContext, new PromptListener() {
+                            @Override
+                            public void returnTrueOrFalse(boolean trueOrFalse) {
+                                if (trueOrFalse) {
+                                    ConstantsUtil.jumpPersonalInfo = true;
+                                    ScreenManagerUtil.popAllActivityExceptOne(MainActivity.class);
+                                }
+                            }
+                        }, "提示", "是否跳转到个人中心页将本地工序提交至服务器后再进行删除？", "否", "是").show();
+                    } else {
+                        deleteBtn(position);
+                    }
+                }
+            });
+
+            // 单选
             holder.rlRight.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -325,7 +403,8 @@ public class TreeNodeAdapter extends BaseAdapter {
                     }
                     n.setChoice(true);
                     SpUtil.put(mContext, "selectProcess", position);
-                    TreeNodeAdapter.this.notifyDataSetChanged();
+                    //notifyItemChanged(position);
+                    notifyDataSetChanged();
                 }
             });
 
@@ -336,30 +415,219 @@ public class TreeNodeAdapter extends BaseAdapter {
                 holder.rlItemTree.setPadding(0 * (n.getLevel() - 1), 3, 3, 3);
             }
         }
-        return view;
+    }
+
+    @Override
+    public int getItemCount() {
+        return all == null ? 0 : all.size();
+    }
+
+    /**
+     * 添加
+     *
+     * @param point
+     */
+    private void addBtn(final int point) {
+        new RejectDialog(mContext, new ReportListener() {
+            @Override
+            public void returnUserId(String userId) {
+                add(all.get(point), point, userId);
+            }
+        }, "提示", "请输入层级名称", "取消", "添加").show();
+    }
+
+    /**
+     * 删除
+     *
+     * @param point
+     */
+    public void deleteBtn(final int point) {
+        new PromptDialog(mContext, new PromptListener() {
+            @Override
+            public void returnTrueOrFalse(boolean trueOrFalse) {
+                if (trueOrFalse) {
+                    delete(all.get(point), point);
+                }
+            }
+        }, "提示", "数据删除无法恢复，您确认删除么？", "取消", "确认").show();
+    }
+
+    /**
+     * 添加
+     *
+     * @param node
+     * @param point
+     * @param levelName
+     */
+    private void add(final Node node, final int point, String levelName) {
+        LoadingUtils.showLoading(mContext);
+        JSONObject obj = new JSONObject();
+        final String[] str = levelName.split("&&");
+        obj.put("levelName", str[1]);
+        if (StrUtil.equals("0", str[0])) {
+            obj.put("parentId", node.getParentId());
+            if (node.getParent().isRoot()) {
+                obj.put("parentIdAll", "");
+            } else {
+                obj.put("parentIdAll", node.getParent().getParentIdAll());
+            }
+        } else {
+            obj.put("parentId", node.getLevelId());
+            obj.put("parentIdAll", node.getParentIdAll());
+        }
+        String url;
+        if (StrUtil.equals("1", processType)) {
+            url = ConstantsUtil.addGxLevel;
+        } else if (StrUtil.equals("2", processType)) {
+            url = ConstantsUtil.addZlLevel;
+        } else  {
+            url = ConstantsUtil.addAqLevel;
+        }
+
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    Gson gson = new Gson();
+                    BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        mContext.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                JSONObject obj = new JSONObject(jsonData);
+                                obj = new JSONObject(obj.getObj("data").toString());
+                                Node n = new Node();
+                                n.setLevelId((String) obj.getObj("levelId", ""));
+                                n.setLevelName((String) obj.getObj("levelName", ""));
+                                n.setParentId((String) obj.getObj("parentId", ""));
+                                n.setFolderFlag((String) obj.getObj("folderFlag", ""));
+                                n.setExpanded(false);
+                                n.setLoading(false);
+                                n.setChoice(false);
+
+                                if (StrUtil.equals("0", str[0])) {
+                                    n.setParent(node.getParent());
+                                    allCache.add(point, n);
+                                    all.add(point, n);
+                                    notifyItemInserted(point);
+                                } else {
+                                    n.setParent(node);
+                                    node.setExpanded(true);
+                                    node.setLoading(true);
+                                    node.setChoice(true);
+
+                                    List<Node> nodeList = node.getChildren();
+                                    nodeList.add(n);
+                                    all.get(point).setChildren(nodeList);
+                                    allCache.get(point).setChildren(nodeList);
+
+                                    allCache.add(point + 1, n);
+                                    all.add(point + 1, n);
+
+                                    notifyItemInserted(point + 1);
+                                }
+                                LoadingUtils.hideLoading();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.json_error));
+                }
+            }
+        });
+    }
+
+    /**
+     * 删除
+     *
+     * @param node
+     * @param point
+     */
+    private void delete(final Node node, final int point) {
+        LoadingUtils.showLoading(mContext);
+        List<Map<String, String>> mapList = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
+        map.put("levelId", node.getLevelId());
+        mapList.add(map);
+        String url;
+        if (StrUtil.equals("1", processType)) {
+            url = ConstantsUtil.deleteGxLevel;
+        } else if (StrUtil.equals("2", processType)) {
+            url = ConstantsUtil.deleteZlLevel;
+        } else  {
+            url = ConstantsUtil.deleteAqLevel;
+        }
+
+        Request request = ChildThreadUtil.getRequest(mContext, url, new Gson().toJson(mapList));
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    Gson gson = new Gson();
+                    BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        mContext.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                allCache.remove(point);
+                                all.remove(point);
+                                notifyItemRemoved(point);
+                                if(point != all.size()){ // 如果移除的是最后一个，忽略
+                                    notifyItemRangeChanged(point, all.size() - point);
+                                }
+                                LoadingUtils.hideLoading();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.json_error));
+                }
+            }
+        });
     }
 
     /**
      * 列表项控件集合
      */
-    private class ViewHolder {
-        // 展开收缩图标
-        @ViewInject(R.id.imgViewState)
+    public class TreeNodeHolder extends RecyclerView.ViewHolder {
         private ImageView imgViewState;
-        @ViewInject(R.id.imgViewNode)
         private ImageView imgViewNode;
-        @ViewInject(R.id.imgViewSelect)
         private ImageView imgViewSelect;
-
-        // 标题
-        @ViewInject(R.id.txtTitle)
         private TextView txtTitle;
-        @ViewInject(R.id.rlItemTree)
+        private Button btnAddLevel;
+        private Button btnDeleteLevel;
         private RelativeLayout rlItemTree;
-        @ViewInject(R.id.rlNodeState)
-        private RelativeLayout rlNodeState;
-        @ViewInject(R.id.rlRight)
+        private LinearLayout llMain;
         private RelativeLayout rlRight;
-    }
 
+        public TreeNodeHolder(View itemView) {
+            super(itemView);
+            imgViewState = (ImageView) itemView.findViewById(R.id.imgViewState);
+            imgViewNode = (ImageView) itemView.findViewById(R.id.imgViewNode);
+            imgViewSelect = (ImageView) itemView.findViewById(R.id.imgViewSelect);
+            txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
+            btnAddLevel = (Button) itemView.findViewById(R.id.btnAddLevel);
+            btnDeleteLevel = (Button) itemView.findViewById(R.id.btnDeleteLevel);
+            rlItemTree = (RelativeLayout) itemView.findViewById(R.id.rlItemTree);
+            rlRight = (RelativeLayout) itemView.findViewById(R.id.rlRight);
+            llMain = (LinearLayout) itemView.findViewById(R.id.llMain);
+        }
+    }
 }
