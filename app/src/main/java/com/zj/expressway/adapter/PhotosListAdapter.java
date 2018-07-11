@@ -20,7 +20,6 @@ import com.zj.expressway.bean.PictureBean;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.listener.ShowPhotoListener;
-import com.zj.expressway.model.PictureModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
@@ -39,28 +38,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:11
- *       工序详情照片列表适配器
+ * Created by HaiJun on 2018/6/11 17:11
+ * 工序详情照片列表适配器
  */
 public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.ContractorDetailsHolder> {
     private Activity mContext;
@@ -179,6 +158,7 @@ public class PhotosListAdapter extends RecyclerView.Adapter<PhotosListAdapter.Co
 
     /**
      * 删除服务器上图片
+     *
      * @param bean
      * @param point
      */

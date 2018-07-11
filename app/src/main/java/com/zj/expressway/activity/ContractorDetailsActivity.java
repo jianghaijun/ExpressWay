@@ -825,6 +825,8 @@ public class ContractorDetailsActivity extends BaseActivity {
         @Override
         protected Void doInBackground(String... params) {
             Bitmap bitmap = BitmapFactory.decodeFile(strFilePath + fileUrlName);
+            // 压缩图片
+            //bitmap = FileUtil.compressBitmap(bitmap);
             // 在图片上添加水印
             bitmap = ImageUtil.createWaterMaskLeftTop(mContext, bitmap, params[0], addPhotoBean);
             // 保存到SD卡指定文件夹下
@@ -860,7 +862,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         File file = new File(ConstantsUtil.SAVE_PATH + fileName);
         try {
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 75, bos);
             bos.flush();
             bos.close();
         } catch (IOException e) {

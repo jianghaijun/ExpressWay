@@ -87,7 +87,7 @@ public class ProcessPopupWindow extends PopupWindow {
             txtWorkingName.setText(bean.getDictName());
             txtWorkingName.setTextSize(14);
             txtWorkingName.setTextColor(ContextCompat.getColor(mActivity, R.color.black));
-            int widthSize = (int) ((width * 0.8) - DensityUtil.dip2px(10 + 40 + 80 * 2 + 3));
+            int widthSize = (int) ((width * 0.8) - DensityUtil.dip2px(10 + 40 + 80 + 3));
             lp = new TableRow.LayoutParams(widthSize, DensityUtil.dip2px(30));
             if (i == 0) {
                 lp.setMargins(0, 0, DensityUtil.dip2px(1), 0);
@@ -102,7 +102,7 @@ public class ProcessPopupWindow extends PopupWindow {
             tableRow.addView(txtWorkingName, lp);
 
             // 拍照要求
-            TextView txtDistance = new TextView(mActivity);
+            /*TextView txtDistance = new TextView(mActivity);
             txtDistance.setBackgroundColor(ContextCompat.getColor(mActivity, R.color.white));
             txtDistance.setText(bean.getPhotoDistance());
             txtDistance.setTextSize(14);
@@ -114,7 +114,7 @@ public class ProcessPopupWindow extends PopupWindow {
                 lp.setMargins(0, DensityUtil.dip2px(1), DensityUtil.dip2px(1), 0);
             }
             txtDistance.setGravity(Gravity.CENTER);
-            tableRow.addView(txtDistance, lp);
+            tableRow.addView(txtDistance, lp);*/
 
             // 照片数量
             TextView txtPhotoNum = new TextView(mActivity);

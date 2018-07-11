@@ -200,14 +200,14 @@
                         android:textColor="@color/black"
                         android:textSize="@dimen/fourteen_sp" />
 
-                    <RadioButton
+                    <!--<RadioButton
                         android:id="@+id/rBtn2"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="@string/serious"
                         android:textColor="@color/black"
-                        android:textSize="@dimen/fourteen_sp" />
+                        android:textSize="@dimen/fourteen_sp" />-->
 
                     <RadioButton
                         android:id="@+id/rBtn3"
@@ -218,6 +218,43 @@
                         android:textColor="@color/black"
                         android:textSize="@dimen/fourteen_sp" />
                 </RadioGroup>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:minHeight="@dimen/forty">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/one_dp"
+                    android:layout_marginLeft="@dimen/ten_dp"
+                    android:layout_marginRight="@dimen/ten_dp"
+                    android:background="@color/gray" />
+
+                <TextView
+                    android:id="@+id/txtHiddenTroubleType"
+                    android:layout_width="@dimen/eighty_dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:gravity="right|center"
+                    android:text="@string/hiddenTroubleType"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <com.zj.expressway.view.GridRadioGroup
+                    android:id="@+id/rgType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/ten_dp"
+                    android:layout_toRightOf="@+id/txtHiddenTroubleType"
+                    android:background="@null"
+                    android:columnCount="3"
+                    android:minHeight="@dimen/forty"
+                    android:orientation="horizontal" />
 
             </RelativeLayout>
 

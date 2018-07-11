@@ -24,6 +24,15 @@ public class ContractorBean extends DataSupport implements Serializable {
     private String levelType;       // 质量或安全
     private String canExpand;     // 是否有子工序 1:有 0：无
     private int isLocalAdd;     // 是否是本地添加 1：是 2：否
+    private String levelLevel;     // 是否是本地添加 1：是 2：否
+
+    public String getLevelLevel() {
+        return levelLevel;
+    }
+
+    public void setLevelLevel(String levelLevel) {
+        this.levelLevel = levelLevel;
+    }
 
     public String getParentIdAll() {
         return parentIdAll;

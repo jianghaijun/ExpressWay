@@ -22,14 +22,17 @@
         android:layout_height="@dimen/fifty_dp"
         android:layout_below="@+id/actionBar"
         android:background="@null"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/five_dp"
+        android:paddingRight="@dimen/five_dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/five_dp"
             android:layout_weight="1"
-            android:background="@drawable/gray_stroke_white_solid_bg">
+            android:background="@drawable/gray_stroke_white_solid_bg"
+            android:padding="@dimen/one_dp">
 
             <Button
                 android:id="@+id/btnCondition1"
@@ -47,7 +50,8 @@
             android:layout_height="match_parent"
             android:layout_margin="@dimen/five_dp"
             android:layout_weight="1"
-            android:background="@drawable/gray_stroke_white_solid_bg">
+            android:background="@drawable/gray_stroke_white_solid_bg"
+            android:padding="@dimen/one_dp">
 
             <Button
                 android:id="@+id/btnCondition2"
@@ -65,7 +69,8 @@
             android:layout_height="match_parent"
             android:layout_margin="@dimen/five_dp"
             android:layout_weight="1"
-            android:background="@drawable/gray_stroke_white_solid_bg">
+            android:background="@drawable/gray_stroke_white_solid_bg"
+            android:padding="@dimen/one_dp">
 
             <Button
                 android:id="@+id/btnCondition3"
@@ -77,15 +82,13 @@
                 android:drawableRight="@drawable/drop_down"
                 android:paddingRight="@dimen/ten_dp" />
         </RelativeLayout>
-
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/llButtons"
-        android:layout_marginBottom="@dimen/five_dp"
-        android:layout_marginTop="@dimen/five_dp"
+        android:layout_margin="@dimen/five_dp"
         android:background="@null">
 
         <com.scwang.smartrefresh.layout.SmartRefreshLayout
@@ -93,6 +96,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/rlInput"
+            android:layout_marginLeft="@dimen/five_dp"
+            android:layout_marginRight="@dimen/five_dp"
             app:srlEnableLoadMoreWhenContentNotFull="true">
 
             <android.support.v7.widget.RecyclerView
@@ -102,7 +107,6 @@
                 android:background="@color/white"
                 android:paddingBottom="@dimen/five_dp"
                 android:scrollbars="none" />
-
         </com.scwang.smartrefresh.layout.SmartRefreshLayout>
 
         <RelativeLayout

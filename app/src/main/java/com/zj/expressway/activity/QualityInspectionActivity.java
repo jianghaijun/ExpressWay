@@ -22,6 +22,7 @@ import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
@@ -110,6 +111,7 @@ public class QualityInspectionActivity extends BaseActivity {
         ScreenManagerUtil.pushActivity(this);
 
         txtTitle.setText(R.string.app_name);
+
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         imgBtnRight.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.search_btn));
@@ -228,9 +230,9 @@ public class QualityInspectionActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        qualityActivity.initData(2, txtTakePhoto, null);
-        toDoActivity.initData(4, txtUnSubmit, null);
-        hasToDoActivity.initData(5, txtSubmit, null);
+        qualityActivity.initData(2, txtTakePhoto, null, true);
+        toDoActivity.initData(4, txtUnSubmit, null, false);
+        hasToDoActivity.initData(5, txtSubmit, null, false);
     }
 
     /**
@@ -290,13 +292,13 @@ public class QualityInspectionActivity extends BaseActivity {
     private void setStates(int option) {
         // 待拍照
         //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 待审核
         //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 已完成
         //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
 
         switch (option) {
             case 0:
@@ -323,10 +325,10 @@ public class QualityInspectionActivity extends BaseActivity {
             case 0:
                 break;
             case 1:
-                toDoActivity.initData(4, txtUnSubmit, searchContext);
+                toDoActivity.initData(4, txtUnSubmit, searchContext, true);
                 break;
             case 2:
-                hasToDoActivity.initData(5, txtSubmit, searchContext);
+                hasToDoActivity.initData(5, txtSubmit, searchContext, true);
                 break;
         }
     }

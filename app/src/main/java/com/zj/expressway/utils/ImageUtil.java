@@ -125,7 +125,7 @@ public class ImageUtil {
         StaticLayout layout = new StaticLayout(processPath, 0, processPath.length(), DateUtils.getTextPaint(textSize, processPath, Color.BLACK), processPathWatermarkWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.5F, true);
         // 文字开始的坐标
         float textX = width - watermarkBitmap.getWidth() + constructionSiteWidth + DensityUtil.dip2px(5);
-        float textY = height - watermarkBitmap.getHeight() + topSize - DensityUtil.dip2px(5);
+        float textY = height - watermarkBitmap.getHeight() + topSize - DensityUtil.dip2px(3);
         // 画文字
         canvas.translate(textX, textY);
         layout.draw(canvas);

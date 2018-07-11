@@ -1,7 +1,6 @@
 package com.zj.expressway.adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +18,8 @@ import com.zj.expressway.R;
 import com.zj.expressway.activity.AddProcessActivity;
 import com.zj.expressway.activity.MainActivity;
 import com.zj.expressway.base.BaseModel;
+import com.zj.expressway.bean.ContractorBean;
+import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.RejectDialog;
 import com.zj.expressway.listener.ContractorListener;
@@ -34,6 +35,8 @@ import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 import com.zj.expressway.view.SwipeMenuLayout;
+
+import org.litepal.crud.DataSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -302,9 +305,9 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
             }
 
             if (n.isChoice()) {
-                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.btn_check));
+                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.radio_check));
             } else {
-                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.btn_un_check));
+                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.radio_un_check));
             }
 
             // 展开收缩
@@ -315,6 +318,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 }
             });
 
+            // 只用工序才能长按添加
             if (processType.equals("1")) {
                 // 长按事件
                 holder.llMain.setOnLongClickListener(new View.OnLongClickListener() {
@@ -328,6 +332,8 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                                     if (isSync) {
                                         Intent intent = new Intent(mContext, AddProcessActivity.class);
                                         intent.putExtra("position", position);
+                                        intent.putExtra("levelId", "update");
+                                        intent.putExtra("levelName", "");
                                         mContext.startActivityForResult(intent, 1005);
                                     } else {
                                         new PromptDialog(mContext, new PromptListener() {
@@ -356,6 +362,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                     if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                         ToastUtil.showShort(mContext, mContext.getString(R.string.not_network));
                     } else if (n.isLocalAdd()) {
+                        // 防止服务器没有父节点导致异常问题
                         new PromptDialog(mContext, new PromptListener() {
                             @Override
                             public void returnTrueOrFalse(boolean trueOrFalse) {
@@ -371,23 +378,43 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 }
             });
 
+            // 编辑功能
+            if (n.isLocalAdd() && StrUtil.equals("1", n.getLevelLevel())) {
+                holder.btnUpdateLevel.setVisibility(View.VISIBLE);
+                holder.btnUpdateLevel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(mContext, AddProcessActivity.class);
+                        intent.putExtra("position", position);
+                        intent.putExtra("levelId", n.getLevelId());
+                        intent.putExtra("levelName", n.getLevelName());
+                        mContext.startActivityForResult(intent, 1006);
+                    }
+                });
+            }
+
             // 删除工序
             holder.btnDeleteLevel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     ((SwipeMenuLayout) holder.itemView).quickClose();
-                    if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                        ToastUtil.showShort(mContext, mContext.getString(R.string.not_network));
-                    } else if (n.isLocalAdd()) {
+                    if (n.isLocalAdd()) {
                         new PromptDialog(mContext, new PromptListener() {
                             @Override
                             public void returnTrueOrFalse(boolean trueOrFalse) {
                                 if (trueOrFalse) {
-                                    ConstantsUtil.jumpPersonalInfo = true;
-                                    ScreenManagerUtil.popAllActivityExceptOne(MainActivity.class);
+                                    DataSupport.deleteAll(ContractorBean.class, "levelId=?", n.getLevelId());
+                                    DataSupport.deleteAll(ContractorBean.class, "parentId=?", n.getLevelId());
+                                    DataSupport.deleteAll(WorkingBean.class, "levelId=?", n.getLevelId());
+                                    allCache.remove(position);
+                                    all.remove(position);
+                                    notifyItemRemoved(position);
+                                    if (position != all.size()) { // 如果移除的是最后一个，忽略
+                                        notifyItemRangeChanged(position, all.size() - position);
+                                    }
                                 }
                             }
-                        }, "提示", "是否跳转到个人中心页将本地工序提交至服务器后再进行删除？", "否", "是").show();
+                        }, "提示", "数据删除无法恢复，您确认删除么？", "取消", "确认").show();
                     } else {
                         deleteBtn(position);
                     }
@@ -403,7 +430,6 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                     }
                     n.setChoice(true);
                     SpUtil.put(mContext, "selectProcess", position);
-                    //notifyItemChanged(position);
                     notifyDataSetChanged();
                 }
             });
@@ -441,7 +467,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
      *
      * @param point
      */
-    public void deleteBtn(final int point) {
+    private void deleteBtn(final int point) {
         new PromptDialog(mContext, new PromptListener() {
             @Override
             public void returnTrueOrFalse(boolean trueOrFalse) {
@@ -480,7 +506,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
             url = ConstantsUtil.addGxLevel;
         } else if (StrUtil.equals("2", processType)) {
             url = ConstantsUtil.addZlLevel;
-        } else  {
+        } else {
             url = ConstantsUtil.addAqLevel;
         }
 
@@ -563,7 +589,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
             url = ConstantsUtil.deleteGxLevel;
         } else if (StrUtil.equals("2", processType)) {
             url = ConstantsUtil.deleteZlLevel;
-        } else  {
+        } else {
             url = ConstantsUtil.deleteAqLevel;
         }
 
@@ -587,7 +613,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                                 allCache.remove(point);
                                 all.remove(point);
                                 notifyItemRemoved(point);
-                                if(point != all.size()){ // 如果移除的是最后一个，忽略
+                                if (point != all.size()) { // 如果移除的是最后一个，忽略
                                     notifyItemRangeChanged(point, all.size() - point);
                                 }
                                 LoadingUtils.hideLoading();
@@ -612,6 +638,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
         private ImageView imgViewSelect;
         private TextView txtTitle;
         private Button btnAddLevel;
+        private Button btnUpdateLevel;
         private Button btnDeleteLevel;
         private RelativeLayout rlItemTree;
         private LinearLayout llMain;
@@ -624,6 +651,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
             imgViewSelect = (ImageView) itemView.findViewById(R.id.imgViewSelect);
             txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
             btnAddLevel = (Button) itemView.findViewById(R.id.btnAddLevel);
+            btnUpdateLevel = (Button) itemView.findViewById(R.id.btnUpdateLevel);
             btnDeleteLevel = (Button) itemView.findViewById(R.id.btnDeleteLevel);
             rlItemTree = (RelativeLayout) itemView.findViewById(R.id.rlItemTree);
             rlRight = (RelativeLayout) itemView.findViewById(R.id.rlRight);

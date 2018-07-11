@@ -326,7 +326,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 loadProcedureByNodeId(point, levelId);
             } else {
                 List<ContractorBean> listBean = DataSupport.where("parentId = ? and levelType = ?", levelId, processType).find(ContractorBean.class);
-                setNodeInChildren(listBean, point, true, false);
+                setNodeInChildren(listBean, point, true);
             }
         }
     };
@@ -380,7 +380,7 @@ public class ContractorTreeActivity extends BaseActivity {
                                     model.getData().addAll(beanList);
                                 }
                                 // 将数据添加到Node的子节点中
-                                setNodeInChildren(model.getData(), position, true, false);
+                                setNodeInChildren(model.getData(), position, true);
                                 LoadingUtils.hideLoading();
                             }
                         });
@@ -400,7 +400,7 @@ public class ContractorTreeActivity extends BaseActivity {
      * @param data
      * @param position
      */
-    private void setNodeInChildren(List<ContractorBean> data, int position, boolean isLoading, boolean isLocalAdd) {
+    private void setNodeInChildren(List<ContractorBean> data, int position, boolean isLoading) {
         List<Node> nodes = new ArrayList<>();
         for (ContractorBean contractor : data) {
             String levelId = contractor.getLevelId();
@@ -410,6 +410,7 @@ public class ContractorTreeActivity extends BaseActivity {
             n.setParent(all.get(position));
             n.setLevelId(levelId);
             n.setLevelName(levelName);
+            n.setLevelLevel(contractor.getLevelLevel());
             n.setParentId(contractor.getParentId());
             n.setParentIdAll(contractor.getParentIdAll());
             n.setParentNameAll(contractor.getParentNameAll());
@@ -417,7 +418,7 @@ public class ContractorTreeActivity extends BaseActivity {
             n.setExpanded(false);
             n.setLoading(false);
             n.setChoice(false);
-            n.setLocalAdd(isLocalAdd);
+            n.setLocalAdd(StrUtil.equals(contractor.getIsLocalAdd()+"", "1"));
             nodes.add(n);
         }
 
@@ -469,13 +470,24 @@ public class ContractorTreeActivity extends BaseActivity {
                 int position = data.getIntExtra("position", 0);
                 ArrayList<String> dictId = data.getStringArrayListExtra("dictIdList");
 
+                // 判断子级是否有重复层级名称
+                List<Node> nodeList = all.get(position).getChildren();
+                if (nodeList != null && nodeList.size() != 0) {
+                    for (Node node : nodeList) {
+                        if (StrUtil.equals(node.getLevelName(), pileNo)) {
+                            ToastUtil.showShort(mContext, "不能添加相同层级名称的数据！");
+                            return;
+                        }
+                    }
+                }
+
                 List<ContractorBean> beanList = new ArrayList<>();
                 String parentLevelId = RandomUtil.randomUUID().replaceAll("-", "");
                 // 1、向节点下添加桩号
                 String parentIdAll = all.get(position).getParentIdAll() + "," + parentLevelId;
                 String parentNameAll = all.get(position).getParentNameAll() + "," + pileNo;
 
-                ContractorBean newPileNo = addLocalLevel(parentLevelId, pileNo, all.get(position).getLevelId(), "1", "0", "", parentIdAll, parentNameAll);
+                ContractorBean newPileNo = addLocalLevel(parentLevelId, pileNo, all.get(position).getLevelId(), "1", "0", "", parentIdAll, parentNameAll, "1");
                 beanList.add(newPileNo);
                 // 向桩号下添加层级
                 for (String str : dictId) {
@@ -486,7 +498,7 @@ public class ContractorTreeActivity extends BaseActivity {
                             String levelId = RandomUtil.randomUUID().replaceAll("-", "");
                             parentIdAll += "," + levelId;
                             parentNameAll += "," + proBean.getDictName();
-                            addLocalLevel(levelId, proBean.getDictName(), parentLevelId, "0", "1", proBean.getDictCode(), parentIdAll, parentNameAll);
+                            addLocalLevel(levelId, proBean.getDictName(), parentLevelId, "0", "1", proBean.getDictCode(), parentIdAll, parentNameAll, "2");
                             List<ProcessDictionaryBean> list = DataSupport.where("parentId=?", str).find(ProcessDictionaryBean.class);
                             for (ProcessDictionaryBean bean : list) {
                                 addLocalProcess(bean, position, pileNo + "," + proBean.getDictName(), levelId, parentIdAll);
@@ -496,7 +508,87 @@ public class ContractorTreeActivity extends BaseActivity {
                 }
                 all.get(position).setExpanded(true);
                 allCache.get(position).setExpanded(true);
-                setNodeInChildren(beanList, position, false, true);
+                setNodeInChildren(beanList, position, false);
+            } else if (requestCode == 1006) {
+                // 子级新增
+                String pileNo = data.getStringExtra("pileNo");
+                String levelId = data.getStringExtra("levelId");
+                int position = data.getIntExtra("position", 0);
+                ArrayList<String> dictId = data.getStringArrayListExtra("dictIdList");
+                ArrayList<String> oldDictId = data.getStringArrayListExtra("oldDictIdList");
+                ArrayList<String> oldDictName = data.getStringArrayListExtra("oldDictNameList");
+
+                // 判断父级中的子级是否有重复层级名称
+                String oldName = all.get(position).getLevelName();
+                List<Node> nodeList = all.get(position).getParent().getChildren();
+                if (nodeList != null && nodeList.size() != 0) {
+                    for (Node node : nodeList) {
+                        if (StrUtil.equals(node.getLevelName(), pileNo) && !StrUtil.equals(node.getLevelName(), oldName)) {
+                            ToastUtil.showShort(mContext, "不能添加相同层级名称的数据！");
+                            return;
+                        }
+                    }
+                }
+
+                // 修改桩号
+                List<ContractorBean> pileNoList = DataSupport.where("levelId=?", levelId).find(ContractorBean.class);
+                if (pileNoList != null) {
+                    for (ContractorBean bean : pileNoList) {
+                        bean.setLevelName(pileNo);
+                        bean.setParentNameAll(bean.getParentNameAll().substring(0, bean.getParentNameAll().lastIndexOf(",")) + "," + pileNo);
+                        bean.saveOrUpdate("levelId=?", bean.getLevelId());
+                    }
+                }
+
+                // 判断以前选择的层级是否还在---有去除新选择的--没有删除原来的
+                for (int i = 0; i < oldDictId.size(); i++) {
+                    if (dictId.contains(oldDictId.get(i))) {
+                        dictId.remove(oldDictId.get(i));
+                    } else {
+                        List<ContractorBean> oldLevelList = DataSupport.where("parentId=? and levelName=?", levelId, oldDictName.get(i)).find(ContractorBean.class);
+                        if (oldLevelList != null) {
+                            for (ContractorBean bean : oldLevelList) {
+                                DataSupport.deleteAll(ContractorBean.class, "levelId=?", bean.getLevelId());
+                                DataSupport.deleteAll(WorkingBean.class, "levelId=?", bean.getLevelId());
+                            }
+                        }
+                    }
+                }
+
+                // 修改桩号下层级
+                for (String str : dictId) {
+                    // 查询层级
+                    List<ProcessDictionaryBean> proList = DataSupport.where("dictId=?", str).find(ProcessDictionaryBean.class);
+                    if (proList != null) {
+                        for (ProcessDictionaryBean proBean : proList) {
+                            String newLevelId = RandomUtil.randomUUID().replaceAll("-", "");
+                            String parentIdAll = all.get(position).getParentIdAll() + "," + newLevelId;
+                            String parentNameAll = all.get(position).getParentNameAll() + "," + proBean.getDictName();
+                            addLocalLevel(newLevelId, proBean.getDictName(), levelId, "0", "1", proBean.getDictCode(), parentIdAll, parentNameAll, "2");
+                            List<ProcessDictionaryBean> list = DataSupport.where("parentId=?", str).find(ProcessDictionaryBean.class);
+                            for (ProcessDictionaryBean bean : list) {
+                                addLocalProcess(bean, position, pileNo + "," + proBean.getDictName(), newLevelId, parentIdAll);
+                            }
+                        }
+                    }
+                }
+
+                ta.ExpandOrCollapse(position);
+
+                all.get(position).setLevelName(pileNo);
+                if (all.get(position).getChildren() != null) {
+                    final List<Node> nodeList1 = all.get(position).getChildren();
+                    for (Node node : nodeList1) {
+                        allCache.remove(node);
+                    }
+                    all.get(position).getChildren().clear();
+                }
+                allCache.get(position).setLevelName(pileNo);
+                all.get(position).setExpanded(false);
+                all.get(position).setLoading(false);
+                allCache.get(position).setExpanded(false);
+                allCache.get(position).setLoading(false);
+                ta.notifyDataSetChanged();
             }
         }
     }
@@ -510,7 +602,7 @@ public class ContractorTreeActivity extends BaseActivity {
      * @param isFolder
      * @param canExpand
      */
-    private ContractorBean addLocalLevel(String levelId, String levelName, String parentId, String isFolder, String canExpand, String levelCode, String parentIdAll, String parentNameAll) {
+    private ContractorBean addLocalLevel(String levelId, String levelName, String parentId, String isFolder, String canExpand, String levelCode, String parentIdAll, String parentNameAll, String levelLevel) {
         ContractorBean newPileNo = new ContractorBean();
         newPileNo.setLevelId(levelId);// 层级ID
         newPileNo.setLevelName(levelName);// 层级名称
@@ -525,6 +617,7 @@ public class ContractorTreeActivity extends BaseActivity {
         newPileNo.setLevelType(processType);// 质量或安全
         newPileNo.setCanExpand(canExpand);// 是否有子工序 1:有 0：无
         newPileNo.setIsLocalAdd(1);
+        newPileNo.setLevelLevel(levelLevel);
         newPileNo.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
         newPileNo.saveOrUpdate("levelId=?", levelId);
         return newPileNo;
@@ -555,6 +648,7 @@ public class ContractorTreeActivity extends BaseActivity {
         workingBean.setCheckNameAll("未审核");
         workingBean.setType("1");
         workingBean.setIsLocalAdd(1);
+        workingBean.setLevelLevel("3");
         workingBean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
         workingBean.setFileOperationFlag("1");
         workingBean.saveOrUpdate("processId=?", processBean.getDictId());
@@ -583,6 +677,7 @@ public class ContractorTreeActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         ScreenManagerUtil.popActivity(this);
         SpUtil.remove(mContext, "selectProcess");
         List<String> stringList = searchBar.getLastSuggestions();
@@ -595,6 +690,5 @@ public class ContractorTreeActivity extends BaseActivity {
                 bean.save();
             }
         }
-        super.onDestroy();
     }
 }

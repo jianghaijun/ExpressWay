@@ -10,7 +10,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-
 import com.zj.expressway.R;
 import com.zj.expressway.tree.Node;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -46,6 +45,7 @@ public class PersonnelTreeAdapter extends BaseAdapter {
 
     /**
      * 节点点击事件
+     *
      * @param node
      */
     public void ExpandOrCollapse(Node node) {

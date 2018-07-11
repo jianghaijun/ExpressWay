@@ -111,7 +111,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/two_dp"
                     android:layout_below="@+id/txtUnSubmit"
-                    android:background="@color/dark_grey" />
+                    android:background="@color/gray" />
             </RelativeLayout>
 
             <View
@@ -158,7 +158,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/two_dp"
                     android:layout_below="@+id/txtSubmit"
-                    android:background="@color/dark_grey" />
+                    android:background="@color/gray" />
             </RelativeLayout>
         </LinearLayout>
 

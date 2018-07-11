@@ -14,15 +14,24 @@ public class Node {
     private String levelName;                           // 层级名称
     private String levelId;                             // 层级ID
     private String parentId;                            // 父ID
-    private String parentIdAll;                            // 父ID
-    private String parentNameAll;                            // 父ID
+    private String parentIdAll;                         // 父ID
+    private String parentNameAll;                       // 父ID
     private String folderFlag;                          // 是否是文件夹flag 0:不是文件夹 1：是文件夹
     private String isFinish;                            // 是否已完成
     private boolean isCanClick;                         // 是否有子工序
     private boolean isLoading = false;                  // 是否已经加载
     private boolean isExpanded = true;                  // 是否处于展开状态
     private boolean isChoice = false;                   // 是否选中
-    private boolean isLocalAdd = false;                   // 是否本地添加
+    private boolean isLocalAdd = false;                 // 是否本地添加
+    private String levelLevel;                          // 层级级别
+
+    public String getLevelLevel() {
+        return levelLevel;
+    }
+
+    public void setLevelLevel(String levelLevel) {
+        this.levelLevel = levelLevel;
+    }
 
     public boolean isLocalAdd() {
         return isLocalAdd;

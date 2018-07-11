@@ -153,6 +153,7 @@
     <string name="remarks">审核意见：</string>
     <string name="hiddenTroubleHeadline">具体段落和部位：</string>
     <string name="hiddenTroubleLevel">隐患级别：</string>
+    <string name="hiddenTroubleType">隐患类型：</string>
     <string name="reject">驳回</string>
     <string name="examine">审核</string>
     <string name="elevation">现标高</string>
@@ -174,11 +175,13 @@
     <string name="no_any_data">已经加载全部数据！</string>
     <string name="commonly">一般</string>
     <string name="serious">严重</string>
-    <string name="critical">紧要</string>
+    <string name="critical">重大</string>
     <string name="rectificationPeriod">整改期限：</string>
     <string name="rectificationRequirements">整改要求：</string>
     <string name="noSearchContext">无搜索内容！</string>
     <string name="add">添加</string>
+    <string name="update">修改</string>
+    <string name="process_choice">工序选择</string>
     <string name="inputPileNo">请输入桩号</string>
     <string name="prompt">向左滑动可删除或添加层级！</string>
     <string name="sameLevelAdd">同级新增</string>

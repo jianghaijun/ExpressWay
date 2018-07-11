@@ -38,7 +38,7 @@
                 android:textColor="@color/black"
                 android:textSize="@dimen/fourteen_sp" />
 
-            <TextView
+            <!--<TextView
                 android:id="@+id/txtTakePhotoRequirement"
                 android:layout_width="79dp"
                 android:layout_height="@dimen/thirty"
@@ -47,7 +47,7 @@
                 android:gravity="center"
                 android:text="@string/take_photo_requirement"
                 android:textColor="@color/black"
-                android:textSize="@dimen/fourteen_sp" />
+                android:textSize="@dimen/fourteen_sp" />-->
 
             <TextView
                 android:id="@+id/txtTakePhotoNum"

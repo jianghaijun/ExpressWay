@@ -11,8 +11,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.Logger;
 import com.yuyh.library.imgsel.ISNav;
 import com.yuyh.library.imgsel.common.ImageLoader;
 import com.yuyh.library.imgsel.config.ISCameraConfig;
@@ -31,7 +29,6 @@ import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.SelectPhotoWayDialog;
 import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.model.CheckVersionModel;
-import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.model.ProcessDictionaryModel;
 import com.zj.expressway.model.SyncLinkageMenuModel;
 import com.zj.expressway.model.SyncLinkageMenuSecondModel;
@@ -64,28 +61,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 16:45
- *       个人设置
+ * Created by HaiJun on 2018/6/11 16:45
+ * 个人设置
  */
 public class MySettingActivity extends BaseActivity {
     private MyHolder myHolder;
@@ -154,6 +131,7 @@ public class MySettingActivity extends BaseActivity {
             switch (v.getId()) {
                 // 注销
                 case R.id.btnSignOut:
+                    SpUtil.put(mActivity, "isFirstStar", true);
                     SpUtil.put(mActivity, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
                     ScreenManagerUtil.popAllActivityExceptOne();
                     mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
@@ -219,7 +197,7 @@ public class MySettingActivity extends BaseActivity {
                 // 同步工序字典
                 case R.id.btnSyncProcessDictionary:
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(mActivity)) {
-                        syncProcessDictionary();
+                        syncProcessDictionaryClick(true);
                     } else {
                         ToastUtil.showShort(mActivity, mActivity.getString(R.string.not_network));
                     }
@@ -334,15 +312,157 @@ public class MySettingActivity extends BaseActivity {
     }
 
     /**
-     * 同步服务器字典表
+     * （异步）同步服务器字典表
      */
-    public void syncProcessDictionary() {
-        //LoadingUtils.showLoading(mActivity);
+    public void syncProcessDictionary(final boolean isShowLogin) throws IOException {
+        if (isShowLogin) {
+            LoadingUtils.showLoading(mActivity);
+        }
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.appGetTwoinoneDictList, "");
+        Response response = ConstantsUtil.okHttpClient.newCall(request).execute();
+        String data = response.body().string();
+        if (JsonUtils.isGoodJson(data)) {
+            Gson gson = new Gson();
+            final ProcessDictionaryModel model = gson.fromJson(data, ProcessDictionaryModel.class);
+            if (model.isSuccess()) {
+                if (ObjectUtil.isNotNull(model)) {
+                    syncLinkageMenu(isShowLogin);
+                    for (ProcessDicBaseBean processBean : model.getData()) {
+                        // 保存工序字典
+                        ProcessDictionaryBean dictBean = new ProcessDictionaryBean();
+                        dictBean.setDelFlag(processBean.getDelFlag());
+                        dictBean.setCreateTime(processBean.getCreateTime());
+                        dictBean.setCreateUser(processBean.getCreateUser());
+                        dictBean.setCreateUserName(processBean.getCreateUserName());
+                        dictBean.setModifyTime(processBean.getModifyTime());
+                        dictBean.setModifyUser(processBean.getModifyUser());
+                        dictBean.setCreateUserName(processBean.getModifyUserName());
+                        dictBean.setDictId(processBean.getDictId());
+                        dictBean.setDictName(processBean.getDictName());
+                        dictBean.setDictCode(processBean.getDictCode());
+                        dictBean.setParentId(processBean.getParentId());
+                        dictBean.setPhotoContent(processBean.getPhotoContent());
+                        dictBean.setPhotoDistance(processBean.getPhotoDistance());
+                        dictBean.setPhotoNumber(processBean.getPhotoNumber());
+                        dictBean.setFirstLevelId(processBean.getFirstLevelId());
+                        dictBean.setFirstLevelName(processBean.getFirstLevelName());
+                        dictBean.setSecondLevelId(processBean.getSecondLevelId());
+                        dictBean.setSecondLevelName(processBean.getSecondLevelName());
+                        dictBean.setThirdLevelId(processBean.getThirdLevelId());
+                        dictBean.setThirdLevelName(processBean.getThirdLevelName());
+                        dictBean.setType("1");
+                        dictBean.saveOrUpdate("dictId=?", processBean.getDictId());
+                        if (ObjectUtil.isNotNull(processBean.getGxDictionaryList())) {
+                            for (ProcessDictionaryBean bean : processBean.getGxDictionaryList()) {
+                                bean.setType("2");
+                                bean.saveOrUpdate("dictId=?", bean.getDictId());
+                            }
+                        }
+                    }
+                } else {
+                    if (isShowLogin) {
+                        ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    }
+                }
+            } else {
+                if (isShowLogin) {
+                    ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                }
+            }
+        } else {
+            if (isShowLogin) {
+                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+            }
+        }
+    }
+
+    /**
+     * (异步) 同步三级联动菜单
+     */
+    private void syncLinkageMenu(final boolean isShowLogin) throws IOException {
+        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.getFirSecThiLevelSelect, "");
+        Response response = ConstantsUtil.okHttpClient.newCall(request).execute();
+        String data = response.body().string();
+        if (JsonUtils.isGoodJson(data)) {
+            Gson gson = new Gson();
+            final SyncLinkageMenuModel model = gson.fromJson(data, SyncLinkageMenuModel.class);
+            if (model.isSuccess()) {
+                if (ObjectUtil.isNotNull(model)) {
+                    for (SyncLinkageMenuSecondModel secondModel : model.getData()) {
+                        SyncLinkageMenuBean firstBean = new SyncLinkageMenuBean();
+                        firstBean.setDelFlag(secondModel.getDelFlag());
+                        firstBean.setCreateTime(secondModel.getCreateTime());
+                        firstBean.setCreateUser(secondModel.getCreateUser());
+                        firstBean.setCreateUserName(secondModel.getCreateUserName());
+                        firstBean.setModifyTime(secondModel.getModifyTime());
+                        firstBean.setModifyUser(secondModel.getModifyUser());
+                        firstBean.setModifyUserName(secondModel.getModifyUserName());
+                        firstBean.setFirstLevelId(secondModel.getFirstLevelId());
+                        firstBean.setFirstLevelName(secondModel.getFirstLevelName());
+                        firstBean.setFirstLevelCode(secondModel.getFirstLevelCode());
+                        firstBean.setSortFlag(secondModel.getSortFlag());
+                        firstBean.setSelectFlag(secondModel.getSelectFlag());
+                        firstBean.setType("1");
+                        firstBean.saveOrUpdate("firstLevelId=?", secondModel.getFirstLevelId());
+                        if (ObjectUtil.isNotNull(secondModel.getSecondLevelList())) {
+                            for (SyncLinkageMenuThirdModel thirdBean : secondModel.getSecondLevelList()) {
+                                SyncLinkageMenuBean secondBean = new SyncLinkageMenuBean();
+                                secondBean.setDelFlag(thirdBean.getDelFlag());
+                                secondBean.setCreateTime(thirdBean.getCreateTime());
+                                secondBean.setCreateUser(thirdBean.getCreateUser());
+                                secondBean.setCreateUserName(thirdBean.getCreateUserName());
+                                secondBean.setModifyTime(thirdBean.getModifyTime());
+                                secondBean.setModifyUser(thirdBean.getModifyUser());
+                                secondBean.setModifyUserName(thirdBean.getModifyUserName());
+                                secondBean.setFirstLevelId(thirdBean.getFirstLevelId());
+                                secondBean.setSecondLevelId(thirdBean.getSecondLevelId());
+                                secondBean.setSecondLevelName(thirdBean.getSecondLevelName());
+                                secondBean.setSecondLevelCode(thirdBean.getSecondLevelCode());
+                                secondBean.setSortFlag(thirdBean.getSortFlag());
+                                secondBean.setType("2");
+                                secondBean.saveOrUpdate("secondLevelId=?", thirdBean.getSecondLevelId());
+                                if (ObjectUtil.isNotNull(thirdBean.getThirdLevelList())) {
+                                    for (SyncLinkageMenuBean bean : thirdBean.getThirdLevelList()) {
+                                        bean.setType("3");
+                                        bean.saveOrUpdate("thirdLevelId=?", bean.getThirdLevelId());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    SpUtil.put(mActivity, "isSync", true);
+                    if (isShowLogin) {
+                        ChildThreadUtil.toastMsgHidden(mActivity, "同步成功！");
+                    }
+                } else {
+                    if (isShowLogin) {
+                        ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    }
+                }
+            } else {
+                if (isShowLogin) {
+                    ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                }
+            }
+        } else {
+            if (isShowLogin) {
+                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+            }
+        }
+    }
+
+    /**
+     * （同步）同步服务器字典表
+     */
+    public void syncProcessDictionaryClick(final boolean isShowLogin) {
+        if (isShowLogin) {
+            LoadingUtils.showLoading(mActivity);
+        }
         Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.appGetTwoinoneDictList, "");
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
+                ChildThreadUtil.toastMsgHidden(mActivity, getString(R.string.server_exception));
             }
 
             @Override
@@ -352,11 +472,10 @@ public class MySettingActivity extends BaseActivity {
                     Gson gson = new Gson();
                     final ProcessDictionaryModel model = gson.fromJson(data, ProcessDictionaryModel.class);
                     if (model.isSuccess()) {
-                        mActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (ObjectUtil.isNotNull(model)) {
-                                    syncLinkageMenu();
+                        if (ObjectUtil.isNotNull(model)) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
                                     for (ProcessDicBaseBean processBean : model.getData()) {
                                         // 保存工序字典
                                         ProcessDictionaryBean dictBean = new ProcessDictionaryBean();
@@ -389,30 +508,37 @@ public class MySettingActivity extends BaseActivity {
                                             }
                                         }
                                     }
-                                } else {
-                                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                    syncLinkageMenuClick(isShowLogin);
                                 }
+                            });
+                        } else {
+                            if (isShowLogin) {
+                                ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
                             }
-                        });
+                        }
                     } else {
-                        //ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                        if (isShowLogin) {
+                            ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                        }
                     }
                 } else {
-                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    if (isShowLogin) {
+                        ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    }
                 }
             }
         });
     }
 
     /**
-     * 同步三级联动菜单
+     * (同步) 同步三级联动菜单
      */
-    private void syncLinkageMenu() {
+    private void syncLinkageMenuClick(final boolean isShowLogin) {
         Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.getFirSecThiLevelSelect, "");
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.server_exception));
+                ChildThreadUtil.toastMsgHidden(mActivity, getString(R.string.server_exception));
             }
 
             @Override
@@ -469,17 +595,25 @@ public class MySettingActivity extends BaseActivity {
                                         }
                                     }
                                     SpUtil.put(mActivity, "isSync", true);
-                                    //ChildThreadUtil.toastMsgHidden(mActivity, "同步成功！");
+                                    if (isShowLogin) {
+                                        ChildThreadUtil.toastMsgHidden(mActivity, "同步成功！");
+                                    }
                                 } else {
-                                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                    if (isShowLogin) {
+                                        ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                                    }
                                 }
                             }
                         });
                     } else {
-                        //ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                        if (isShowLogin) {
+                            ChildThreadUtil.checkTokenHidden(mActivity, model.getMessage(), model.getCode());
+                        }
                     }
                 } else {
-                    //ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    if (isShowLogin) {
+                        ChildThreadUtil.toastMsgHidden(mActivity, mActivity.getString(R.string.json_error));
+                    }
                 }
             }
         });
@@ -510,7 +644,7 @@ public class MySettingActivity extends BaseActivity {
                 level.put("delFlag", 0);
                 level.put("createTime", System.currentTimeMillis());
                 level.put("createUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
-                level.put("createUserName",SpUtil.get(mActivity, "UserName", ""));
+                level.put("createUserName", SpUtil.get(mActivity, "UserName", ""));
                 level.put("modifyTime", System.currentTimeMillis());
                 level.put("modifyUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
                 level.put("modifyUserName", SpUtil.get(mActivity, "UserName", ""));
@@ -538,7 +672,7 @@ public class MySettingActivity extends BaseActivity {
                 process.put("delFlag", 0);
                 process.put("createTime", System.currentTimeMillis());
                 process.put("createUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
-                process.put("createUserName",SpUtil.get(mActivity, "UserName", ""));
+                process.put("createUserName", SpUtil.get(mActivity, "UserName", ""));
                 process.put("modifyTime", System.currentTimeMillis());
                 process.put("modifyUser", SpUtil.get(mActivity, ConstantsUtil.USER_ID, ""));
                 process.put("modifyUserName", SpUtil.get(mActivity, "UserName", ""));
@@ -553,6 +687,7 @@ public class MySettingActivity extends BaseActivity {
 
     /**
      * 同步数据到服务器
+     *
      * @param jsonData
      */
     private void syncDataToServer(String jsonData) {

@@ -80,6 +80,15 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String troubleRequire; // 整改内容
     private String dangerRequire;
     private int isLocalAdd;     // 是否是本地添加 1：是 2：否
+    private String levelLevel;     // 是否是本地添加 1：是 2：否
+
+    public String getLevelLevel() {
+        return levelLevel;
+    }
+
+    public void setLevelLevel(String levelLevel) {
+        this.levelLevel = levelLevel;
+    }
 
     public int getIsLocalAdd() {
         return isLocalAdd;

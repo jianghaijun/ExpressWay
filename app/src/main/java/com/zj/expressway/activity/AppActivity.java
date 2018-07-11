@@ -14,7 +14,7 @@ import com.zj.expressway.R;
 import com.zj.expressway.adapter.AppInfoAdapter;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.AppInfoBean;
-import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.bean.MainPageBean;
 import com.zj.expressway.loader.GlideImageLoader;
 
 import org.xutils.view.annotation.ViewInject;
@@ -39,7 +39,21 @@ public class AppActivity extends BaseActivity {
         x.view().inject(hold, layoutApp);
     }
 
-    public void setDate(List<String> objList, final WorkingBean data) {
+    /**
+     * 赋值
+     *
+     * @param objList
+     */
+    public void setDate(List<MainPageBean> objList) {
+        List<String> urlList = new ArrayList<>();
+        final List<String> strList = new ArrayList<>();
+        if (objList != null && objList.size() != 0) {
+            for (MainPageBean bean : objList) {
+                urlList.add(bean.getFileUrl());
+                strList.add(bean.getViewContent());
+            }
+        }
+
         //设置banner样式
         hold.banner.setBannerStyle(BannerConfig.CIRCLE_INDICATOR);
         //设置图片加载器
@@ -53,32 +67,24 @@ public class AppActivity extends BaseActivity {
         //设置指示器位置（当banner模式中有指示器时）
         hold.banner.setIndicatorGravity(BannerConfig.RIGHT);
         //设置图片集合
-        hold.banner.setImages(objList);
+        hold.banner.setImages(urlList);
         hold.banner.start();
-
-        // 开启跑马灯
-        hold.txtHorseRaceLamp.setText("中国交通建设股份有限公司成立于2006年10月8日，经国务院批准，由中国交通建设集团有限公司（国务院国资委监管的中央企业）整体重组改制并独家发起设立的股份有限公司，并于2006年12月15日在香港联合交易所主板挂牌上市交易，成为中国第一家实现境外整体上市的特大型国有基建企业。");
-        hold.txtHorseRaceLamp.setSelected(true);
-
-        final List<String> stringList = new ArrayList<>();
-        stringList.add("2005至今，公司先后获得567项自主知识产权专利，荣获20项国家科学技术进步奖，279项省部级科技进步奖，16项鲁班奖，30项詹天佑土木工程大奖，59项国家优质工程奖（其中金奖7项），242项省部级优质工程奖，35项国家级工法。");
-        stringList.add("2011年，公司名列世界500强第211位，排名较上年提升了13位；位居ENR全球最大225家国际承包商第11位，连续5年位居中国上榜企业第1名；位居中国企业500强第19位。");
-        stringList.add("2010年，公司入选“福布斯全球2000强企业”榜单，排名位列第297位，居中国内地建筑企业首位。");
-
-        hold.txtEnterPriseInfo.setText(stringList.get(0));
-
+        // 设置图片下文字信息
+        hold.txtEnterPriseInfo.setText(strList.size() > 0 ? strList.get(0) : "");
         // 活动监听
         hold.banner.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
-
-            @Override
-            public void onPageSelected(int position) {
-                hold.txtEnterPriseInfo.setText(stringList.get(position));
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {}
+            public void onPageSelected(int position) {
+                hold.txtEnterPriseInfo.setText(strList.get(position));
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
         });
 
         // 添加图片、标题
@@ -109,7 +115,7 @@ public class AppActivity extends BaseActivity {
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.bid_management);
-        bean.setTitle("标段管理");
+        bean.setTitle("地图展示");
         appInfoList.add(bean);
         bean = new AppInfoBean();
         bean.setImgUrl(R.drawable.group_management);
@@ -151,8 +157,6 @@ public class AppActivity extends BaseActivity {
         private RecyclerView rvAppInfo;
         @ViewInject(R.id.txtEnterPriseInfo)
         private TextView txtEnterPriseInfo;
-        @ViewInject(R.id.txtHorseRaceLamp)
-        private TextView txtHorseRaceLamp;
 
     }
 }

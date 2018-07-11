@@ -7,8 +7,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -27,11 +25,11 @@ import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
+import com.zj.expressway.utils.LoadingUtils;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
-import org.w3c.dom.Text;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
@@ -58,7 +56,7 @@ public class ProcessListActivity extends BaseActivity {
     private Activity mContext;
     private TextView btnProcessNum;
     private String userId;
-    private boolean isFirstLoad = true;
+    private boolean isFirstLoad = true, isTypeOneFirst = true;
     private int viewType, pagePosition = 1, processSum = 0, loadType = 0;
     private List<WorkingBean> workingBeanList = new ArrayList<>();
 
@@ -82,19 +80,19 @@ public class ProcessListActivity extends BaseActivity {
      * @param btnProcessNum 工序数量
      * @param searchContext 搜索文字
      */
-    public void initData(int viewType, TextView btnProcessNum, final String searchContext) {
+    public void initData(int viewType, TextView btnProcessNum, final String searchContext, boolean isLoading) {
         this.viewType = viewType;
         this.btnProcessNum = btnProcessNum;
         loadType = 0;
-        if (StrUtil.isEmpty(searchContext)) {
-            isFirstLoad = true;
-        }
+        isFirstLoad = true;
         workingBeanList.clear();
 
         // 设置主题颜色
         holder.refreshLayout.setPrimaryColorsId(R.color.main_bg, android.R.color.white);
         holder.refreshLayout.setFooterTriggerRate(1);
         holder.refreshLayout.setEnableFooterFollowWhenLoadFinished(true);
+        holder.refreshLayout.setEnableScrollContentWhenLoaded(true);//是否在加载完成时滚动列表显示新的内容
+        holder.refreshLayout.setEnableScrollContentWhenRefreshed(true);
         // 通过多功能监听接口实现 在第一次加载完成之后 自动刷新
         holder.refreshLayout.setOnMultiPurposeListener(new SimpleMultiPurposeListener() {
             @Override
@@ -107,9 +105,9 @@ public class ProcessListActivity extends BaseActivity {
                 if (workingBeanList.size() < processSum) {
                     pagePosition++;
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                        getData(searchContext);
+                        getData(searchContext, false);
                     } else {
-                        getLocalData(searchContext);
+                        getLocalData(searchContext, false);
                     }
                 } else {
                     ToastUtil.showShort(mContext, "没有更多数据了！");
@@ -123,9 +121,9 @@ public class ProcessListActivity extends BaseActivity {
                 pagePosition = 1;
                 workingBeanList.clear();
                 if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-                    getData(searchContext);
+                    getData(searchContext, false);
                 } else {
-                    getLocalData(searchContext);
+                    getLocalData(searchContext, false);
                 }
             }
         });
@@ -157,9 +155,9 @@ public class ProcessListActivity extends BaseActivity {
 
         // 有网---无网
         if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
-            getLocalData(searchContext);
+            getLocalData(searchContext, isLoading);
         } else {
-            getData(searchContext);
+            getData(searchContext, isLoading);
         }
     }
 
@@ -168,7 +166,10 @@ public class ProcessListActivity extends BaseActivity {
      *
      * @param searchContext
      */
-    private void getData(final String searchContext) {
+    private void getData(final String searchContext, final boolean isLoading) {
+        if (isLoading) {
+            LoadingUtils.showLoading(mContext);
+        }
         JSONObject obj = new JSONObject();
         obj.put("page", pagePosition);
         obj.put("limit", 10);
@@ -245,14 +246,14 @@ public class ProcessListActivity extends BaseActivity {
                                         bean.setType(viewType + "");
                                         bean.setUserId(userId);
                                         if (viewType == 1) {
-                                            bean.saveOrUpdate("processId=?", bean.getProcessId());
+                                            bean.saveOrUpdate("processId=? and type=?", bean.getProcessId(), viewType + "");
                                         } else {
                                             bean.setProcessId(bean.getWorkId());
-                                            bean.saveOrUpdate("processId=? and nodeName=?", bean.getWorkId(), bean.getNodeName());
+                                            bean.saveOrUpdate("processId=? and nodeName=? and type=?", bean.getWorkId(), bean.getNodeName(), viewType + "");
                                         }
                                     }
 
-                                    if (viewType == 1) {
+                                    if (viewType == 1 && isFirstLoad) {
                                         List<WorkingBean> workingBeenList;
                                         if (StrUtil.isEmpty(searchContext)) {
                                             workingBeenList = DataSupport.where("userId=? and type=1 and isLocalAdd=1", String.valueOf(SpUtil.get(mContext, ConstantsUtil.USER_ID, ""))).find(WorkingBean.class);
@@ -262,7 +263,7 @@ public class ProcessListActivity extends BaseActivity {
 
                                         if (workingBeenList != null && workingBeenList.size() > 0) {
                                             workingBeanList.addAll(workingBeenList);
-                                            processSum+=workingBeenList.size();
+                                            processSum += workingBeenList.size();
                                         }
                                     }
 
@@ -270,6 +271,9 @@ public class ProcessListActivity extends BaseActivity {
                                 }
                                 initProcessListData();
                                 stopLoad();
+                                if (isLoading) {
+                                    LoadingUtils.hideLoading();
+                                }
                             }
                         });
                     } else {
@@ -311,30 +315,14 @@ public class ProcessListActivity extends BaseActivity {
                     mContext.startActivity(intent);
                     break;
                 case 2:
-                    initData(viewType, btnProcessNum, "");
+                    initData(viewType, btnProcessNum, "", true);
+                    break;
+                case 3:
+                    Intent treeIntent = new Intent(mContext, ContractorTreeActivity.class);
+                    treeIntent.putExtra("type", "1");
+                    mContext.startActivityForResult(treeIntent, 10002);
                     break;
             }
-        }
-    }
-
-    /**
-     * 更新适配器
-     */
-    public void updateData() {
-        List<WorkingBean> beanList = DataSupport.where("type = ? and userId = ? and flowType=?", viewType + "", userId, String.valueOf(SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2"))).find(WorkingBean.class);
-        if (beanList == null || beanList.size() == 0) {
-            holder.btnNoProcessAdd.setVisibility(View.VISIBLE);
-            holder.ivLogo.setVisibility(View.VISIBLE);
-            holder.btnAddProcess.setVisibility(View.GONE);
-        } else {
-            processSum = beanList.size();
-            workingBeanList.clear();
-            workingBeanList.addAll(beanList);
-            holder.btnNoProcessAdd.setVisibility(View.GONE);
-            holder.ivLogo.setVisibility(View.GONE);
-            holder.btnAddProcess.setVisibility(View.VISIBLE);
-            initProcessListData();
-            holder.refreshLayout.finishLoadMoreWithNoMoreData();
         }
     }
 
@@ -352,50 +340,70 @@ public class ProcessListActivity extends BaseActivity {
     /**
      * 获取本地数据
      */
-    private void getLocalData(String searchContext) {
+    private void getLocalData(String searchContext, boolean isLoading) {
+        if (isLoading) {
+            LoadingUtils.showLoading(mContext);
+        }
         String start = String.valueOf((pagePosition - 1) * 10);
-        String end = String.valueOf(pagePosition * 10);
+        String end = "10";
         List<WorkingBean> workingBeen;
+        List<WorkingBean> workingBeenSum;
         String str = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "");
         if (StrUtil.isEmpty(searchContext)) {
             if (viewType == 1 || viewType == 2) {
                 workingBeen = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType + "", start, end).find(WorkingBean.class);
+                workingBeenSum = DataSupport.where("userId=? and type=?", userId, viewType + "").find(WorkingBean.class);
             } else {
                 if (str.equals("1")) {
                     workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "sxdehzl", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and flowId=?", userId, viewType + "", "sxdehzl").find(WorkingBean.class);
                 } else if (str.equals("2")) {
                     workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "zxHwZlTrouble", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and flowId=?", userId, viewType + "", "zxHwZlTrouble").find(WorkingBean.class);
                 } else if (str.equals("3")) {
                     workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "zxHwAqHiddenDanger", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and flowId=?", userId, viewType + "", "zxHwAqHiddenDanger").find(WorkingBean.class);
                 } else {
                     workingBeen = DataSupport.where("userId=? and type=? order by enterTime desc limit ?, ?", userId, viewType + "", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=?", userId, viewType + "").find(WorkingBean.class);
                 }
             }
         } else {
             if (viewType == 1) {
                 workingBeen = DataSupport.where("userId=? and type=? and levelIdAll like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
+                workingBeenSum = DataSupport.where("userId=? and type=? and levelIdAll like ?", userId, viewType + "", "%" + searchContext + "%").find(WorkingBean.class);
             } else if (viewType == 2) {
                 if (str.equals("2")) {
                     workingBeen = DataSupport.where("userId=? and type=? and troubleTitle like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and troubleTitle like ?", userId, viewType + "", "%" + searchContext + "%").find(WorkingBean.class);
                 } else {
                     workingBeen = DataSupport.where("userId=? and type=? and dangerTitle like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and dangerTitle like ?", userId, viewType + "", "%" + searchContext + "%").find(WorkingBean.class);
                 }
             } else {
                 if (str.equals("1")) {
                     workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "sxdehzl", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and title like ? and flowId=?", userId, viewType + "", "%" + searchContext + "%", "sxdehzl").find(WorkingBean.class);
                 } else if (str.equals("2")) {
                     workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "zxHwZlTrouble", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and title like ? and flowId=?", userId, viewType + "", "%" + searchContext + "%", "zxHwZlTrouble").find(WorkingBean.class);
                 } else if (str.equals("3")) {
                     workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "zxHwAqHiddenDanger", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and title like ? and flowId=?", userId, viewType + "", "%" + searchContext + "%", "zxHwAqHiddenDanger").find(WorkingBean.class);
                 } else {
                     workingBeen = DataSupport.where("userId=? and type=? and title like ? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and title like ?", userId, viewType + "", "%" + searchContext + "%").find(WorkingBean.class);
                 }
             }
         }
-        processSum = workingBeen == null ? 0 : workingBeen.size();
+
+        processSum = workingBeenSum == null ? 0 : workingBeenSum.size();
         workingBeanList.addAll(workingBeen);
         stopLoad();
         initProcessListData();
+        if (isLoading) {
+            LoadingUtils.hideLoading();
+        }
     }
 
     /**
@@ -418,6 +426,18 @@ public class ProcessListActivity extends BaseActivity {
             holder.llSearchData.setVisibility(View.GONE);
         }
 
+        if (viewType == 1 && isTypeOneFirst) {
+            isTypeOneFirst = false;
+            holder.rvMsg.setVisibility(View.GONE);
+            holder.ivLogo.setVisibility(View.VISIBLE);
+            holder.ivLogo.setText("");
+            holder.btnProcessChoice.setVisibility(View.VISIBLE);
+            holder.btnProcessChoice.setOnClickListener(new onClick(3));
+        } else {
+            holder.ivLogo.setVisibility(View.GONE);
+            holder.btnProcessChoice.setVisibility(View.GONE);
+        }
+
         // 设置tab显示工序数量
         if (isFirstLoad) {
             isFirstLoad = false;
@@ -426,14 +446,30 @@ public class ProcessListActivity extends BaseActivity {
 
         // 数据处理
         if (viewType == 1) {
-            processAdapter = new ProcessListAdapter(mContext, workingBeanList);
+            if (processAdapter == null) {
+                processAdapter = new ProcessListAdapter(mContext, workingBeanList);
+                holder.rvMsg.setAdapter(processAdapter);
+                holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
+            } else {
+                processAdapter.notifyDataSetChanged();
+            }
         } else if (viewType == 2) {
-            addProcessAdapter = new AddProcessAdapter(mContext, workingBeanList, holder.ivLogo);
+            if (addProcessAdapter == null) {
+                addProcessAdapter = new AddProcessAdapter(mContext, workingBeanList, holder.ivLogo);
+                holder.rvMsg.setAdapter(addProcessAdapter);
+                holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
+            } else {
+                addProcessAdapter.notifyDataSetChanged();
+            }
         } else {
-            toDoProcessAdapter = new ToDoProcessAdapter(mContext, workingBeanList);
+            if (toDoProcessAdapter == null) {
+                toDoProcessAdapter = new ToDoProcessAdapter(mContext, workingBeanList);
+                holder.rvMsg.setAdapter(toDoProcessAdapter);
+                holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
+            } else {
+                toDoProcessAdapter.notifyDataSetChanged();
+            }
         }
-        holder.rvMsg.setAdapter(processAdapter == null ? toDoProcessAdapter == null ? addProcessAdapter : toDoProcessAdapter : processAdapter);
-        holder.rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
     }
 
     /**
@@ -456,8 +492,8 @@ public class ProcessListActivity extends BaseActivity {
         private TextView txtClear;
         @ViewInject(R.id.llSearchData)
         private RelativeLayout llSearchData;
-
-
+        @ViewInject(R.id.btnProcessChoice)
+        private Button btnProcessChoice;
 
     }
 }

@@ -196,8 +196,8 @@ public class WorkingProcedureActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        toBeAuditedActivity.initData(4, txtUnSubmit, null);
-        finishActivity.initData(5, txtSubmit, null);
+        toBeAuditedActivity.initData(4, txtUnSubmit, null, true);
+        finishActivity.initData(5, txtSubmit, null, false);
     }
 
     /**
@@ -208,10 +208,10 @@ public class WorkingProcedureActivity extends BaseActivity {
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
             case 0:
-                toBeAuditedActivity.initData(4, txtUnSubmit, levelId);
+                toBeAuditedActivity.initData(4, txtUnSubmit, levelId, true);
                 break;
             case 1:
-                finishActivity.initData(5, txtSubmit, levelId);
+                finishActivity.initData(5, txtSubmit, levelId, true);
                 break;
         }
     }
@@ -268,10 +268,10 @@ public class WorkingProcedureActivity extends BaseActivity {
     private void setStates(int option) {
         // 待审核
         //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 已完成
         //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
 
         switch (option) {
             case 0:

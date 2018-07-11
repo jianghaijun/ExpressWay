@@ -12,10 +12,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.tencent.bugly.crashreport.CrashReport;
 import com.zj.expressway.R;
 import com.zj.expressway.activity.AuditManagementActivity;
-import com.zj.expressway.activity.ProcessManagerActivity;
 import com.zj.expressway.activity.ProcessReportActivity;
 import com.zj.expressway.activity.QrCodeScanActivity;
 import com.zj.expressway.activity.QualityInspectionActivity;
@@ -42,28 +40,8 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:01
- *       应用信息适配器
+ * Created by HaiJun on 2018/6/11 17:01
+ * 应用信息适配器
  */
 public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoHold> {
     private Activity mContext;

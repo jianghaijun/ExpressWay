@@ -22,7 +22,8 @@ import com.scwang.smartrefresh.layout.constant.RefreshState;
 import com.scwang.smartrefresh.layout.listener.SimpleMultiPurposeListener;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.LocalProcessListAdapter;
-import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.base.BaseNoImmersionBarActivity;
+import com.zj.expressway.bean.ContractorBean;
 import com.zj.expressway.bean.ProcessDictionaryBean;
 import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.bean.SyncLinkageMenuBean;
@@ -46,7 +47,7 @@ import cn.qqtheme.framework.widget.WheelView;
 /**
  * Created by HaiJun on 2018/6/11 16:32
  */
-public class AddProcessActivity extends BaseActivity {
+public class AddProcessActivity extends BaseNoImmersionBarActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.imgBtnRight)
@@ -59,6 +60,8 @@ public class AddProcessActivity extends BaseActivity {
     private Button btnCondition2;
     @ViewInject(R.id.btnCondition3)
     private Button btnCondition3;
+    @ViewInject(R.id.btnQueryAdd)
+    private Button btnQueryAdd;
     @ViewInject(R.id.refreshLayout)
     private RefreshLayout refreshLayout;
     @ViewInject(R.id.rvProcessList)
@@ -81,8 +84,10 @@ public class AddProcessActivity extends BaseActivity {
     private int processSum; // 工序数量
     private int pagePosition = 1, loadType = -1;
     private boolean isSearch = false;
-    private String firstLevelId = "", secondLevelId = "", thirdLevelId = "", searchText = "";
+    private String firstLevelId = "", secondLevelId = "", thirdLevelId = "", searchText = "", levelId;
     private Activity mContext;
+    private ArrayList<String> oldSelect = new ArrayList<>();
+    private ArrayList<String> oldSelectName = new ArrayList<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -92,7 +97,13 @@ public class AddProcessActivity extends BaseActivity {
         mContext = this;
         ScreenManagerUtil.pushActivity(this);
 
-        txtTitle.setText("添加层级");
+        levelId = getIntent().getStringExtra("levelId");
+        if (StrUtil.equals(levelId, "update")) {
+            txtTitle.setText("添加层级");
+        } else {
+            btnQueryAdd.setText("确认修改");
+            txtTitle.setText("修改层级");
+        }
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnRight.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.back_btn));
@@ -242,10 +253,18 @@ public class AddProcessActivity extends BaseActivity {
         String end = String.valueOf(pagePosition * 10);
 
         List<ProcessDictionaryBean> list = DataSupport.where(sb.toString() + "type = 1 order by createTime desc limit ?, ?", start, end).find(ProcessDictionaryBean.class);
+        List<ContractorBean> contractorBeen = DataSupport.where("parentId=?", levelId).find(ContractorBean.class);
 
         processSum = list == null ? 0 : list.size();
         if (list != null) {
             for (ProcessDictionaryBean bean : list) {
+                for (ContractorBean bean1 : contractorBeen) {
+                    if (StrUtil.equals(bean.getDictName(), bean1.getLevelName())) {
+                        bean.setSelect(true);
+                        oldSelect.add(bean.getDictId());
+                        oldSelectName.add(bean.getDictName());
+                    }
+                }
                 bean.setOperation("拍照内容");
             }
         }
@@ -271,6 +290,10 @@ public class AddProcessActivity extends BaseActivity {
         } else {
             rvProcessList.setVisibility(View.VISIBLE);
             llSearchData.setVisibility(View.GONE);
+        }
+
+        if (!StrUtil.equals(levelId, "update")) {
+            edtProcessNum.setText(getIntent().getStringExtra("levelName"));
         }
 
         // 数据处理
@@ -354,7 +377,7 @@ public class AddProcessActivity extends BaseActivity {
         picker.show();
     }
 
-    @Event({ R.id.imgBtnLeft, R.id.imgBtnRight, R.id.btnCondition1, R.id.btnCondition2, R.id.btnCondition3, R.id.txtClear, R.id.btnQueryAdd })
+    @Event({R.id.imgBtnLeft, R.id.imgBtnRight, R.id.btnCondition1, R.id.btnCondition2, R.id.btnCondition3, R.id.txtClear, R.id.btnQueryAdd})
     private void onClick(View v) {
         SyncLinkageMenuBean syncLinkageMenuBean = new SyncLinkageMenuBean();
         syncLinkageMenuBean.setFirstLevelName("全部");
@@ -446,7 +469,10 @@ public class AddProcessActivity extends BaseActivity {
                     Intent intent = new Intent();
                     intent.putExtra("position", getIntent().getIntExtra("position", 0)); // 点击节点位置
                     intent.putStringArrayListExtra("dictIdList", strList); // 层级Id
+                    intent.putStringArrayListExtra("oldDictIdList", oldSelect); // 层级Id
+                    intent.putStringArrayListExtra("oldDictNameList", oldSelectName); // 层级Id
                     intent.putExtra("pileNo", edtProcessNum.getText().toString()); // 桩号
+                    intent.putExtra("levelId", levelId); // 层级Id
                     setResult(Activity.RESULT_OK, intent);
                     this.finish();
                 }

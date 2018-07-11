@@ -46,6 +46,7 @@ public class LocalProcessListAdapter extends RecyclerView.Adapter<LocalProcessLi
         if (position == 0) {
             holder.txtMoreInfo.setText(processList.get(position).getOperation());
             holder.txtTitle.setText(processList.get(position).getDictName());
+            holder.txtSelect.setImageDrawable(null);
         } else {
             if (processList.get(position).isSelect()) {
                 holder.txtSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.btn_check));
@@ -64,11 +65,6 @@ public class LocalProcessListAdapter extends RecyclerView.Adapter<LocalProcessLi
                     } else {
                         processList.get(position).setSelect(true);
                     }
-
-                    /*for (ProcessDictionaryBean bean : processList) {
-                        bean.setSelect(false);
-                    }
-                    processList.get(position).setSelect(true);*/
                     notifyDataSetChanged();
                 }
             });

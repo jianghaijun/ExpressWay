@@ -8,7 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -17,14 +16,7 @@ import com.zj.expressway.R;
 import com.zj.expressway.activity.ContractorDetailsActivity;
 import com.zj.expressway.activity.ReviewProgressActivity;
 import com.zj.expressway.activity.ToDoDetailsActivity;
-import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.dialog.PhotoRequirementsDialog;
-import com.zj.expressway.listener.PromptListener;
-import com.zj.expressway.utils.ConstantsUtil;
-import com.zj.expressway.utils.SpUtil;
-
-import org.litepal.crud.DataSupport;
 
 import java.util.List;
 
@@ -32,28 +24,8 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 
 /**
- *                     _ooOoo_
- *                    o8888888o
- *                    88" . "88
- *                    (| -_- |)
- *                    O\  =  /O
- *                 ____/`---'\____
- *               .'  \\|     |//  `.
- *              /  \\|||  :  |||//  \
- *             /  _||||| -:- |||||-  \
- *             |   | \\\  -  /// |   |
- *             | \_|  ''\---/''  |   |
- *             \  .-\__  `-`  ___/-. /
- *           ___`. .'  /--.--\  `. . __
- *        ."" '<  `.___\_<|>_/___.'  >'"".
- *       | | :  `- \`.;`\ _ /`;.`/ - ` : | |
- *       \  \ `-.   \_ __\ /__ _/   .-` /  /
- * ======`-.____`-.___\_____/___.-`____.-'======
- *                     `=---='
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
- * 			   佛祖保佑       永无BUG
- *       Created by HaiJun on 2018/6/11 17:11
- *       工序列表适配器
+ * Created by HaiJun on 2018/6/11 17:11
+ * 工序列表适配器
  */
 public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.ProcessHolder> {
     private Activity mContext;
@@ -61,6 +33,7 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
 
     /**
      * 重载
+     *
      * @param mContext
      * @param workingBeanList
      */
@@ -121,14 +94,14 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
 
             if (StrUtil.equals(data.getFlowStatus(), "审核中")) {
                 imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.audit));
-            } else if (StrUtil.equals(data.getFlowStatus(), "已结束")) {
+            } else if (StrUtil.equals(data.getFlowStatus(), "结束")) {
                 imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.finish));
             } else if (StrUtil.equals(data.getFlowStatus(), "已驳回")) {
                 imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.reject));
             } else {
                 imgViewProgress.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.progress));
             }
-                //txtProcedureState.setText(data.getFlowName());
+            //txtProcedureState.setText(data.getFlowName());
             rlBottom.setOnClickListener(new onClick(data));
             imgViewProgress.setOnClickListener(new onClick(data));
             txtReviewProgress.setOnClickListener(new onClick(data));

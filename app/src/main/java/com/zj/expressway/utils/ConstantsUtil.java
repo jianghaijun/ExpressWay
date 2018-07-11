@@ -49,8 +49,6 @@ public class ConstantsUtil {
      * userHead
      */
     public static String USER_HEAD = "USER_HEAD";
-    // 屏幕高度
-    public static String SCREEN_HEIGHT = "SCREEN_HEIGHT";
     // 选中人员id
     public static String SELECT_USER_ID = "SELECT_USER_ID";
     // 工序列表类型（0：工序 1：质量 2：安全）
@@ -91,6 +89,9 @@ public class ConstantsUtil {
     public static final String deleteGxLevel = prefix + "batchDeleteUpdateZxHwGxProjectLevel";
     public static final String deleteZlLevel = prefix + "batchDeleteUpdateZxHwZlProjectLevel";
     public static final String deleteAqLevel = prefix + "batchDeleteUpdateZxHwAqProjectLevel";
+
+    // 获取首页数据
+    public static final String getIndexviewHomePage = prefix + "getIndexviewHomePage";
 
     /**
      * 图片上传

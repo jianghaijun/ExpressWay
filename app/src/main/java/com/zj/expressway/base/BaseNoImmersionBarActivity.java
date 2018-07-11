@@ -20,23 +20,17 @@ import java.util.List;
 import cn.bingoogolapple.swipebacklayout.BGASwipeBackHelper;
 
 /**
- *       Created by HaiJun on 2018/6/11 17:16
- *       基类Activity
+ * Created by HaiJun on 2018/6/11 17:16
+ * 基类Activity
  */
-public class BaseActivity extends AppCompatActivity implements BGASwipeBackHelper.Delegate {
+public class BaseNoImmersionBarActivity extends AppCompatActivity implements BGASwipeBackHelper.Delegate {
     private PermissionListener perListener;
     protected BGASwipeBackHelper mSwipeBackHelper;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        // 必须在 Application 的 onCreate 方法中执行 BGASwipeBackHelper.init 来初始化滑动返回」
-        // 在 super.onCreate(savedInstanceState) 之前调用该方法
         initSwipeBackFinish();
         super.onCreate(savedInstanceState);
-        ImmersionBar.with(this)
-                .statusBarColor(R.color.btn_check)
-                .fitsSystemWindows(true)
-                .init();
     }
 
     /**
@@ -108,6 +102,7 @@ public class BaseActivity extends AppCompatActivity implements BGASwipeBackHelpe
 
     /**
      * 申请权限
+     *
      * @param permissions
      * @param perListener
      */
@@ -129,6 +124,7 @@ public class BaseActivity extends AppCompatActivity implements BGASwipeBackHelpe
 
     /**
      * 权限申请回调函数
+     *
      * @param requestCode
      * @param permissions
      * @param grantResults

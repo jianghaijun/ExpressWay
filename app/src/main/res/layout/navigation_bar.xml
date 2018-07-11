@@ -56,7 +56,7 @@
             android:id="@+id/rlMsg"
             android:layout_width="@dimen/zero_dp"
             android:layout_height="match_parent"
-            android:background="@null"
+            android:background="@drawable/action_bar_bg"
             android:visibility="gone"
             app:layout_widthPercent="100%h">
 
@@ -65,7 +65,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
-                android:background="@null"
+                android:background="@drawable/action_bar_bg"
+                android:focusable="false"
                 android:src="@drawable/message" />
 
             <TextView
@@ -77,6 +78,7 @@
                 android:layout_marginRight="-7.5dp"
                 android:layout_marginTop="-7.5dp"
                 android:background="@drawable/design_point_red"
+                android:focusable="false"
                 android:gravity="center"
                 android:text="12"
                 android:textColor="@color/white"

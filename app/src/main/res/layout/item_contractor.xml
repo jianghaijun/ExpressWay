@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.zj.expressway.view.SwipeMenuLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/fifty_dp"
-    android:clickable="true"
-    android:paddingBottom="1dp">
+    android:layout_height="@dimen/fifty_one_dp"
+    android:clickable="true">
 
     <LinearLayout
         android:id="@+id/llMain"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/fifty_dp"
+        android:layout_height="@dimen/fifty_one_dp"
         android:background="@drawable/touch_bg"
         android:orientation="vertical">
 
@@ -72,6 +71,11 @@
                     android:contentDescription="@null" />
             </RelativeLayout>
         </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/one_dp"
+            android:background="@color/gray" />
     </LinearLayout>
 
     <Button
@@ -84,8 +88,19 @@
         android:textSize="@dimen/fourteen_sp" />
 
     <Button
-        android:id="@+id/btnDeleteLevel"
+        android:id="@+id/btnUpdateLevel"
         android:layout_width="@dimen/fifty_dp"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/one_dp"
+        android:background="@color/supervision"
+        android:text="@string/update"
+        android:textColor="@color/white"
+        android:textSize="@dimen/fourteen_sp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/btnDeleteLevel"
+        android:layout_width="@dimen/fifty_one_dp"
         android:layout_height="match_parent"
         android:background="@color/main_bg"
         android:text="@string/delete"

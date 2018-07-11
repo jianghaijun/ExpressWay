@@ -98,7 +98,7 @@ public class AuditManagementActivity extends BaseActivity {
 
         llButtons.setVisibility(View.GONE);
 
-        initFabBtn();
+        //initFabBtn();
         initBtnTitle();
         initViewPageData();
         initSearchRecord();
@@ -236,7 +236,7 @@ public class AuditManagementActivity extends BaseActivity {
         txtClear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                takePictureActivity.initData(1, txtTakePhoto, null);
+                takePictureActivity.initData(1, txtTakePhoto, null, true);
             }
         });
 
@@ -255,9 +255,9 @@ public class AuditManagementActivity extends BaseActivity {
      * 初始化列表数据
      */
     private void initRecyclerViewData() {
-        takePictureActivity.initData(1, txtTakePhoto, null);
-        toBeAuditedActivity.initData(4, txtUnSubmit, null);
-        finishActivity.initData(5, txtSubmit, null);
+        takePictureActivity.initData(1, txtTakePhoto, null, true);
+        toBeAuditedActivity.initData(4, txtUnSubmit, null, false);
+        finishActivity.initData(5, txtSubmit, null, false);
     }
 
     /**
@@ -268,13 +268,13 @@ public class AuditManagementActivity extends BaseActivity {
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
             case 0:
-                takePictureActivity.initData(1, txtTakePhoto, levelId);
+                takePictureActivity.initData(1, txtTakePhoto, levelId, true);
                 break;
             case 1:
-                toBeAuditedActivity.initData(4, txtUnSubmit, levelId);
+                toBeAuditedActivity.initData(4, txtUnSubmit, levelId, true);
                 break;
             case 2:
-                finishActivity.initData(5, txtSubmit, levelId);
+                finishActivity.initData(5, txtSubmit, levelId, true);
                 break;
         }
     }
@@ -331,29 +331,29 @@ public class AuditManagementActivity extends BaseActivity {
     private void setStates(int option) {
         // 待拍照
         //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 待审核
         //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 已完成
         //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
-        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.dark_grey));
+        vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
 
         switch (option) {
             case 0:
                 //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_1));
-                dragView.getDragView().setVisibility(View.VISIBLE);
+                //dragView.getDragView().setVisibility(View.VISIBLE);
                 break;
             case 1:
                 //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_2));
-                dragView.getDragView().setVisibility(View.GONE);
+                //dragView.getDragView().setVisibility(View.GONE);
                 break;
             case 2:
                 //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_3));
-                dragView.getDragView().setVisibility(View.GONE);
+                //dragView.getDragView().setVisibility(View.GONE);
                 break;
         }
     }

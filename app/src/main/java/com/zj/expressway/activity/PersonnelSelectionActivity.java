@@ -69,8 +69,8 @@ public class PersonnelSelectionActivity extends BaseActivity {
     private TextView txtSelect;
     @ViewInject(R.id.llPersonal)
     private LinearLayout llPersonal;
-    @ViewInject(R.id.rlTop)
-    private RelativeLayout rlTop;
+    @ViewInject(R.id.rlBottom)
+    private RelativeLayout rlBottom;
     // 工序人员List
     @ViewInject(R.id.lvContractorList)
     private ListView lvPersonnelList;
@@ -144,7 +144,8 @@ public class PersonnelSelectionActivity extends BaseActivity {
             getData();
         } else {
             txtNode.setVisibility(View.GONE);
-            rlTop.setVisibility(View.GONE);
+            lvPersonnelList.setVisibility(View.GONE);
+            rlBottom.setVisibility(View.GONE);
         }
     }
 
