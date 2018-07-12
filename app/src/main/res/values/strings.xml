@@ -178,6 +178,7 @@
     <string name="critical">重大</string>
     <string name="rectificationPeriod">整改期限：</string>
     <string name="rectificationRequirements">整改要求：</string>
+    <string name="dangerDescription">隐患描述：</string>
     <string name="noSearchContext">无搜索内容！</string>
     <string name="add">添加</string>
     <string name="update">修改</string>

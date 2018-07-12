@@ -106,7 +106,6 @@ public class LoginActivity extends BaseActivity {
                             if (!isLogin) {
                                 isLogin = true;
                                 UserInfo user = userList.get(0);
-                                SpUtil.put(mContext, ConstantsUtil.USER_LEVEL, StrUtil.isEmpty(user.getUserLevel()) ? "" : user.getUserLevel());
                                 SpUtil.put(mContext, "UserName", StrUtil.isEmpty(user.getRealName()) ? "" : user.getRealName());
                                 SpUtil.put(mContext, "user", StrUtil.isEmpty(user.getUserId()) ? "" : user.getUserId());
                                 SpUtil.put(mContext, ConstantsUtil.USER_ID, StrUtil.isEmpty(user.getUserId()) ? "" : user.getUserId());

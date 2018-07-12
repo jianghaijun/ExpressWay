@@ -1,6 +1,7 @@
 package com.zj.expressway.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
+import com.youth.banner.listener.OnBannerListener;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.AppInfoAdapter;
 import com.zj.expressway.base.BaseActivity;
@@ -47,8 +49,10 @@ public class AppActivity extends BaseActivity {
     public void setDate(List<MainPageBean> objList) {
         List<String> urlList = new ArrayList<>();
         final List<String> strList = new ArrayList<>();
+        final List<String> idList = new ArrayList<>();
         if (objList != null && objList.size() != 0) {
             for (MainPageBean bean : objList) {
+                idList.add(bean.getViewId());
                 urlList.add(bean.getFileUrl());
                 strList.add(bean.getViewContent());
             }
@@ -84,6 +88,15 @@ public class AppActivity extends BaseActivity {
 
             @Override
             public void onPageScrollStateChanged(int state) {
+            }
+        });
+        // 点击事件
+        hold.banner.setOnBannerListener(new OnBannerListener() {
+            @Override
+            public void OnBannerClick(int position) {
+                Intent intent = new Intent(mContext, EditScrollPhotoActivity.class);
+                intent.putExtra("viewId", idList.get(position));
+                mContext.startActivity(intent);
             }
         });
 

@@ -187,35 +187,6 @@ public class AuditManagementActivity extends BaseActivity {
     }
 
     /**
-     * 添加悬浮按钮
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void initFabBtn() {
-        Button imgBtn = new Button(this);
-        imgBtn.setTextColor(ContextCompat.getColor(this, R.color.white));
-        imgBtn.setTextSize(10);
-        imgBtn.setElevation(50f);
-        imgBtn.setBackground(ContextCompat.getDrawable(this, R.drawable.fab_tree));
-        imgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, ContractorTreeActivity.class);
-                intent.putExtra("type", "1");
-                startActivityForResult(intent, 10002);
-            }
-        });
-
-        dragView = new SonnyJackDragView.Builder()
-                .setActivity(this)
-                .setDefaultLeft(DensityUtil.getScreenWidth() - DensityUtil.dip2px(75))
-                .setDefaultTop(DensityUtil.getScreenHeight() - DensityUtil.dip2px(100))
-                .setNeedNearEdge(false)
-                .setSize(DensityUtil.dip2px(50))
-                .setView(imgBtn)
-                .build();
-    }
-
-    /**
      * 初始化viewPage数据
      */
     private void initViewPageData() {

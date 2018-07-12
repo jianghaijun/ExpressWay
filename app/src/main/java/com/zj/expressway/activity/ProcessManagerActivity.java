@@ -281,7 +281,6 @@ public class ProcessManagerActivity extends BaseActivity {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
         obj.put("parentId", parentId);
-        obj.put("levelType", SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
         Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.getZxHwGxProjectLevelList, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override

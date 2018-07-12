@@ -808,7 +808,6 @@ public class ContractorDetailsActivity extends BaseActivity {
         addPhotoBean.setLongitude(String.valueOf(longitude));
         addPhotoBean.setLocation(sLocation);
         addPhotoBean.setUserId((String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""));
-        addPhotoBean.setPhotoType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
         addPhotoBean.setCreateTime(System.currentTimeMillis());
         String[] strings = new String[]{processPath};
         addPhotoBean.save();

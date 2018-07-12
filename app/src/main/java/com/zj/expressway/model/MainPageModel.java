@@ -13,9 +13,36 @@ public class MainPageModel extends BaseModel {
     private String todayFinishNum;
     private String todoCount;
     private String hasTodoCount;
+    private String version;
+    private String unSubmitted;
+    private long fileLength;
     private MainPageModel data;
     private List<MainPageBean> newsList;
     private List<MainPageBean> viewList;
+
+    public String getUnSubmitted() {
+        return unSubmitted;
+    }
+
+    public void setUnSubmitted(String unSubmitted) {
+        this.unSubmitted = unSubmitted;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public long getFileLength() {
+        return fileLength;
+    }
+
+    public void setFileLength(long fileLength) {
+        this.fileLength = fileLength;
+    }
 
     public MainPageModel getData() {
         return data;

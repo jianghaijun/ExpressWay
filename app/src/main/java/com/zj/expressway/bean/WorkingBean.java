@@ -73,14 +73,50 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String opinionContent;
     private String flowType;
     private String troubleTitle; // 标题
+    private String troubleType; // 标题
     private String dangerTitle;
     private String troubleLevel; // 隐患级别
     private String dangerLevel;
+    private String dangerType;
     private long deadline; // 整改期限
     private String troubleRequire; // 整改内容
+    private String dangerContent; // 整改内容
+    private String troubleContent; // 整改内容
     private String dangerRequire;
     private int isLocalAdd;     // 是否是本地添加 1：是 2：否
     private String levelLevel;     // 是否是本地添加 1：是 2：否
+
+    public String getDangerContent() {
+        return dangerContent;
+    }
+
+    public void setDangerContent(String dangerContent) {
+        this.dangerContent = dangerContent;
+    }
+
+    public String getTroubleContent() {
+        return troubleContent;
+    }
+
+    public void setTroubleContent(String troubleContent) {
+        this.troubleContent = troubleContent;
+    }
+
+    public String getTroubleType() {
+        return troubleType;
+    }
+
+    public void setTroubleType(String troubleType) {
+        this.troubleType = troubleType;
+    }
+
+    public String getDangerType() {
+        return dangerType;
+    }
+
+    public void setDangerType(String dangerType) {
+        this.dangerType = dangerType;
+    }
 
     public String getLevelLevel() {
         return levelLevel;

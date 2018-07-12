@@ -20,34 +20,18 @@ public class ConstantsUtil {
     public static String prefix = "";
     // accountId
     public static String ACCOUNT_ID = "tongren_qyh_app_id";
-
     // 参数格式
     public static SameDayBean sameDayBean;
     public static boolean isDownloadApk = false;
     public static boolean jumpPersonalInfo = false;
     public static ButtonListModel buttonModel;
-
     // 参数格式
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    /**
-     * 用户id
-     */
+    // 用户id
     public static String USER_ID = "USER_ID";
-    /**
-     * 用户等级
-     */
-    public static String USER_LEVEL = "USER_LEVEL";
-    /**
-     * 用户类型
-     */
-    public static String USER_TYPE = "USER_TYPE";
-    /**
-     * token
-     */
+    // token
     public static String TOKEN = "TOKEN";
-    /**
-     * userHead
-     */
+    // userHead
     public static String USER_HEAD = "USER_HEAD";
     // 选中人员id
     public static String SELECT_USER_ID = "SELECT_USER_ID";
@@ -57,144 +41,85 @@ public class ConstantsUtil {
     public static String slide = "SLIDE";
     // 长按
     public static String Long_press = "Long_press";
-
-    /**
-     * OkHttpClient
-     */
+    // OkHttpClient
     public static OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .connectTimeout(30000L, TimeUnit.MILLISECONDS)
             .readTimeout(30000L, TimeUnit.MILLISECONDS)
             .build();
     // 是否登录成功
     public static final String IS_LOGIN_SUCCESSFUL = "IS_LOGIN_SUCCESSFUL";
+    // 通讯录地址
+    public static final String Mail_Url = "http://qyh.apih5.com/personWeb/";
+    // 轮播图编辑
+    public static final String Scroll_Photo = "https://www.baidu.com/";
 
-    /**
-     * 登录
-     */
+    // 登录
     public static final String LOGIN = prefix + "user/" + "login";
-    /**
-     * 上传别名
-     */
-    public static final String SUBMIT_ALIAS = prefix + "appAddSxZlUserExtend";
-    /**
-     * 层级列表
-     */
+    // 层级列表
     public static final String getZxHwGxProjectLevelList = prefix + "getZxHwGxProjectLevelList";
     public static final String getZxHwAqProjectLevelList = prefix + "getZxHwAqProjectLevelList";
     public static final String getZxHwZlProjectLevelList = prefix + "getZxHwZlProjectLevelList";
-
+    // 添加层级
     public static final String addGxLevel = prefix + "addZxHwGxProjectLevel";
     public static final String addZlLevel = prefix + "addZxHwZlProjectLevel";
     public static final String addAqLevel = prefix + "addZxHwAqProjectLevel";
+    // 删除层级
     public static final String deleteGxLevel = prefix + "batchDeleteUpdateZxHwGxProjectLevel";
     public static final String deleteZlLevel = prefix + "batchDeleteUpdateZxHwZlProjectLevel";
     public static final String deleteAqLevel = prefix + "batchDeleteUpdateZxHwAqProjectLevel";
-
     // 获取首页数据
     public static final String getIndexviewHomePage = prefix + "getIndexviewHomePage";
-
-    /**
-     * 图片上传
-     */
+    // 图片上传
     public static final String UP_LOAD_PHOTOS = prefix + "appUploadGxAttachment";
     public static final String upload = prefix + "appUploadCommon";
-    /**
-     * 删除图片
-     */
+    // 删除图片
     public static final String DELETE_PHOTOS = prefix + "appBatchDeleteZxHwGxAttachment";
-    /**
-     * 版本检查
-     */
+    // 版本检查
     public static final String CHECK_VERSION = prefix + "version/checkVersion";
+    // 下载APK
+    public static final String DOWNLOAD_APK = prefix + "version/downloadFile";
     // 同步工序字典
     public static final String appGetTwoinoneDictList = prefix + "appGetTwoinoneDictList";
     // 同步三级联动菜单
     public static final String getFirSecThiLevelSelect = prefix + "getFirSecThiLevelSelect";
     // 同步到服务器
     public static final String syncDataToServer = prefix + "appSyncProjectLevelAndProcess";
-    /**
-     * 下载APK
-     */
-    public static final String DOWNLOAD_APK = prefix + "version/downloadFile";
-    /**
-     * 获取滚动信息
-     */
-    public static final String GET_SCROLL_INFO = prefix + "appGetNewestPhotoAndProcess";
-    /**
-     * 上传用户头像
-     */
+    // 上传用户头像
     public static final String UPLOAD_ICON = prefix + "appUploadIcon";
-    /**
-     * 获取消息列表
-     */
+    // 获取消息列表
     public static final String GET_TIMER_TASK_LIST = prefix + "getSxZlTimerTaskList";
-    /**
-     * 修改密码
-     */
+    // 修改密码
     public static final String UPDATE_PASSWORD = prefix + "user/updateUserPwd";
-    /**
-     * 工序报表获取首页数据
-     */
+    // 工序报表获取首页数据
     public static final String PROCESS_REPORT_TODAY = prefix + "getProcessReportToday";
-    /**
-     * 按分部获取当日报表详情
-     */
+    // 按分部获取当日报表详情
     public static final String PROCESS_PROCESS_REPORT_TODAY = prefix + "getProcessReportDetailToday";
-    /**
-     * 按分部获取当日报表详情
-     */
+    // 按分部获取当日报表详情
     public static final String PROCESS_AND_PHOTO_LIST_TODAY = prefix + "getProcessAndPhotoListToday";
-    /**
-     * 获取人员结构
-     */
+    // 获取人员结构
     public static final String PERSONNEL_LIST = prefix + "getSysDepartmentUserAllTree";
-    /**
-     * 待办列表
-     */
+    // 待办列表
     public static final String TO_DO_LIST = prefix + "getTodoList";
     public static final String getTodoListBySenduser = prefix + "getTodoListBySenduser";
-    /**
-     * 已办列表
-     */
+    // 已办列表
     public static final String HAS_TO_DO_LIST = prefix + "getHasTodoList";
     public static final String getHasTodoListBySenduser = prefix + "getHasTodoListBySenduser";
-    /**
-     * 待拍照
-     */
+    // 待拍照
     public static final String getZxHwGxProcessList = prefix + "getZxHwGxProcessList";
-    /**
-     * 获取已办待办数量
-     */
-    public static final String FLOW_COUNT = prefix + "getFlowCount";
-    /**
-     * 获取流程节点
-     */
+    // 获取流程节点
     public static final String getHistory = prefix + "getHistory";
-    /**
-     * 新流程详情
-     */
+    // 新流程详情
     public static final String FLOW_DETAILS = prefix + "getSubmitFlow";
-    /**
-     * 新流程详情
-     */
+    // 新流程详情
     public static final String submitFlow = prefix + "submitFlow";
-    /**
-     * 发起流程
-     */
+    // 发起流程
     public static final String startFlow = prefix + "startFlow";
-    /**
-     * 新流程详情
-     */
+    // 新流程详情
     public static final String openPageFlow = prefix + "openPageFlow";
 
-    /**
-     * 文件存储路径
-     */
+    // 文件存储路径
     public static final String SAVE_PATH = "/mnt/sdcard/zjExpressway/";
 
-    /**
-     * 类描述：GPS状态类
-     */
     //用户手动开启GPS
     public static final int GPS_ENABLED = 0;
     //用户手动关闭GPS
@@ -205,7 +130,6 @@ public class ConstantsUtil {
     public static final int GPS_TEMPORARILY_UNAVAILABLE = 3;
     //服务正常有效
     public static final int GPS_AVAILABLE = 4;
-
     // 数字4
     public static final int FOCUS_FRAME_WIDE = 4;
     // 数字5
@@ -242,6 +166,4 @@ public class ConstantsUtil {
 
     // 下载apk文件名称
     public static final String APK_NAME = "expressway.apk";
-    // 最新上传照片工序位置：
-    public static final String uploadFilePath = "最新上传照片工序位置：";
 }

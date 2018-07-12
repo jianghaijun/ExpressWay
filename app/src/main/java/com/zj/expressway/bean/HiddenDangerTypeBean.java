@@ -6,7 +6,16 @@ package com.zj.expressway.bean;
 
 public class HiddenDangerTypeBean {
     private String typeTitle;
+    private int typeId;
     private boolean isSelect;
+
+    public int getTypeId() {
+        return typeId;
+    }
+
+    public void setTypeId(int typeId) {
+        this.typeId = typeId;
+    }
 
     public String getTypeTitle() {
         return typeTitle;

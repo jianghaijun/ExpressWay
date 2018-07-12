@@ -245,16 +245,15 @@
                     android:textColor="@color/black"
                     android:textSize="@dimen/fourteen_sp" />
 
-                <com.zj.expressway.view.GridRadioGroup
-                    android:id="@+id/rgType"
+                <GridLayout
+                    android:id="@+id/gridLType"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:layout_toRightOf="@+id/txtHiddenTroubleType"
                     android:background="@null"
                     android:columnCount="3"
-                    android:minHeight="@dimen/forty"
-                    android:orientation="horizontal" />
+                    android:minHeight="@dimen/forty" />
 
             </RelativeLayout>
 
@@ -331,6 +330,45 @@
                     android:drawableRight="@drawable/date"
                     android:minHeight="@dimen/forty"
                     android:paddingRight="@dimen/ten_dp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/one_dp"
+                    android:layout_marginLeft="@dimen/ten_dp"
+                    android:layout_marginRight="@dimen/ten_dp"
+                    android:background="@color/gray" />
+
+                <TextView
+                    android:id="@+id/txtDangerDescription"
+                    android:layout_width="@dimen/eighty_dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:gravity="right|center"
+                    android:text="@string/dangerDescription"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <EditText
+                    android:id="@+id/edtDangerDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/five_dp"
+                    android:layout_marginRight="@dimen/ten_dp"
+                    android:layout_marginTop="@dimen/five_dp"
+                    android:layout_toRightOf="@+id/txtDangerDescription"
+                    android:background="@drawable/gray_stroke_white_solid_bg"
+                    android:gravity="left|center"
+                    android:minHeight="@dimen/sixty_dp"
+                    android:padding="@dimen/five_dp"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
             <RelativeLayout

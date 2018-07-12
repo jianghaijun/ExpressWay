@@ -13,7 +13,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -24,8 +26,8 @@ import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PhotosListAdapter;
 import com.zj.expressway.adapter.TimeLineAdapter;
-import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.base.BaseModel;
+import com.zj.expressway.base.BaseNoImmersionBarActivity;
 import com.zj.expressway.bean.HiddenDangerTypeBean;
 import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
@@ -49,7 +51,6 @@ import com.zj.expressway.utils.ProviderUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
-import com.zj.expressway.view.GridRadioGroup;
 
 import org.litepal.crud.DataSupport;
 import org.xutils.common.util.DensityUtil;
@@ -80,7 +81,7 @@ import okhttp3.Response;
 /**
  * 详情
  */
-public class ToDoDetailsActivity extends BaseActivity {
+public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageButton imgBtnLeft;
     @ViewInject(R.id.txtTitle)
@@ -96,8 +97,8 @@ public class ToDoDetailsActivity extends BaseActivity {
     private EditText edtHiddenTroubleHeadline;
     @ViewInject(R.id.rgLevel)
     private RadioGroup rgLevel;
-    @ViewInject(R.id.rgType)
-    private GridRadioGroup rgType;
+    @ViewInject(R.id.gridLType)
+    private GridLayout gridLType;
     @ViewInject(R.id.rBtn1)
     private RadioButton rBtn1;
     /*@ViewInject(R.id.rBtn2)
@@ -110,6 +111,8 @@ public class ToDoDetailsActivity extends BaseActivity {
     private ImageButton imgBtnAdd;
     @ViewInject(R.id.edtRectificationRequirements)
     private EditText edtRectificationRequirements;
+    @ViewInject(R.id.edtDangerDescription)
+    private EditText edtDangerDescription;
     @ViewInject(R.id.rvContractorDetails)
     private RecyclerView rvContractorDetails;
     @ViewInject(R.id.rvTimeMarker)
@@ -121,6 +124,7 @@ public class ToDoDetailsActivity extends BaseActivity {
     // 图片列表
     private PhotosListAdapter photosAdapter;
     private List<PhotosBean> photosList = new ArrayList<>();
+    private List<HiddenDangerTypeBean> typeList = new ArrayList<>();
 
     // 拍照
     private Activity mContext;
@@ -196,6 +200,7 @@ public class ToDoDetailsActivity extends BaseActivity {
             txtEntryTime.setText(DateUtils.setDataToStr(System.currentTimeMillis()));
             setImgData(new ArrayList<PhotosBean>(), selectLevelId);
             setShowButton(setButtons());
+            setHiddenTroubleType(StrUtil.equals("2", checkType), "");
         } else if (StrUtil.equals(workId, "details")) {
             List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
             deleteWorkingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
@@ -205,82 +210,85 @@ public class ToDoDetailsActivity extends BaseActivity {
             setShowButton(setButtons());
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", processId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
+            setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? deleteWorkingBean.getTroubleType() : deleteWorkingBean.getDangerType());
         } else {
             initData();
         }
-
-        setHiddenTroubleType();
     }
 
     /**
      * 隐患类型
+     *
+     * @param isAdd
+     * @param selectId
      */
-    private void setHiddenTroubleType() {
-        List<HiddenDangerTypeBean> typeList = new ArrayList<>();
-        HiddenDangerTypeBean bean1 = new HiddenDangerTypeBean();
-        bean1.setTypeTitle("安全管理");
-        bean1.setSelect(false);
-        typeList.add(bean1);
-        HiddenDangerTypeBean bean2 = new HiddenDangerTypeBean();
-        bean2.setTypeTitle("文明施工");
-        bean2.setSelect(false);
-        typeList.add(bean2);
-        HiddenDangerTypeBean bean3 = new HiddenDangerTypeBean();
-        bean3.setTypeTitle("临边防护");
-        bean3.setSelect(false);
-        typeList.add(bean3);
-        HiddenDangerTypeBean bean4 = new HiddenDangerTypeBean();
-        bean4.setTypeTitle("高处作业");
-        bean4.setSelect(false);
-        typeList.add(bean4);
-        HiddenDangerTypeBean bean5 = new HiddenDangerTypeBean();
-        bean5.setTypeTitle("基坑支护");
-        bean5.setSelect(false);
-        typeList.add(bean5);
-        HiddenDangerTypeBean bean6 = new HiddenDangerTypeBean();
-        bean6.setTypeTitle("模板工程");
-        bean6.setSelect(false);
-        typeList.add(bean6);
-        HiddenDangerTypeBean bean7 = new HiddenDangerTypeBean();
-        bean7.setTypeTitle("施工机具");
-        bean7.setSelect(false);
-        typeList.add(bean7);
-        HiddenDangerTypeBean bean8 = new HiddenDangerTypeBean();
-        bean8.setTypeTitle("脚手架");
-        bean8.setSelect(false);
-        typeList.add(bean8);
-        HiddenDangerTypeBean bean9 = new HiddenDangerTypeBean();
-        bean9.setTypeTitle("交通安全");
-        bean9.setSelect(false);
-        typeList.add(bean9);
-        HiddenDangerTypeBean bean10 = new HiddenDangerTypeBean();
-        bean10.setTypeTitle("个体防护");
-        bean10.setSelect(false);
-        typeList.add(bean10);
-        HiddenDangerTypeBean bean11 = new HiddenDangerTypeBean();
-        bean11.setTypeTitle("起重吊装");
-        bean11.setSelect(false);
-        typeList.add(bean11);
-        HiddenDangerTypeBean bean12 = new HiddenDangerTypeBean();
-        bean12.setTypeTitle("施工用电");
-        bean12.setSelect(false);
-        typeList.add(bean12);
-        HiddenDangerTypeBean bean13 = new HiddenDangerTypeBean();
-        bean13.setTypeTitle("消防防火");
-        bean13.setSelect(false);
-        typeList.add(bean13);
-
-        for (HiddenDangerTypeBean bean : typeList) {
-            RadioButton rb = new RadioButton(this);
-            rb.setText(bean.getTypeTitle());
-            if (bean.isSelect()) {
-                rb.setChecked(true);
-            } else {
-                rb.setChecked(false);
-            }
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams((DensityUtil.getScreenWidth() - DensityUtil.dip2px(90)) / 3, DensityUtil.dip2px(40));
-            rgType.addView(rb, params);
+    private void setHiddenTroubleType(boolean isAdd, String selectId) {
+        if (!isAdd) {
+            typeList.add(addBean("安全管理", 100, selectId));
+            typeList.add(addBean("文明施工", 101, selectId));
+            typeList.add(addBean("临边防护", 102, selectId));
+            typeList.add(addBean("高处作业", 103, selectId));
+            typeList.add(addBean("基坑支护", 104, selectId));
+            typeList.add(addBean("模板工程", 105, selectId));
+            typeList.add(addBean("施工机具", 106, selectId));
+            typeList.add(addBean("脚手架", 107, selectId));
+            typeList.add(addBean("交通安全", 108, selectId));
+            typeList.add(addBean("个体防护", 109, selectId));
+            typeList.add(addBean("起重吊装", 110, selectId));
+            typeList.add(addBean("施工用电", 111, selectId));
+            typeList.add(addBean("消防防火", 112, selectId));
+        } else {
+            typeList.add(addBean("外观", 100, selectId));
+            typeList.add(addBean("尺寸", 101, selectId));
+            typeList.add(addBean("坐标", 102, selectId));
+            typeList.add(addBean("工序", 103, selectId));
+            typeList.add(addBean("工艺", 104, selectId));
+            typeList.add(addBean("其它", 105, selectId));
         }
+
+        for (int i = 0; i < typeList.size(); i++) {
+            final int j = i;
+            HiddenDangerTypeBean bean = typeList.get(i);
+            CheckBox checkBox = new CheckBox(this);
+            checkBox.setText(bean.getTypeTitle());
+            if (bean.isSelect()) {
+                checkBox.setChecked(true);
+            } else {
+                checkBox.setChecked(false);
+            }
+            checkBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (typeList.get(j).isSelect()) {
+                        typeList.get(j).setSelect(false);
+                    } else {
+                        typeList.get(j).setSelect(true);
+                    }
+                }
+            });
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams((DensityUtil.getScreenWidth() - DensityUtil.dip2px(90)) / 3, DensityUtil.dip2px(40));
+            gridLType.addView(checkBox, params);
+        }
+    }
+
+    /**
+     * 添加隐患类型
+     *
+     * @param title
+     * @param id
+     * @param selectId
+     * @return
+     */
+    private HiddenDangerTypeBean addBean(String title, int id, String selectId) {
+        HiddenDangerTypeBean bean = new HiddenDangerTypeBean();
+        bean.setTypeTitle(title);
+        bean.setTypeId(id);
+        if (selectId.contains("" + id)) {
+            bean.setSelect(true);
+        } else {
+            bean.setSelect(false);
+        }
+        return bean;
     }
 
     /**
@@ -306,6 +314,7 @@ public class ToDoDetailsActivity extends BaseActivity {
             }
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", workId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
+            setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? workingBean.getTroubleType() : workingBean.getDangerType());
         }
     }
 
@@ -402,6 +411,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                                 }
                                 setShowButton(model.getData().getButtonList());
                                 initTimeLineView(model.getData().getFlowHistoryList());
+                                setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType());
                                 LoadingUtils.hideLoading();
                             }
                         });
@@ -453,6 +463,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                 selectText = "重大";
             }
             edtRectificationRequirements.setText(flowBean.getTroubleRequire());
+            edtDangerDescription.setText(flowBean.getTroubleContent());
         } else {
             edtHiddenTroubleHeadline.setText(flowBean.getDangerTitle());     // 隐患标题
             if (StrUtil.equals(flowBean.getDangerLevel(), "1")) {
@@ -466,6 +477,7 @@ public class ToDoDetailsActivity extends BaseActivity {
                 selectText = "重大";
             }
             edtRectificationRequirements.setText(flowBean.getDangerRequire());
+            edtDangerDescription.setText(flowBean.getDangerContent());
         }
         btnChangeDate.setText(DateUtils.setDataToStr2(flowBean.getDeadline()));
 
@@ -543,16 +555,22 @@ public class ToDoDetailsActivity extends BaseActivity {
             ToastUtil.showShort(mContext, "请先选择工序！");
             return false;
         } else if (StrUtil.isEmpty(edtHiddenTroubleHeadline.getText().toString())) {
-            ToastUtil.showShort(mContext, "请填写隐患标题！");
+            ToastUtil.showShort(mContext, "请填写标题！");
             return false;
         } else if (StrUtil.isEmpty(selectText)) {
-            ToastUtil.showShort(mContext, "请选择隐患级别！");
+            ToastUtil.showShort(mContext, "请选择级别！");
+            return false;
+        } else if (StrUtil.isEmpty(isSelectType())) {
+            ToastUtil.showShort(mContext, "请选择类型！");
             return false;
         } else if (StrUtil.isEmpty(btnChangeDate.getText().toString())) {
             ToastUtil.showShort(mContext, "请选择整改期限！");
             return false;
-        } else if (StrUtil.isEmpty(edtRectificationRequirements.getText().toString())) {
-            ToastUtil.showShort(mContext, "请填写整改要求！");
+        } else if (StrUtil.isEmpty(btnChangeDate.getText().toString())) {
+            ToastUtil.showShort(mContext, "请选择整改期限！");
+            return false;
+        } else if (StrUtil.isEmpty(edtDangerDescription.getText().toString())) {
+            ToastUtil.showShort(mContext, "请填写隐患描述！");
             return false;
         } else if (photosList.size() == 0) {
             ToastUtil.showShort(mContext, "请先拍照！");
@@ -560,6 +578,26 @@ public class ToDoDetailsActivity extends BaseActivity {
         } else {
             return true;
         }
+    }
+
+    /**
+     * 判断是否选择隐患类型
+     *
+     * @return
+     */
+    private String isSelectType() {
+        StringBuffer sb = new StringBuffer();
+        int size = typeList.size();
+        for (int i = 0; i < size; i++) {
+            if (typeList.get(i).isSelect()) {
+                if (i < size - 1) {
+                    sb.append(typeList.get(i).getTypeId() + ",");
+                } else {
+                    sb.append(typeList.get(i).getTypeId() + "");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -588,14 +626,19 @@ public class ToDoDetailsActivity extends BaseActivity {
                 level = 3;
                 break;
         }
+
         if (StrUtil.equals(checkType, "2")) {
             bean.setTroubleTitle(edtHiddenTroubleHeadline.getText().toString());
             bean.setTroubleLevel(level + "");
             bean.setTroubleRequire(edtRectificationRequirements.getText().toString());
+            bean.setTroubleType(isSelectType());
+            bean.setTroubleContent(edtDangerDescription.getText().toString());
         } else {
             bean.setDangerTitle(edtHiddenTroubleHeadline.getText().toString());
             bean.setDangerLevel(level + "");
             bean.setDangerRequire(edtRectificationRequirements.getText().toString());
+            bean.setDangerType(isSelectType());
+            bean.setDangerContent(edtDangerDescription.getText().toString());
         }
         bean.setDeadline(DateUtil.parse(btnChangeDate.getText().toString()).getTime());
         bean.saveOrUpdate("processId=?", StrUtil.equals(workId, "add") ? uuid : processId);
@@ -652,8 +695,12 @@ public class ToDoDetailsActivity extends BaseActivity {
 
         if (StrUtil.equals(type, "2")) {
             tableDataMap.put("troubleLevel", level);
+            tableDataMap.put("troubleType", isSelectType());
+            tableDataMap.put("troubleContent", edtDangerDescription.getText().toString());
         } else {
             tableDataMap.put("dangerLevel", level);
+            tableDataMap.put("dangerType", isSelectType());
+            tableDataMap.put("dangerContent", edtDangerDescription.getText().toString());
         }
 
         tableDataMap.put("deadline", DateUtil.parse(btnChangeDate.getText().toString()).getTime());
@@ -1056,7 +1103,6 @@ public class ToDoDetailsActivity extends BaseActivity {
                     addPhotoBean.setIsNewAdd(1);
                     addPhotoBean.setRoleFlag("1");
                     addPhotoBean.setUserId(userId);
-                    addPhotoBean.setPhotoType((String) SpUtil.get(mContext, ConstantsUtil.USER_TYPE, ""));
                     addPhotoBean.setCreateTime(System.currentTimeMillis());
                     addPhotoBean.save();
                     photosList.add(addPhotoBean);

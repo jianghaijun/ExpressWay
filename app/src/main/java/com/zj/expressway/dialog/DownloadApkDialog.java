@@ -85,13 +85,13 @@ public class DownloadApkDialog extends Dialog {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 Uri uri;
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
-                    uri = Uri.fromFile(new File(ConstantsUtil.SAVE_PATH + "quality.apk"));
+                    uri = Uri.fromFile(new File(ConstantsUtil.SAVE_PATH + ConstantsUtil.APK_NAME));
                 } else {
                     /**
                      * 7.0 调用系统相机拍照不再允许使用Uri方式，应该替换为FileProvider
                      * 并且这样可以解决MIUI系统上拍照返回size为0的情况
                      */
-                    uri = FileProvider.getUriForFile(mContext, ProviderUtil.getFileProviderName(mActivity), new File(ConstantsUtil.SAVE_PATH + "quality.apk"));
+                    uri = FileProvider.getUriForFile(mContext, ProviderUtil.getFileProviderName(mActivity), new File(ConstantsUtil.SAVE_PATH + ConstantsUtil.APK_NAME));
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
                 intent.setDataAndType(uri, "application/vnd.android.package-archive");

@@ -17,6 +17,8 @@ import com.zj.expressway.activity.ContractorDetailsActivity;
 import com.zj.expressway.activity.ReviewProgressActivity;
 import com.zj.expressway.activity.ToDoDetailsActivity;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.SpUtil;
 
 import java.util.List;
 
@@ -122,25 +124,6 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                /*case R.id.imgViewTakePhoto:
-                    List<PhotosBean> phoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ?", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workingBean.getProcessId()).find(PhotosBean.class);
-                    boolean isHave = phoneList == null || phoneList.size() == 0 ? false : true;
-                    if (!workingBean.getTrackStatus().equals("0") || isHave) {
-                        // 直接拍照--->详情
-                        takePhotoActivity(workingBean, true);
-                    } else {
-                        // 提示拍照要求--->详情
-                        PhotoRequirementsDialog dialog = new PhotoRequirementsDialog(mContext, new PromptListener() {
-                            @Override
-                            public void returnTrueOrFalse(boolean trueOrFalse) {
-                                if (trueOrFalse) {
-                                    takePhotoActivity(workingBean, true);
-                                }
-                            }
-                        }, workingBean);
-                        dialog.show();
-                    }
-                    break;*/
                 case R.id.imgViewProgress:
                 case R.id.txtReviewProgress:
                     reviewProgressActivity(workingBean.getWorkId());
@@ -161,8 +144,10 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         Intent intent;
         if (bean.getFlowId().equals("zxHwZlTrouble")) {
             intent = new Intent(mContext, ToDoDetailsActivity.class);
+            SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
         } else if (bean.getFlowId().equals("zxHwAqHiddenDanger")) {
             intent = new Intent(mContext, ToDoDetailsActivity.class);
+            SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "3");
         } else {
             intent = new Intent(mContext, ContractorDetailsActivity.class);
         }

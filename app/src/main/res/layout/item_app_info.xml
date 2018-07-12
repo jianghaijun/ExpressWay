@@ -7,8 +7,8 @@
     android:orientation="vertical">
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/forty_five_dp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/forty_seven_dp"
         android:layout_marginTop="@dimen/five_dp">
 
         <com.zj.expressway.view.TouchHighlightImageButton
@@ -22,11 +22,13 @@
 
         <TextView
             android:id="@+id/txtSubmitPhoneNum"
-            android:layout_width="@dimen/twenty_dp"
-            android:layout_height="@dimen/twenty_dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="5dp"
-            android:background="@drawable/design_point"
+            android:layout_width="@dimen/fifteen_dp"
+            android:layout_height="@dimen/fifteen_dp"
+            android:layout_alignRight="@+id/imgInfo"
+            android:layout_alignTop="@+id/imgInfo"
+            android:layout_marginRight="-7.5dp"
+            android:layout_marginTop="-7.5dp"
+            android:background="@drawable/design_point_red"
             android:gravity="center"
             android:textColor="@color/white"
             android:textSize="@dimen/eight_sp"

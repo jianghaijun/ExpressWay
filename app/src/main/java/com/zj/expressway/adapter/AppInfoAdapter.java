@@ -63,6 +63,29 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
         top.setBounds(0, 0, top.getMinimumWidth(), top.getMinimumHeight());
         holder.imgView.setImageDrawable(ContextCompat.getDrawable(mContext, appInfoBeanList.get(position).getImgUrl()));
         holder.txtTitle.setText(appInfoBeanList.get(position).getTitle());
+        if (position == 0 || position == 3) {
+            if (position == 0) {
+                String unSubmittedNum = (String) SpUtil.get(mContext, "unSubmittedNum", "0");
+                int num = Integer.valueOf(unSubmittedNum);
+                if (num != 0) {
+                    holder.txtSubmitPhoneNum.setVisibility(View.VISIBLE);
+                    if (num > 99) {
+                        holder.txtSubmitPhoneNum.setTextSize(6);
+                    }
+                    holder.txtSubmitPhoneNum.setText(num > 99 ? "99+" : num+"");
+                }
+            } else if (position == 3){
+                String todoCount = (String) SpUtil.get(mContext, "todoCount", "0");
+                int num = Integer.valueOf(todoCount);
+                if (num != 0) {
+                    holder.txtSubmitPhoneNum.setVisibility(View.VISIBLE);
+                    if (num > 99) {
+                        holder.txtSubmitPhoneNum.setTextSize(6);
+                    }
+                    holder.txtSubmitPhoneNum.setText(num > 99 ? "99+" : num+"");
+                }
+            }
+        }
         // 图标点击事件
         holder.imgView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,18 +96,21 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     case 0:
                         intent = new Intent(mContext, AuditManagementActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
+                        SpUtil.put(mContext, "showSelectBtn", true);
                         mContext.startActivity(intent);
                         break;
                     // 质量
                     case 1:
                         intent = new Intent(mContext, QualityInspectionActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
+                        SpUtil.put(mContext, "showSelectBtn", true);
                         mContext.startActivity(intent);
                         break;
                     // 安全巡查
                     case 2:
                         intent = new Intent(mContext, QualityInspectionActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "3");
+                        SpUtil.put(mContext, "showSelectBtn", true);
                         mContext.startActivity(intent);
                         break;
                     // 审核管理
@@ -171,11 +197,13 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
     public class AppInfoHold extends RecyclerView.ViewHolder {
         private TouchHighlightImageButton imgView;
         private TextView txtTitle;
+        private TextView txtSubmitPhoneNum;
 
         public AppInfoHold(View itemView) {
             super(itemView);
             imgView = (TouchHighlightImageButton) itemView.findViewById(R.id.imgInfo);
             txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
+            txtSubmitPhoneNum = (TextView) itemView.findViewById(R.id.txtSubmitPhoneNum);
         }
     }
 

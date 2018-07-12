@@ -2,6 +2,7 @@ package com.zj.expressway.adapter;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,11 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.zj.expressway.R;
+import com.zj.expressway.activity.ContractorDetailsActivity;
+import com.zj.expressway.activity.ToDoDetailsActivity;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.SpUtil;
 
 import java.util.List;
 
@@ -42,28 +47,28 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgHolder> {
         holder.txtDate.setText(DateUtil.formatDateTime(DateUtil.date(System.currentTimeMillis())));
         //holder.txtContext.setText(workingBean.getContent().contains("进入app") ? workingBean.getContent().replace("进入app", "点击") : workingBean.getContent());
         holder.txtContext.setText(workingBean.getLevelNameAll());
-        /*holder.txtContext.setOnClickListener(new View.OnClickListener() {
+        holder.txtContext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent;
-                if (workingBean.getFlowId().equals("zxHwZlHiddenDanger")) {
+                if (workingBean.getFlowId().equals("zxHwZlTrouble")) {
                     intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
                 } else if (workingBean.getFlowId().equals("zxHwAqHiddenDanger")) {
                     intent = new Intent(mContext, ToDoDetailsActivity.class);
+                    SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "3");
                 } else {
                     intent = new Intent(mContext, ContractorDetailsActivity.class);
                 }
-                intent.putExtra("flowId", workingBean.getFlowId());
-                intent.putExtra("processId", workingBean.getProcessId());
-                intent.putExtra("processState", workingBean.getProcessState());
-                intent.putExtra("processPath", workingBean.getLevelNameAll());
-                intent.putExtra("taskId", workingBean.getTaskId());
+                intent.putExtra("flowId", workingBean.getFlowId() == null ? "" : workingBean.getFlowId());
+                intent.putExtra("workId", workingBean.getWorkId() == null ? "" : workingBean.getWorkId());
+                intent.putExtra("mainTablePrimaryId", workingBean.getMainTablePrimaryId() == null ? "" : workingBean.getMainTablePrimaryId());
+                intent.putExtra("isToDo", true);
                 intent.putExtra("isLocalAdd", workingBean.getIsLocalAdd());
-                intent.putExtra("canCheck", workingBean.getCanCheck());
-                intent.putExtra("isPopTakePhoto", workingBean);
+                intent.putExtra("isPopTakePhoto", false);
                 mContext.startActivity(intent);
             }
-        });*/
+        });
     }
 
     @Override

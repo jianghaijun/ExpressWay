@@ -106,31 +106,6 @@ public class ProcessListAdapter extends RecyclerView.Adapter<ProcessListAdapter.
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                /*case R.id.imgViewTakePhoto:
-                    List<PhotosBean> phoneList = DataSupport.where("isToBeUpLoad = 1 AND userId = ? AND processId = ?", (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, ""), workingBean.getProcessId()).find(PhotosBean.class);
-                    boolean isHave = phoneList == null || phoneList.size() == 0 ? false : true;
-                    String state = StrUtil.isEmpty(workingBean.getTrackStatus()) ? "" : workingBean.getTrackStatus();
-                    if (!state.equals("0") || isHave) {
-                        // 直接拍照--->详情
-                        takePhotoActivity(workingBean, true);
-                    } else {
-                        // 提示拍照要求--->详情
-                        PhotoRequirementsDialog dialog = new PhotoRequirementsDialog(mContext, new PromptListener() {
-                            @Override
-                            public void returnTrueOrFalse(boolean trueOrFalse) {
-                                if (trueOrFalse) {
-                                    takePhotoActivity(workingBean, true);
-                                }
-                            }
-                        }, workingBean);
-                        dialog.show();
-                    }
-                    break;
-                case R.id.imgViewProgress:
-                case R.id.txtReviewProgress:
-                    reviewProgressActivity(workingBean.getProcessId());
-                    break;
-                case R.id.rlBottom:*/
                 case R.id.rlProcedurePath:
                     takePhotoActivity(workingBean, false);
                     break;

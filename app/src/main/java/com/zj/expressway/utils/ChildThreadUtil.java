@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 
 import com.zj.expressway.activity.LoginActivity;
-import com.zj.expressway.listener.ILoadCallback;
 
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -45,22 +44,6 @@ public class ChildThreadUtil {
     }
 
     /**
-     * 关闭加载
-     * @param mContext
-     * @param callback
-     */
-    public static void closeLoading(Activity mContext, final ILoadCallback callback) {
-        if (callback != null) {
-            mContext.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    callback.onFailure();
-                }
-            });
-        }
-    }
-
-    /**
      * 弹出消息(判断token是否过期)---隐藏加载框
      * @param mContext
      * @param msg   提示信息
@@ -75,7 +58,7 @@ public class ChildThreadUtil {
                     case 3003:
                     case 3004:
                         // Token异常重新登录
-                        ToastUtil.showLong(mContext, "Token过期请重新登录！");
+                        ToastUtil.showLong(mContext, msg);
                         SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
                         ScreenManagerUtil.popAllActivityExceptOne();
                         mContext.startActivity(new Intent(mContext, LoginActivity.class));
@@ -101,6 +84,21 @@ public class ChildThreadUtil {
                 .url(ConstantsUtil.BASE_URL + strUrl)
                 .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
                 .post(requestBody)
+                .build();
+        return request;
+    }
+
+    /**
+     * 获取Request
+     * @param mContext
+     * @param strUrl
+     * @return
+     */
+    public static Request getRequestByGet(Activity mContext, String strUrl) {
+        Request request = new Request.Builder()
+                .url(ConstantsUtil.BASE_URL + strUrl)
+                .addHeader("token", (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, ""))
+                .get()
                 .build();
         return request;
     }

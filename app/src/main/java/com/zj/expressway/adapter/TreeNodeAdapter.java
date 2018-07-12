@@ -56,8 +56,8 @@ import okhttp3.Response;
  * 无限树形图适配器
  */
 public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNodeHolder> {
-    public List<Node> allCache = new ArrayList<>();
-    public List<Node> all = new ArrayList<>();
+    public List<Node> allCache;
+    public List<Node> all;
     private int expandedIcon = -1;
     private int collapsedIcon = -1;
     private Activity mContext;
@@ -65,33 +65,21 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
     private List<String> nodeName = new ArrayList<>();
     private ContractorListener listener;
     private String processType;
+    private boolean showSelect;
 
     /**
      * @param mContext
-     * @param rootNode
+     * @param all
+     * @param allCache
+     * @param listener
      */
-    public TreeNodeAdapter(Activity mContext, Node rootNode, ContractorListener listener) {
+    public TreeNodeAdapter(Activity mContext, List<Node> all, List<Node> allCache, ContractorListener listener) {
         this.mContext = mContext;
         this.listener = listener;
+        this.all = all;
+        this.allCache = allCache;
         processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
-        addNode(rootNode);
-    }
-
-    /**
-     * 添加节点
-     *
-     * @param node
-     */
-    private void addNode(Node node) {
-        if (node.getParent() != null) {
-            all.add(node);
-            allCache.add(node);
-        }
-        if (node.isLeaf())
-            return;
-        for (int i = 0; i < node.getChildren().size(); i++) {
-            addNode(node.getChildren().get(i));
-        }
+        showSelect = (boolean) SpUtil.get(mContext, "showSelectBtn", true);
     }
 
     /**
@@ -138,7 +126,6 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 all.add(n);
             }
         }
-        //notifyItemChanged(0);
         this.notifyDataSetChanged();
     }
 
@@ -176,14 +163,12 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 if (n.isExpanded()) {
                     n.setExpanded(!n.isExpanded());
                     filterNode();
-                    //notifyItemChanged(position);
                     this.notifyDataSetChanged();
                 } else {
                     // 是否已加载
                     if (n.isLoading()) {
                         n.setExpanded(!n.isExpanded());
                         filterNode();
-                        //notifyItemChanged(position);
                         this.notifyDataSetChanged();
                     } else {
                         // 加载该节点下的工序 设置根节点的展开状态
@@ -197,7 +182,6 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 }
                 n.setChoice(true);
                 SpUtil.put(mContext, "selectProcess", position);
-                //notifyItemChanged(position);
                 notifyDataSetChanged();
             }
         }
@@ -304,10 +288,14 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 }
             }
 
-            if (n.isChoice()) {
-                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.radio_check));
+            if (showSelect) {
+                if (n.isChoice()) {
+                    holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.radio_check));
+                } else {
+                    holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.radio_un_check));
+                }
             } else {
-                holder.imgViewSelect.setImageDrawable(ContextCompat.getDrawable(mContext, R.drawable.radio_un_check));
+                holder.imgViewSelect.setVisibility(View.GONE);
             }
 
             // 展开收缩
@@ -406,12 +394,15 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                                     DataSupport.deleteAll(ContractorBean.class, "levelId=?", n.getLevelId());
                                     DataSupport.deleteAll(ContractorBean.class, "parentId=?", n.getLevelId());
                                     DataSupport.deleteAll(WorkingBean.class, "levelId=?", n.getLevelId());
+                                    List<Node> nodeList = n.getChildren();
+
                                     allCache.remove(position);
                                     all.remove(position);
-                                    notifyItemRemoved(position);
-                                    if (position != all.size()) { // 如果移除的是最后一个，忽略
-                                        notifyItemRangeChanged(position, all.size() - position);
+
+                                    if (n.isExpanded() && nodeList != null) {
+                                        removeLevel(nodeList);
                                     }
+                                    notifyDataSetChanged();
                                 }
                             }
                         }, "提示", "数据删除无法恢复，您确认删除么？", "取消", "确认").show();
@@ -439,6 +430,16 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 holder.rlItemTree.setPadding(50 * (n.getLevel() - 1), 3, 3, 3);
             } else {
                 holder.rlItemTree.setPadding(0 * (n.getLevel() - 1), 3, 3, 3);
+            }
+        }
+    }
+
+    private void removeLevel(List<Node> nodeList) {
+        for (Node n : nodeList) {
+            allCache.remove(n);
+            all.remove(n);
+            if (n.getChildren() != null) {
+                removeLevel(n.getChildren());
             }
         }
     }
@@ -554,10 +555,16 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                                     all.get(point).setChildren(nodeList);
                                     allCache.get(point).setChildren(nodeList);
 
+                                    all.get(point).setFolderFlag("0");
+                                    all.get(point).setExpanded(true);
+                                    allCache.get(point).setFolderFlag("0");
+                                    allCache.get(point).setExpanded(true);
+
                                     allCache.add(point + 1, n);
                                     all.add(point + 1, n);
 
-                                    notifyItemInserted(point + 1);
+                                    notifyDataSetChanged();
+                                    //notifyItemInserted(point + 1);
                                 }
                                 LoadingUtils.hideLoading();
                             }
@@ -610,12 +617,14 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                         mContext.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                List<Node> nodeList = node.getChildren();
                                 allCache.remove(point);
                                 all.remove(point);
-                                notifyItemRemoved(point);
-                                if (point != all.size()) { // 如果移除的是最后一个，忽略
-                                    notifyItemRangeChanged(point, all.size() - point);
+
+                                if (node.isExpanded() && nodeList != null) {
+                                    removeLevel(nodeList);
                                 }
+                                notifyDataSetChanged();
                                 LoadingUtils.hideLoading();
                             }
                         });

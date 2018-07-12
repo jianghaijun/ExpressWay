@@ -267,7 +267,7 @@ public class MySettingActivity extends BaseActivity {
      * 版本检查
      */
     public void checkVersion() {
-        Request request = ChildThreadUtil.getRequest(mActivity, ConstantsUtil.CHECK_VERSION, "");
+        Request request = ChildThreadUtil.getRequestByGet(mActivity, ConstantsUtil.CHECK_VERSION);
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -287,9 +287,7 @@ public class MySettingActivity extends BaseActivity {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    fileLength = model.getFileLength();
-                                    PromptDialog promptDialog = new PromptDialog(mActivity, choiceListener, "发现新版本", "是否更新？", "否", "是");
-                                    promptDialog.show();
+                                    downloadApk(model.getFileLength());
                                 }
                             });
                         } else {
@@ -309,6 +307,17 @@ public class MySettingActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    /**
+     * 是否下载Apk
+     * @param fileLength
+     */
+    public void downloadApk(long fileLength) {
+        ConstantsUtil.isDownloadApk = true;
+        this.fileLength = fileLength;
+        PromptDialog promptDialog = new PromptDialog(mActivity, choiceListener, "发现新版本", "是否更新？", "否", "是");
+        promptDialog.show();
     }
 
     /**

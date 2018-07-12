@@ -1,8 +1,13 @@
 package com.zj.expressway.base;
 
 import android.content.Context;
+import android.content.Intent;
 import android.webkit.JavascriptInterface;
 
+import com.zj.expressway.activity.LoginActivity;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 /**
@@ -18,6 +23,14 @@ public class BaseInJavaScript {
     @JavascriptInterface
     public void showToast(String str) {
         ToastUtil.showShort(mContext, str);
+    }
+
+    @JavascriptInterface
+    public void tokenBeOverdue(String msg) {
+        ToastUtil.showLong(mContext, msg);
+        SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
+        ScreenManagerUtil.popAllActivityExceptOne();
+        mContext.startActivity(new Intent(mContext, LoginActivity.class));
     }
 
 }

@@ -270,16 +270,16 @@ public class ContractorTreeActivity extends BaseActivity {
             }
 
             addNode(root);
-            ta = new TreeNodeAdapter(this, root, listener);
-                /* 设置展开和折叠时图标 */
+            ta = new TreeNodeAdapter(this, all, allCache, listener);
+            /* 设置展开和折叠时图标 */
             ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
-                /* 设置默认展开级别 */
+            /* 设置默认展开级别 */
             ta.setExpandLevel(1);
             lvContractorList.setAdapter(ta);
             lvContractorList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
 
-            allCache = ta.allCache;
-            all = ta.all;
+            /*allCache = ta.allCache;
+            all = ta.all;*/
         } else {
             btnNoData.setVisibility(View.VISIBLE);
         }
@@ -307,8 +307,6 @@ public class ContractorTreeActivity extends BaseActivity {
         n.setExpanded(false);
         n.setLoading(false);
         n.setChoice(false);
-        //n.setCanClick(contractorListBean.getCanExpand().equals("1"));
-        //n.setIsFinish(contractorListBean.getIsFinish());
         root.add(n);
         return n;
     }
@@ -319,8 +317,8 @@ public class ContractorTreeActivity extends BaseActivity {
     private ContractorListener listener = new ContractorListener() {
         @Override
         public void returnData(List<Node> allCaches, List<Node> allNode, int point, String levelId) {
-            allCache = allCaches;
-            all = allNode;
+            //allCache = allCaches;
+            //all = allNode;
             // 没有网络并且没有加载过
             if (JudgeNetworkIsAvailable.isNetworkAvailable(ContractorTreeActivity.this)) {
                 loadProcedureByNodeId(point, levelId);
@@ -487,6 +485,17 @@ public class ContractorTreeActivity extends BaseActivity {
                 String parentIdAll = all.get(position).getParentIdAll() + "," + parentLevelId;
                 String parentNameAll = all.get(position).getParentNameAll() + "," + pileNo;
 
+                all.get(position).setFolderFlag("0");
+                all.get(position).setLoading(true);
+                allCache.get(position).setFolderFlag("0");
+                allCache.get(position).setLoading(true);
+
+                List<ContractorBean> beanList1 = DataSupport.where("levelId=?", all.get(position).getLevelId()).find(ContractorBean.class);
+                for (ContractorBean bean : beanList1) {
+                    bean.setCanExpand("0");
+                    bean.saveOrUpdate("levelId=?", bean.getLevelId());
+                }
+
                 ContractorBean newPileNo = addLocalLevel(parentLevelId, pileNo, all.get(position).getLevelId(), "1", "0", "", parentIdAll, parentNameAll, "1");
                 beanList.add(newPileNo);
                 // 向桩号下添加层级
@@ -577,7 +586,7 @@ public class ContractorTreeActivity extends BaseActivity {
 
                 all.get(position).setLevelName(pileNo);
                 if (all.get(position).getChildren() != null) {
-                    final List<Node> nodeList1 = all.get(position).getChildren();
+                    List<Node> nodeList1 = all.get(position).getChildren();
                     for (Node node : nodeList1) {
                         allCache.remove(node);
                     }

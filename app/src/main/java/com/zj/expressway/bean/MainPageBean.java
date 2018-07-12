@@ -9,8 +9,17 @@ import java.io.Serializable;
  */
 
 public class MainPageBean extends DataSupport implements Serializable {
+    private String viewId;
     private String viewContent;
     private String fileUrl;
+
+    public String getViewId() {
+        return viewId;
+    }
+
+    public void setViewId(String viewId) {
+        this.viewId = viewId;
+    }
 
     public String getViewContent() {
         return viewContent;
