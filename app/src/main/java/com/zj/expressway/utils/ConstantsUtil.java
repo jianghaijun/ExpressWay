@@ -51,7 +51,9 @@ public class ConstantsUtil {
     // 通讯录地址
     public static final String Mail_Url = "http://qyh.apih5.com/personWeb/";
     // 轮播图编辑
-    public static final String Scroll_Photo = "https://www.baidu.com/";
+    public static final String Scroll_Photo = "http://114.116.12.219/tongren_mobile/#/newDetail/";
+    // 地图
+    public static final String Map = "http://114.116.12.219/tongren_mobile/#/map/123";
 
     // 登录
     public static final String LOGIN = prefix + "user/" + "login";
@@ -116,6 +118,8 @@ public class ConstantsUtil {
     public static final String startFlow = prefix + "startFlow";
     // 新流程详情
     public static final String openPageFlow = prefix + "openPageFlow";
+    // 系统消息
+    public static final String appGetMessageList = prefix + "appGetMessageList";
 
     // 文件存储路径
     public static final String SAVE_PATH = "/mnt/sdcard/zjExpressway/";

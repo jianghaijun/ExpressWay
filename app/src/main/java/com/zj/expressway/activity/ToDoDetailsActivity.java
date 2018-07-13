@@ -93,6 +93,12 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     private TextView txtPressLocal;
     @ViewInject(R.id.txtEntryTime)
     private TextView txtEntryTime;
+    @ViewInject(R.id.txtHiddenTroubleType)
+    private TextView txtHiddenTroubleType;
+    @ViewInject(R.id.txtHiddenTroubleLevel)
+    private TextView txtHiddenTroubleLevel;
+    @ViewInject(R.id.txtDangerDescription)
+    private TextView txtDangerDescription;
     @ViewInject(R.id.edtHiddenTroubleHeadline)
     private EditText edtHiddenTroubleHeadline;
     @ViewInject(R.id.rgLevel)
@@ -101,8 +107,8 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     private GridLayout gridLType;
     @ViewInject(R.id.rBtn1)
     private RadioButton rBtn1;
-    /*@ViewInject(R.id.rBtn2)
-    private RadioButton rBtn2;*/
+    @ViewInject(R.id.rBtn2)
+    private RadioButton rBtn2;
     @ViewInject(R.id.rBtn3)
     private RadioButton rBtn3;
     @ViewInject(R.id.btnChangeDate)
@@ -162,6 +168,14 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         userId = (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "");
 
         checkType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
+        if (!StrUtil.equals("2", checkType)) {
+            rBtn2.setVisibility(View.GONE);
+        } else {
+            txtHiddenTroubleType.setText("问题类型：");
+            txtHiddenTroubleLevel.setText("问题级别：");
+            txtDangerDescription.setText("问题描述：");
+            rBtn3.setText("紧要");
+        }
 
         if (StrUtil.equals("add", workId)) {
             if (StrUtil.equals("2", checkType)) {
@@ -456,11 +470,11 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                 rBtn1.setChecked(true);
                 selectText = "一般";
             } else if (StrUtil.equals(flowBean.getTroubleLevel(), "2")) {
-                /*rBtn2.setChecked(true);
-                selectText = "严重";*/
+                rBtn2.setChecked(true);
+                selectText = "严重";
             } else {
                 rBtn3.setChecked(true);
-                selectText = "重大";
+                selectText = "紧要";
             }
             edtRectificationRequirements.setText(flowBean.getTroubleRequire());
             edtDangerDescription.setText(flowBean.getTroubleContent());
@@ -469,11 +483,9 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             if (StrUtil.equals(flowBean.getDangerLevel(), "1")) {
                 rBtn1.setChecked(true);
                 selectText = "一般";
-            } else if (StrUtil.equals(flowBean.getDangerLevel(), "2")) {
-                /*rBtn2.setChecked(true);
-                selectText = "严重";*/
             } else {
                 rBtn3.setChecked(true);
+                rBtn3.setText("重大");
                 selectText = "重大";
             }
             edtRectificationRequirements.setText(flowBean.getDangerRequire());
@@ -623,6 +635,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                 level = 2;
                 break;
             case "紧要":
+            case "重大":
                 level = 3;
                 break;
         }
@@ -689,6 +702,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                 level = 2;
                 break;
             case "紧要":
+            case "重大":
                 level = 3;
                 break;
         }
@@ -1075,7 +1089,14 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             switch (requestCode) {
                 // 选择工序位置
                 case selectProcessPath:
-                    clearData();
+                    //clearData();
+                    // 是否选择相同层级
+                    if (!StrUtil.equals(txtPressLocal.getText().toString(), data.getStringExtra("procedureName"))) {
+                        uuid = RandomUtil.randomUUID().replaceAll("-", "");
+                        photosList.clear();
+                        photosAdapter.notifyDataSetChanged();
+                    }
+                    workId = "add";
                     txtPressLocal.setText(data.getStringExtra("procedureName"));
                     selectLevelId = data.getStringExtra("levelId");
                     break;

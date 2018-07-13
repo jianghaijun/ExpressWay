@@ -444,6 +444,11 @@ public class ProcessListActivity extends BaseActivity {
         }
         btnProcessNum.setText("" + processSum);
 
+        // 搜索无数据是显示选择工序按钮
+        if (viewType == 1 && !isTypeOneFirst && workingBeanList.size() == 0) {
+            holder.btnProcessChoice.setVisibility(View.VISIBLE);
+        }
+
         // 数据处理
         if (viewType == 1) {
             if (processAdapter == null) {

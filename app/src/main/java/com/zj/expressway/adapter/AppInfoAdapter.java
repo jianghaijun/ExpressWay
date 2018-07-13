@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.activity.AuditManagementActivity;
+import com.zj.expressway.activity.EditScrollPhotoActivity;
 import com.zj.expressway.activity.ProcessReportActivity;
 import com.zj.expressway.activity.QrCodeScanActivity;
 import com.zj.expressway.activity.QualityInspectionActivity;
@@ -135,6 +136,13 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     // 二维码扫描
                     case 5:
                         intent = new Intent(mContext, QrCodeScanActivity.class);
+                        mContext.startActivity(intent);
+                        break;
+                    // 地图
+                    case 6:
+                        intent = new Intent(mContext, EditScrollPhotoActivity.class);
+                        intent.putExtra("url", ConstantsUtil.Map);
+                        intent.putExtra("title", "地图");
                         mContext.startActivity(intent);
                         break;
                     default:

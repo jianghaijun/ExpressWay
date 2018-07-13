@@ -18,6 +18,8 @@ import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.AppInfoBean;
 import com.zj.expressway.bean.MainPageBean;
 import com.zj.expressway.loader.GlideImageLoader;
+import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.SpUtil;
 
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -54,7 +56,7 @@ public class AppActivity extends BaseActivity {
             for (MainPageBean bean : objList) {
                 idList.add(bean.getViewId());
                 urlList.add(bean.getFileUrl());
-                strList.add(bean.getViewContent());
+                strList.add(bean.getViewSummary());
             }
         }
 
@@ -95,7 +97,8 @@ public class AppActivity extends BaseActivity {
             @Override
             public void OnBannerClick(int position) {
                 Intent intent = new Intent(mContext, EditScrollPhotoActivity.class);
-                intent.putExtra("viewId", idList.get(position));
+                intent.putExtra("url", ConstantsUtil.Scroll_Photo + idList.get(position) + "/" + SpUtil.get(mContext, ConstantsUtil.TOKEN, ""));
+                intent.putExtra("title", "详情");
                 mContext.startActivity(intent);
             }
         });

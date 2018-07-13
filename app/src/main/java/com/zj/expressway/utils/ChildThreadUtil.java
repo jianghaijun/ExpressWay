@@ -15,20 +15,6 @@ import okhttp3.RequestBody;
 public class ChildThreadUtil {
 
     /**
-     * 弹出消息---不隐藏加载框
-     * @param mContext
-     * @param msg
-     */
-    public static void toastMsgNoHidden(final Activity mContext, final String msg) {
-        mContext.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ToastUtil.showShort(mContext, msg);
-            }
-        });
-    }
-
-    /**
      * 弹出消息---隐藏加载框
      * @param mContext
      * @param msg

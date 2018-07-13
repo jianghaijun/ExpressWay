@@ -35,6 +35,7 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
     private Activity mContext;
     private Button btn;
     private List<WorkingBean> workingBeanList;
+    private String type;
 
     /**
      * 重载
@@ -46,6 +47,7 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
         this.btn = btn;
         this.mContext = (Activity) mContext;
         this.workingBeanList = workingBeanList;
+        type = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
     }
 
     @Override
@@ -89,7 +91,11 @@ public class AddProcessAdapter extends RecyclerView.Adapter<AddProcessAdapter.Pr
                     btnLevel.setText("严重");
                     break;
                 case "3":
-                    btnLevel.setText("紧要");
+                    if (StrUtil.equals(type, "2")) {
+                        btnLevel.setText("紧要");
+                    } else {
+                        btnLevel.setText("重大");
+                    }
                     break;
             }
             txtTitle.setText(StrUtil.isEmpty(data.getTroubleTitle()) ? data.getDangerTitle() : data.getTroubleTitle());

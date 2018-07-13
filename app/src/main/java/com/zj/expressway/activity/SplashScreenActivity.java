@@ -58,7 +58,7 @@ public class SplashScreenActivity extends BaseActivity {
     private void startNextActivity() {
         ConstantsUtil.BASE_URL = (String) SpUtil.get(this, "BASE_URL", "http://114.116.12.219:8012/tongren/");
         ConstantsUtil.ACCOUNT_ID = (String) SpUtil.get(this, "ACCOUNT_ID", "tongren_qyh_app_id");
-//        ConstantsUtil.BASE_URL = "http://192.168.1.119:8080/web/";
+//        ConstantsUtil.BASE_URL = "http://192.168.1.155:8080/web/";
 //        ConstantsUtil.ACCOUNT_ID = "sjz_qyh_woa_id";
 
         SpUtil.put(this, "isFirstStar", true);

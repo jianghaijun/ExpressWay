@@ -7,11 +7,14 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.zj.expressway.R;
 import com.zj.expressway.activity.ContractorDetailsActivity;
+import com.zj.expressway.activity.EditScrollPhotoActivity;
 import com.zj.expressway.activity.ToDoDetailsActivity;
+import com.zj.expressway.bean.MsgBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.SpUtil;
@@ -27,11 +30,11 @@ import cn.hutool.core.util.StrUtil;
  */
 public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgHolder> {
     private Activity mContext;
-    private List<WorkingBean> workingBeanList;
+    private List<MsgBean> msgBeanList;
 
-    public MsgAdapter(Context mContext, List<WorkingBean> workingBeanList) {
+    public MsgAdapter(Context mContext, List<MsgBean> msgBeanList) {
         this.mContext = (Activity) mContext;
-        this.workingBeanList = workingBeanList;
+        this.msgBeanList = msgBeanList;
     }
 
     @Override
@@ -41,31 +44,18 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgHolder> {
 
     @Override
     public void onBindViewHolder(MsgHolder holder, int position) {
-        final WorkingBean workingBean = workingBeanList.get(position);
-        String ready = StrUtil.equals(workingBean.getIsRead(), "1") ? "已读" : "未读";
-        holder.txtTitle.setText(workingBean.getCreateUserName() + "(" + ready + ")");
-        holder.txtDate.setText(DateUtil.formatDateTime(DateUtil.date(System.currentTimeMillis())));
-        //holder.txtContext.setText(workingBean.getContent().contains("进入app") ? workingBean.getContent().replace("进入app", "点击") : workingBean.getContent());
-        holder.txtContext.setText(workingBean.getLevelNameAll());
-        holder.txtContext.setOnClickListener(new View.OnClickListener() {
+        final MsgBean msgBean = msgBeanList.get(position);
+        String ready = StrUtil.equals(msgBean.getIsRead(), "1") ? "已读" : "未读";
+        holder.txtTitle.setText(msgBean.getMsgTitle() + "(" + ready + ")");
+        holder.txtDate.setText(DateUtil.formatDateTime(DateUtil.date(msgBean.getCreateTime())));
+        holder.txtContext.setText(msgBean.getMsgContent());
+        // 点击跳转
+        holder.llMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent;
-                if (workingBean.getFlowId().equals("zxHwZlTrouble")) {
-                    intent = new Intent(mContext, ToDoDetailsActivity.class);
-                    SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
-                } else if (workingBean.getFlowId().equals("zxHwAqHiddenDanger")) {
-                    intent = new Intent(mContext, ToDoDetailsActivity.class);
-                    SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "3");
-                } else {
-                    intent = new Intent(mContext, ContractorDetailsActivity.class);
-                }
-                intent.putExtra("flowId", workingBean.getFlowId() == null ? "" : workingBean.getFlowId());
-                intent.putExtra("workId", workingBean.getWorkId() == null ? "" : workingBean.getWorkId());
-                intent.putExtra("mainTablePrimaryId", workingBean.getMainTablePrimaryId() == null ? "" : workingBean.getMainTablePrimaryId());
-                intent.putExtra("isToDo", true);
-                intent.putExtra("isLocalAdd", workingBean.getIsLocalAdd());
-                intent.putExtra("isPopTakePhoto", false);
+                Intent intent = new Intent(mContext, EditScrollPhotoActivity.class);
+                intent.putExtra("url", ConstantsUtil.Scroll_Photo + "?" + "msgId=" + msgBean.getMsgId() + "&msgUserId=" + msgBean.getMsgUserId());
+                intent.putExtra("title", "详情");
                 mContext.startActivity(intent);
             }
         });
@@ -73,19 +63,21 @@ public class MsgAdapter extends RecyclerView.Adapter<MsgAdapter.MsgHolder> {
 
     @Override
     public int getItemCount() {
-        return workingBeanList == null ? 0 : workingBeanList.size();
+        return msgBeanList == null ? 0 : msgBeanList.size();
     }
 
     public class MsgHolder extends RecyclerView.ViewHolder {
         private TextView txtDate;
         private TextView txtTitle;
         private TextView txtContext;
+        private LinearLayout llMain;
 
         public MsgHolder(View itemView) {
             super(itemView);
             txtDate = (TextView) itemView.findViewById(R.id.txtDate);
             txtTitle = (TextView) itemView.findViewById(R.id.txtTitle);
             txtContext = (TextView) itemView.findViewById(R.id.txtContext);
+            llMain = (LinearLayout) itemView.findViewById(R.id.llMain);
         }
     }
 }

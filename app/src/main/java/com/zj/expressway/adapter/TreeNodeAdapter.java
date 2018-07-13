@@ -64,6 +64,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
     private Node rootNode;
     private List<String> nodeName = new ArrayList<>();
     private ContractorListener listener;
+    private PromptListener isHaveData;
     private String processType;
     private boolean showSelect;
 
@@ -73,11 +74,12 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
      * @param allCache
      * @param listener
      */
-    public TreeNodeAdapter(Activity mContext, List<Node> all, List<Node> allCache, ContractorListener listener) {
+    public TreeNodeAdapter(Activity mContext, List<Node> all, List<Node> allCache, ContractorListener listener, PromptListener isHaveData) {
         this.mContext = mContext;
         this.listener = listener;
         this.all = all;
         this.allCache = allCache;
+        this.isHaveData = isHaveData;
         processType = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
         showSelect = (boolean) SpUtil.get(mContext, "showSelectBtn", true);
     }
@@ -399,6 +401,10 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                                     allCache.remove(position);
                                     all.remove(position);
 
+                                    if (allCache.size() == 0) {
+                                        isHaveData.returnTrueOrFalse(false);
+                                    }
+
                                     if (n.isExpanded() && nodeList != null) {
                                         removeLevel(nodeList);
                                     }
@@ -434,6 +440,10 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
         }
     }
 
+    /**
+     * 移除
+     * @param nodeList
+     */
     private void removeLevel(List<Node> nodeList) {
         for (Node n : nodeList) {
             allCache.remove(n);
@@ -461,6 +471,78 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                 add(all.get(point), point, userId);
             }
         }, "提示", "请输入层级名称", "取消", "添加").show();
+    }
+
+    /**
+     * 添加
+     * @param levelName
+     */
+    public void noDataAddBtn(String levelName) {
+        add(levelName);
+    }
+
+    /**
+     * 添加
+     * @param levelName
+     */
+    private void add(String levelName) {
+        LoadingUtils.showLoading(mContext);
+        JSONObject obj = new JSONObject();
+        obj.put("levelName", levelName);
+        obj.put("parentId", "0");
+        obj.put("parentIdAll", "");
+        String url;
+        if (StrUtil.equals("1", processType)) {
+            url = ConstantsUtil.addGxLevel;
+        } else if (StrUtil.equals("2", processType)) {
+            url = ConstantsUtil.addZlLevel;
+        } else {
+            url = ConstantsUtil.addAqLevel;
+        }
+
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String jsonData = response.body().string().toString();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    Gson gson = new Gson();
+                    BaseModel model = gson.fromJson(jsonData, BaseModel.class);
+                    if (model.isSuccess()) {
+                        mContext.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                isHaveData.returnTrueOrFalse(true);
+                                JSONObject obj = new JSONObject(jsonData);
+                                obj = new JSONObject(obj.getObj("data").toString());
+                                Node n = new Node();
+                                n.setLevelId((String) obj.getObj("levelId", ""));
+                                n.setLevelName((String) obj.getObj("levelName", ""));
+                                n.setParentId((String) obj.getObj("parentId", ""));
+                                n.setFolderFlag("0");
+                                n.setExpanded(false);
+                                n.setLoading(false);
+                                n.setChoice(false);
+                                n.setParent(new Node());
+                                allCache.add(n);
+                                all.add(n);
+                                notifyItemInserted(0);
+                                LoadingUtils.hideLoading();
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                    }
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mContext, mContext.getString(R.string.json_error));
+                }
+            }
+        });
     }
 
     /**
@@ -548,7 +630,7 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
                                     n.setParent(node);
                                     node.setExpanded(true);
                                     node.setLoading(true);
-                                    node.setChoice(true);
+                                    node.setChoice(false);
 
                                     List<Node> nodeList = node.getChildren();
                                     nodeList.add(n);
@@ -623,6 +705,9 @@ public class TreeNodeAdapter extends RecyclerView.Adapter<TreeNodeAdapter.TreeNo
 
                                 if (node.isExpanded() && nodeList != null) {
                                     removeLevel(nodeList);
+                                }
+                                if (allCache.size() == 0) {
+                                    isHaveData.returnTrueOrFalse(false);
                                 }
                                 notifyDataSetChanged();
                                 LoadingUtils.hideLoading();

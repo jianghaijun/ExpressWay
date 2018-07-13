@@ -46,12 +46,12 @@ public class EditScrollPhotoActivity extends BaseActivity implements CustomWebVi
         actionBar.setVisibility(View.VISIBLE);
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
-        txtTitle.setText("编辑");
+        txtTitle.setText(getIntent().getStringExtra("title"));
 
         WebViewSettingUtil.setSetting(wvMailList);
         wvMailList.addJavascriptInterface(new MailListInJavaScript(this, wvMailList), "android_api");
         wvMailList.setWebViewClient(new CustomWebViewClient(this, this));
-        wvMailList.loadUrl(ConstantsUtil.Scroll_Photo + "?" + getIntent().getStringExtra("viewId"));
+        wvMailList.loadUrl(getIntent().getStringExtra("url"));
     }
 
     @Override

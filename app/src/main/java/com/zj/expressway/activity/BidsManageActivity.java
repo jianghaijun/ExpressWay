@@ -12,8 +12,12 @@ import com.zj.expressway.adapter.TreeNodeAdapter;
 import com.zj.expressway.bean.ContractorBean;
 import com.zj.expressway.bean.ProcessDictionaryBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.dialog.RejectDialog;
+import com.zj.expressway.dialog.RejectUnCanChoiceDialog;
 import com.zj.expressway.dialog.SlippingHintDialog;
 import com.zj.expressway.listener.ContractorListener;
+import com.zj.expressway.listener.PromptListener;
+import com.zj.expressway.listener.ReportListener;
 import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.tree.Node;
 import com.zj.expressway.utils.ChildThreadUtil;
@@ -25,7 +29,6 @@ import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
-import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
@@ -154,28 +157,61 @@ public class BidsManageActivity {
      */
     private void setContractorNode(List<ContractorBean> contractorBean) {
         // 添加节点
-        if (contractorBean != null && contractorBean.size() > 0) {
-            int listSize = contractorBean.size();
-            // 创建根节点
-            Node root = new Node();
-            root.setFolderFlag("1");
+        if (contractorBean == null) {
+            contractorBean = new ArrayList<>();
+        }
 
-            for (int i = 0; i < listSize; i++) {
-                getNode(contractorBean.get(i), root);
-            }
-
-            addNode(root);
-            ta = new TreeNodeAdapter(mContext, all, allCache, listener);
-            /* 设置展开和折叠时图标 */
-            ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
-            /* 设置默认展开级别 */
-            ta.setExpandLevel(1);
-            hold.lvContractorList.setAdapter(ta);
-            hold.lvContractorList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
-        } else {
+        if (contractorBean.size() == 0) {
+            hold.btnQuerySelect.setVisibility(View.VISIBLE);
+            hold.btnQuerySelect.setText("添加层级");
+            hold.btnQuerySelect.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    new RejectUnCanChoiceDialog(mContext, new ReportListener() {
+                        @Override
+                        public void returnUserId(String userId) {
+                            ta.noDataAddBtn(userId);
+                        }
+                    }, "提示", "请输入层级名称", "取消", "添加").show();
+                }
+            });
             hold.btnNoData.setVisibility(View.VISIBLE);
         }
+
+        int listSize = contractorBean.size();
+        // 创建根节点
+        Node root = new Node();
+        root.setFolderFlag("1");
+
+        for (int i = 0; i < listSize; i++) {
+            getNode(contractorBean.get(i), root);
+        }
+
+        addNode(root);
+        ta = new TreeNodeAdapter(mContext, all, allCache, listener, isHaveData);
+            /* 设置展开和折叠时图标 */
+        ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
+            /* 设置默认展开级别 */
+        ta.setExpandLevel(1);
+        hold.lvContractorList.setAdapter(ta);
+        hold.lvContractorList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
     }
+
+    /**
+     * 是否有数据
+     */
+    private PromptListener isHaveData = new PromptListener() {
+        @Override
+        public void returnTrueOrFalse(boolean trueOrFalse) {
+            if (trueOrFalse) {
+                hold.btnNoData.setVisibility(View.GONE);
+                hold.btnQuerySelect.setVisibility(View.GONE);
+            } else {
+                hold.btnNoData.setVisibility(View.VISIBLE);
+                hold.btnQuerySelect.setVisibility(View.VISIBLE);
+            }
+        }
+    };
 
     /**
      * 子节点
@@ -525,22 +561,6 @@ public class BidsManageActivity {
         workingBean.setFileOperationFlag("1");
         workingBean.saveOrUpdate("processId=?", processBean.getDictId());
         return workingBean;
-    }
-
-    @Event({R.id.imgBtnLeft, R.id.btnQuerySelect, R.id.imgBtnRight})
-    private void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.imgBtnLeft:
-                //this.finish();
-                break;
-            case R.id.btnQuerySelect:
-                if (ta != null) {
-                    ta.selectProcess((Integer) SpUtil.get(mContext, "selectProcess", -1));
-                } else {
-                    ToastUtil.showShort(mContext, "数据有误！");
-                }
-                break;
-        }
     }
 
     /**

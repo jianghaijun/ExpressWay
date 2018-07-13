@@ -21,8 +21,11 @@ import com.zj.expressway.bean.ContractorBean;
 import com.zj.expressway.bean.ProcessDictionaryBean;
 import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.dialog.RejectUnCanChoiceDialog;
 import com.zj.expressway.dialog.SlippingHintDialog;
 import com.zj.expressway.listener.ContractorListener;
+import com.zj.expressway.listener.PromptListener;
+import com.zj.expressway.listener.ReportListener;
 import com.zj.expressway.model.ContractorModel;
 import com.zj.expressway.tree.Node;
 import com.zj.expressway.utils.ChildThreadUtil;
@@ -66,6 +69,8 @@ public class ContractorTreeActivity extends BaseActivity {
     private TextView txtTitle;
     @ViewInject(R.id.btnNoData)
     private Button btnNoData;
+    @ViewInject(R.id.btnQuerySelect)
+    private Button btnQuerySelect;
     @ViewInject(R.id.lvContractorList)
     private RecyclerView lvContractorList;
     private Activity mContext;
@@ -82,6 +87,8 @@ public class ContractorTreeActivity extends BaseActivity {
         mContext = this;
         x.view().inject(this);
         ScreenManagerUtil.pushActivity(this);
+
+        SpUtil.put(mContext, "selectProcess", -1);
 
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
@@ -259,31 +266,49 @@ public class ContractorTreeActivity extends BaseActivity {
      */
     private void setContractorNode(List<ContractorBean> contractorBean) {
         // 添加节点
-        if (contractorBean != null && contractorBean.size() > 0) {
-            int listSize = contractorBean.size();
-            // 创建根节点
-            Node root = new Node();
-            root.setFolderFlag("1");
-
-            for (int i = 0; i < listSize; i++) {
-                getNode(contractorBean.get(i), root);
-            }
-
-            addNode(root);
-            ta = new TreeNodeAdapter(this, all, allCache, listener);
-            /* 设置展开和折叠时图标 */
-            ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
-            /* 设置默认展开级别 */
-            ta.setExpandLevel(1);
-            lvContractorList.setAdapter(ta);
-            lvContractorList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
-
-            /*allCache = ta.allCache;
-            all = ta.all;*/
-        } else {
-            btnNoData.setVisibility(View.VISIBLE);
+        if (contractorBean == null) {
+            contractorBean = new ArrayList<>();
         }
+
+        if (contractorBean.size() == 0) {
+            btnNoData.setVisibility(View.VISIBLE);
+            btnQuerySelect.setText("添加层级");
+        }
+
+        int listSize = contractorBean.size();
+        // 创建根节点
+        Node root = new Node();
+        root.setFolderFlag("1");
+
+        for (int i = 0; i < listSize; i++) {
+            getNode(contractorBean.get(i), root);
+        }
+
+        addNode(root);
+        ta = new TreeNodeAdapter(this, all, allCache, listener, isHaveData);
+        /* 设置展开和折叠时图标 */
+        ta.setExpandedCollapsedIcon(R.drawable.open, R.drawable.fold);
+        /* 设置默认展开级别 */
+        ta.setExpandLevel(1);
+        lvContractorList.setAdapter(ta);
+        lvContractorList.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
     }
+
+    /**
+     * 是否有数据
+     */
+    private PromptListener isHaveData = new PromptListener() {
+        @Override
+        public void returnTrueOrFalse(boolean trueOrFalse) {
+            if (trueOrFalse) {
+                btnNoData.setVisibility(View.GONE);
+                btnQuerySelect.setText("确认");
+            } else {
+                btnNoData.setVisibility(View.VISIBLE);
+                btnQuerySelect.setText("添加层级");
+            }
+        }
+    };
 
     /**
      * 子节点
@@ -317,8 +342,6 @@ public class ContractorTreeActivity extends BaseActivity {
     private ContractorListener listener = new ContractorListener() {
         @Override
         public void returnData(List<Node> allCaches, List<Node> allNode, int point, String levelId) {
-            //allCache = allCaches;
-            //all = allNode;
             // 没有网络并且没有加载过
             if (JudgeNetworkIsAvailable.isNetworkAvailable(ContractorTreeActivity.this)) {
                 loadProcedureByNodeId(point, levelId);
@@ -486,9 +509,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 String parentNameAll = all.get(position).getParentNameAll() + "," + pileNo;
 
                 all.get(position).setFolderFlag("0");
-                all.get(position).setLoading(true);
                 allCache.get(position).setFolderFlag("0");
-                allCache.get(position).setLoading(true);
 
                 List<ContractorBean> beanList1 = DataSupport.where("levelId=?", all.get(position).getLevelId()).find(ContractorBean.class);
                 for (ContractorBean bean : beanList1) {
@@ -517,7 +538,7 @@ public class ContractorTreeActivity extends BaseActivity {
                 }
                 all.get(position).setExpanded(true);
                 allCache.get(position).setExpanded(true);
-                setNodeInChildren(beanList, position, false);
+                setNodeInChildren(beanList, position, true);
             } else if (requestCode == 1006) {
                 // 子级新增
                 String pileNo = data.getStringExtra("pileNo");
@@ -672,7 +693,16 @@ public class ContractorTreeActivity extends BaseActivity {
                 break;
             case R.id.btnQuerySelect:
                 if (ta != null) {
-                    ta.selectProcess((Integer) SpUtil.get(mContext, "selectProcess", -1));
+                    if (StrUtil.equals(btnQuerySelect.getText().toString(), "添加层级")) {
+                        new RejectUnCanChoiceDialog(mContext, new ReportListener() {
+                            @Override
+                            public void returnUserId(String userId) {
+                                ta.noDataAddBtn(userId);
+                            }
+                        }, "提示", "请输入层级名称", "取消", "添加").show();
+                    } else {
+                        ta.selectProcess((Integer) SpUtil.get(mContext, "selectProcess", -1));
+                    }
                 } else {
                     ToastUtil.showShort(mContext, "数据有误！");
                 }

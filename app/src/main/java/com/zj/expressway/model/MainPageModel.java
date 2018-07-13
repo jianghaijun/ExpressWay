@@ -14,11 +14,20 @@ public class MainPageModel extends BaseModel {
     private String todoCount;
     private String hasTodoCount;
     private String version;
+    private String unReadNum;
     private String unSubmitted;
     private long fileLength;
     private MainPageModel data;
     private List<MainPageBean> newsList;
     private List<MainPageBean> viewList;
+
+    public String getUnReadNum() {
+        return unReadNum;
+    }
+
+    public void setUnReadNum(String unReadNum) {
+        this.unReadNum = unReadNum;
+    }
 
     public String getUnSubmitted() {
         return unSubmitted;

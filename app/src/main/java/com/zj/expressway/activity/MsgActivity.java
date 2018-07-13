@@ -19,7 +19,9 @@ import com.scwang.smartrefresh.layout.listener.SimpleMultiPurposeListener;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.MsgAdapter;
 import com.zj.expressway.base.BaseActivity;
+import com.zj.expressway.bean.MsgBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.model.MsgModel;
 import com.zj.expressway.model.WorkingListModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -66,7 +68,7 @@ public class MsgActivity extends BaseActivity {
     private MsgAdapter msgAdapter;
     private Activity mContext;
     private int pagePosition = 1, processSum = 0, loadType = 0;
-    private List<WorkingBean> workingBeanList = new ArrayList<>();
+    private List<MsgBean> msgBeanList = new ArrayList<>();
     private String userId;
 
     @Override
@@ -100,7 +102,7 @@ public class MsgActivity extends BaseActivity {
             @Override
             public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
                 loadType = 1;
-                if (workingBeanList.size() < processSum) {
+                if (msgBeanList.size() < processSum) {
                     pagePosition++;
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                         getMsgData(false);
@@ -117,7 +119,7 @@ public class MsgActivity extends BaseActivity {
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
                 loadType = 2;
                 pagePosition = 1;
-                workingBeanList.clear();
+                msgBeanList.clear();
                 if (JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
                     getMsgData(false);
                 } else {
@@ -147,7 +149,7 @@ public class MsgActivity extends BaseActivity {
         obj.put("page", pagePosition);
         obj.put("limit", 10);
         obj.put("flowStatus", "0");
-        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.getZxHwGxProcessList, obj.toString());
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.appGetMessageList, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -160,7 +162,7 @@ public class MsgActivity extends BaseActivity {
                 String jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
                     Gson gson = new Gson();
-                    final WorkingListModel model = gson.fromJson(jsonData, WorkingListModel.class);
+                    final MsgModel model = gson.fromJson(jsonData, MsgModel.class);
                     if (model.isSuccess()) {
                         runOnUiThread(new Runnable() {
                             @Override
@@ -168,12 +170,11 @@ public class MsgActivity extends BaseActivity {
                                 processSum = model.getTotalNumber();
                                 // 向本地数据库保存数据
                                 if (model.getData() != null) {
-                                    for (WorkingBean bean : model.getData()) {
-                                        bean.setType("6");
+                                    for (MsgBean bean : model.getData()) {
                                         bean.setUserId(userId);
-                                        bean.saveOrUpdate("processId=? and type=6", bean.getProcessId());
+                                        bean.saveOrUpdate("msgId=? and userId=?", bean.getMsgId(), userId);
                                     }
-                                    workingBeanList.addAll(model.getData());
+                                    msgBeanList.addAll(model.getData());
                                 }
                                 initProcessListData();
                                 stopLoad();
@@ -205,10 +206,10 @@ public class MsgActivity extends BaseActivity {
         }
         String start = String.valueOf((pagePosition - 1) * 10);
         String end = "10";
-        List<WorkingBean> workingBeen = DataSupport.where("userId=? and type=6 order by enterTime desc limit ?, ?", userId, start, end).find(WorkingBean.class);
-        List<WorkingBean> workingBeenSum = DataSupport.where("userId=? and type=6", userId).find(WorkingBean.class);
+        List<MsgBean> workingBeen = DataSupport.where("userId=? order by createTime desc limit ?, ?", userId, start, end).find(MsgBean.class);
+        List<MsgBean> workingBeenSum = DataSupport.where("userId=?", userId).find(MsgBean.class);
         processSum = workingBeenSum == null ? 0 : workingBeenSum.size();
-        workingBeanList.addAll(workingBeen);
+        msgBeanList.addAll(workingBeen);
         stopLoad();
         initProcessListData();
         if (isLoading) {
@@ -228,7 +229,7 @@ public class MsgActivity extends BaseActivity {
 
         // 数据处理
         if (msgAdapter == null) {
-            msgAdapter = new MsgAdapter(mContext, workingBeanList);
+            msgAdapter = new MsgAdapter(mContext, msgBeanList);
             rvMsg.setAdapter(msgAdapter);
             rvMsg.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false));
         } else {

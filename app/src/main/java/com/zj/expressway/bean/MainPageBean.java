@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 public class MainPageBean extends DataSupport implements Serializable {
     private String viewId;
-    private String viewContent;
+    private String viewSummary;
     private String fileUrl;
 
     public String getViewId() {
@@ -21,12 +21,12 @@ public class MainPageBean extends DataSupport implements Serializable {
         this.viewId = viewId;
     }
 
-    public String getViewContent() {
-        return viewContent;
+    public String getViewSummary() {
+        return viewSummary;
     }
 
-    public void setViewContent(String viewContent) {
-        this.viewContent = viewContent;
+    public void setViewSummary(String viewSummary) {
+        this.viewSummary = viewSummary;
     }
 
     public String getFileUrl() {

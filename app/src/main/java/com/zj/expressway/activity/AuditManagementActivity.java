@@ -1,16 +1,13 @@
 package com.zj.expressway.activity;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -25,10 +22,8 @@ import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
-import com.zj.expressway.view.SonnyJackDragView;
 
 import org.litepal.crud.DataSupport;
-import org.xutils.common.util.DensityUtil;
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
@@ -80,7 +75,6 @@ public class AuditManagementActivity extends BaseActivity {
     private ProcessListActivity finishActivity;
     private ArrayList<View> views;
     private Activity mContext;
-    private SonnyJackDragView dragView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +92,6 @@ public class AuditManagementActivity extends BaseActivity {
 
         llButtons.setVisibility(View.GONE);
 
-        //initFabBtn();
         initBtnTitle();
         initViewPageData();
         initSearchRecord();
@@ -301,30 +294,21 @@ public class AuditManagementActivity extends BaseActivity {
      */
     private void setStates(int option) {
         // 待拍照
-        //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.black));
         vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 待审核
-        //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.black));
         vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
         // 已完成
-        //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.black));
         vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
 
         switch (option) {
             case 0:
-                //btnTakePicture.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vTakePicture.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_1));
-                //dragView.getDragView().setVisibility(View.VISIBLE);
                 break;
             case 1:
-                //btnToBeAudited.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_2));
-                //dragView.getDragView().setVisibility(View.GONE);
                 break;
             case 2:
-                //btnFinish.setTextColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
                 vFinish.setBackgroundColor(ContextCompat.getColor(mContext, R.color.tab_3));
-                //dragView.getDragView().setVisibility(View.GONE);
                 break;
         }
     }
