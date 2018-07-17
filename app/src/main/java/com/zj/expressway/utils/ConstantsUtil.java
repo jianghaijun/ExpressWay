@@ -54,6 +54,8 @@ public class ConstantsUtil {
     public static final String Scroll_Photo = "http://114.116.12.219/tongren_mobile/#/newDetail/";
     // 地图
     public static final String Map = "http://114.116.12.219/tongren_mobile/#/map/123";
+    // 审核管理
+    public static final String audit_management = "http://192.168.1.192/flow/?code=";
 
     // 登录
     public static final String LOGIN = prefix + "user/" + "login";

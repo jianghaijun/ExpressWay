@@ -22,7 +22,7 @@ public class MainPageBean extends DataSupport implements Serializable {
     }
 
     public String getViewSummary() {
-        return viewSummary;
+        return viewSummary == null ? "" : viewSummary;
     }
 
     public void setViewSummary(String viewSummary) {

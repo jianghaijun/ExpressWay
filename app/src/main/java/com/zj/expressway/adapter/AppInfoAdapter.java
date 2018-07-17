@@ -116,8 +116,12 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         break;
                     // 审核管理
                     case 3:
-                        intent = new Intent(mContext, WorkingProcedureActivity.class);
+                        /*intent = new Intent(mContext, WorkingProcedureActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
+                        mContext.startActivity(intent);*/
+                        intent = new Intent(mContext, EditScrollPhotoActivity.class);
+                        intent.putExtra("url", ConstantsUtil.audit_management + SpUtil.get(mContext, ConstantsUtil.TOKEN, ""));
+                        intent.putExtra("title", "审核管理");
                         mContext.startActivity(intent);
                         break;
                     // 工序报表

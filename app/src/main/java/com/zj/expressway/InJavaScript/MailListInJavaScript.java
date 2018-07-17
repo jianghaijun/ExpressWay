@@ -5,8 +5,10 @@ import android.content.Context;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import com.zj.expressway.activity.MainActivity;
 import com.zj.expressway.base.BaseInJavaScript;
 import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.SpUtil;
 
 /**
@@ -27,5 +29,10 @@ public class MailListInJavaScript extends BaseInJavaScript {
     public String getLoginToken() {
         String token = (String) SpUtil.get(mContext, ConstantsUtil.TOKEN, "");
         return token;
+    }
+
+    @JavascriptInterface
+    public void closeActivity() {
+        ScreenManagerUtil.popAllActivityExceptOne(MainActivity.class);
     }
 }

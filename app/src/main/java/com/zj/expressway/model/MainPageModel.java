@@ -3,6 +3,7 @@ package com.zj.expressway.model;
 import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.MainPageBean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -54,7 +55,7 @@ public class MainPageModel extends BaseModel {
     }
 
     public MainPageModel getData() {
-        return data;
+        return data == null ? new MainPageModel() : data;
     }
 
     public void setData(MainPageModel data) {
@@ -86,7 +87,7 @@ public class MainPageModel extends BaseModel {
     }
 
     public List<MainPageBean> getNewsList() {
-        return newsList;
+        return newsList == null ? new ArrayList<MainPageBean>() : newsList;
     }
 
     public void setNewsList(List<MainPageBean> newsList) {
