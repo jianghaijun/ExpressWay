@@ -3,7 +3,11 @@ package com.zj.expressway.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.baidu.speech.asr.SpeechConstant;
 import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.activity.AuditManagementActivity;
@@ -18,9 +23,14 @@ import com.zj.expressway.activity.EditScrollPhotoActivity;
 import com.zj.expressway.activity.ProcessReportActivity;
 import com.zj.expressway.activity.QrCodeScanActivity;
 import com.zj.expressway.activity.QualityInspectionActivity;
-import com.zj.expressway.activity.WorkingProcedureActivity;
+import com.zj.expressway.application.MyApplication;
 import com.zj.expressway.bean.AppInfoBean;
+import com.zj.expressway.control.MyRecognizer;
 import com.zj.expressway.model.SameDayModel;
+import com.zj.expressway.recognization.ChainRecogListener;
+import com.zj.expressway.recognization.MessageStatusRecogListener;
+import com.zj.expressway.ui.BaiduASRDigitalDialog;
+import com.zj.expressway.ui.DigitalDialogInput;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.JsonUtils;
@@ -31,7 +41,9 @@ import com.zj.expressway.utils.ToastUtil;
 import com.zj.expressway.view.TouchHighlightImageButton;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
@@ -73,9 +85,9 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     if (num > 99) {
                         holder.txtSubmitPhoneNum.setTextSize(6);
                     }
-                    holder.txtSubmitPhoneNum.setText(num > 99 ? "99+" : num+"");
+                    holder.txtSubmitPhoneNum.setText(num > 99 ? "99+" : num + "");
                 }
-            } else if (position == 3){
+            } else if (position == 3) {
                 String todoCount = (String) SpUtil.get(mContext, "todoCount", "0");
                 int num = Integer.valueOf(todoCount);
                 if (num != 0) {
@@ -83,7 +95,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     if (num > 99) {
                         holder.txtSubmitPhoneNum.setTextSize(6);
                     }
-                    holder.txtSubmitPhoneNum.setText(num > 99 ? "99+" : num+"");
+                    holder.txtSubmitPhoneNum.setText(num > 99 ? "99+" : num + "");
                 }
             }
         }
@@ -120,7 +132,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
                         mContext.startActivity(intent);*/
                         intent = new Intent(mContext, EditScrollPhotoActivity.class);
-                        intent.putExtra("url", ConstantsUtil.audit_management + SpUtil.get(mContext, ConstantsUtil.TOKEN, ""));
+                        intent.putExtra("url", ConstantsUtil.audit_management);
                         intent.putExtra("title", "审核管理");
                         mContext.startActivity(intent);
                         break;

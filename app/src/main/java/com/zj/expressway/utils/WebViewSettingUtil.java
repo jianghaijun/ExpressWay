@@ -42,6 +42,7 @@ public class WebViewSettingUtil {
                 setJavaScriptEnabled(true);
             }*/
 
+            settings.setLoadWithOverviewMode(true);
             // 开启缓存功能
             settings.setAppCacheEnabled(true);
             // 开启 DOM storage API 功能

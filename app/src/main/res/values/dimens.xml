@@ -27,7 +27,6 @@
     <dimen name="ninety_dp">90dp</dimen>
     <dimen name="one_hundred_dp">100dp</dimen>
     <dimen name="one_hundred_and_fifty_dp">150dp</dimen>
-
     <dimen name="eight_sp">8sp</dimen>
     <dimen name="ten_sp">10sp</dimen>
     <dimen name="twelve_sp">12sp</dimen>
@@ -35,6 +34,8 @@
     <dimen name="sixteen_sp">16sp</dimen>
     <dimen name="twenty_sp">20sp</dimen>
     <dimen name="twenty_five_sp">25sp</dimen>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
 
     <dimen name="one_px">1px</dimen>
     <dimen name="two_px">2px</dimen>

@@ -3,6 +3,7 @@ package com.zj.expressway.base;
 import android.content.Context;
 import android.content.Intent;
 import android.webkit.JavascriptInterface;
+import android.widget.Toast;
 
 import com.zj.expressway.activity.LoginActivity;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -23,6 +24,11 @@ public class BaseInJavaScript {
     @JavascriptInterface
     public void showToast(String str) {
         ToastUtil.showShort(mContext, str);
+    }
+
+    @JavascriptInterface
+    public void showToast(String str, int time) {
+        ToastUtil.show(mContext, str, time);
     }
 
     @JavascriptInterface

@@ -35,4 +35,9 @@ public class MailListInJavaScript extends BaseInJavaScript {
     public void closeActivity() {
         ScreenManagerUtil.popAllActivityExceptOne(MainActivity.class);
     }
+
+    @JavascriptInterface
+    public String getSubmitData() {
+        return (String) SpUtil.get(mContext, "JSONData", "");
+    }
 }

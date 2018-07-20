@@ -2,18 +2,12 @@ package com.zj.expressway.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.widget.Button;
-
-import org.xutils.common.util.DensityUtil;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -34,7 +28,7 @@ import cn.qqtheme.framework.util.ConvertUtils;
 public class DateUtils {
     /**
      * 获取系统当前日期
-     *
+     * yyyy-MM-dd HH:mm:ss
      * @return
      */
     public static String setDataToStr(long lData) {
@@ -43,6 +37,12 @@ public class DateUtils {
         return strDate;
     }
 
+    /**
+     * 获取系统当前日期
+     * yyyy-MM-dd
+     * @param lData
+     * @return
+     */
     public static String setDataToStr2(long lData) {
         Date date = DateUtil.date(lData == 0 ? System.currentTimeMillis() : lData);
         String strDate = DateUtil.format(date, "yyyy-MM-dd");
@@ -115,6 +115,7 @@ public class DateUtils {
 
     /**
      * 获取工序部位所占行数
+     *
      * @param dropText
      * @param mPaint
      * @param dropWidth
@@ -127,6 +128,7 @@ public class DateUtils {
 
     /**
      * 画笔
+     *
      * @param textSize
      * @param dropText
      * @param color
@@ -149,6 +151,7 @@ public class DateUtils {
 
     /**
      * 获取字符串所占像素（px）
+     *
      * @param strings
      * @param p
      * @return
@@ -166,6 +169,7 @@ public class DateUtils {
 
     /**
      * 获取画笔
+     *
      * @param textSize
      * @return
      */
@@ -175,11 +179,12 @@ public class DateUtils {
         Rect rect = new Rect();
         pFont.setTextSize(textSize);
         pFont.getTextBounds("豆", 0, 1, rect);
-        return  pFont;
+        return pFont;
     }
 
     /**
      * 获取画笔
+     *
      * @param textSize
      * @return
      */
@@ -189,18 +194,19 @@ public class DateUtils {
         Rect rect = new Rect();
         pFont.setTextSize(textSize);
         pFont.getTextBounds("豆", 0, 1, rect);
-        return  rect;
+        return rect;
     }
 
     /**
      * 获取一行高度
+     *
      * @param pFont
      * @return
      */
     public static int getOneRowsHeight(Paint pFont) {
         Paint.FontMetrics fm = pFont.getFontMetrics();
         int oneSizeHeight = (int) (fm.descent - fm.ascent);
-        return  oneSizeHeight;
+        return oneSizeHeight;
     }
 
 }

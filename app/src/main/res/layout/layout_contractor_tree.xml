@@ -18,9 +18,9 @@
         android:id="@+id/lvContractorList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="@dimen/ten_dp"
         android:layout_above="@+id/btnQuerySelect"
         android:layout_below="@+id/actionBar"
+        android:paddingLeft="@dimen/ten_dp"
         android:scrollbars="none" />
 
     <!--<ScrollView
@@ -81,7 +81,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/forty"
         android:layout_alignParentBottom="true"
-        android:layout_margin="@dimen/five_dp"
+        android:layout_margin="@dimen/ten_dp"
         android:background="@drawable/btn_blue"
         android:text="@string/query"
         android:textColor="@color/white"
@@ -93,8 +93,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:background="@null"
-        android:visibility="gone"
         android:drawableTop="@drawable/no_data"
         android:text="@string/no_msg"
-        android:textSize="@dimen/fourteen_sp" />
+        android:textSize="@dimen/fourteen_sp"
+        android:visibility="gone" />
 </com.zhy.android.percent.support.PercentRelativeLayout>

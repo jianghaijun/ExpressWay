@@ -23,6 +23,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.Logger;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PhotosListAdapter;
 import com.zj.expressway.adapter.TimeLineAdapter;
@@ -123,6 +125,8 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     private RecyclerView rvContractorDetails;
     @ViewInject(R.id.rvTimeMarker)
     private RecyclerView rvTimeMarker;
+    @ViewInject(R.id.view)
+    private View view;
     @ViewInject(R.id.llButtons)
     private LinearLayout llButtons;
     private TimeLineAdapter timeLineAdapter;
@@ -584,10 +588,10 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         } else if (StrUtil.isEmpty(edtDangerDescription.getText().toString())) {
             ToastUtil.showShort(mContext, "请填写隐患描述！");
             return false;
-        } else if (photosList.size() == 0) {
+        }/* else if (photosList.size() == 0) {
             ToastUtil.showShort(mContext, "请先拍照！");
             return false;
-        } else {
+        }*/ else {
             return true;
         }
     }
@@ -758,16 +762,111 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         object.put("mainTableDataObject", tableDataMap);
         object.put("reviewNodeId", reviewNodeId);
         object.put("reviewUserObjectList", jsonArray);
-        object.put("subTableObject", b);
+        //object.put("subTableObject", b);
 
         org.json.JSONObject data = new org.json.JSONObject(object);
-        submitData(data.toString());
+        // 暂时注释掉
+        //submitData(data.toString());
+
+        Map<String, Object> apiBody = tableDataMap;
+        //tableDataMap.put("subTableObject", b);
+
+        org.json.JSONObject starFlowData = new org.json.JSONObject(tableDataMap);
+
+        SpUtil.put(mContext, "JSONData", data.toString());
+        SpUtil.put(mContext, "startFlowData", starFlowData.toString());
+        // 调用h5
+
+        /*H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean);
+        p.setTouchable(true);
+        p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
+        p.setOutsideTouchable(true);   //设置触摸外面时消失
+        p.showAtDropDownRight(view);*/
+
+        Map<String, Object> newobj = new HashMap<>();
+        if (StrUtil.equals(type, "2")) {
+            newobj.put("api", "addZxHwZlTrouble");
+        } else {
+            newobj.put("api", "addZxHwAqHiddenDanger");
+        }
+
+        newobj.put("apiType", "POST");
+
+        if (StrUtil.equals(type, "2")) {
+            apiBody.put("zlAttachmentList", jsonArr);
+        } else {
+            apiBody.put("aqAttachmentList", jsonArr);
+        }
+
+        newobj.put("apiBody", apiBody);
+
+        submitData(new Gson().toJson(apiBody));
     }
 
     /**
      * 提交、驳回
      */
     private void submitData(String obj) {
+        LoadingUtils.showLoading(mContext);
+//        String url = ConstantsUtil.startFlow;
+        String url = "addZxHwZlTrouble";
+
+        Request request = ChildThreadUtil.getRequest(mContext, url, obj);
+        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                jsonData = response.body().string().toString();
+                LoadingUtils.hideLoading();
+                if (JsonUtils.isGoodJson(jsonData)) {
+                    /*Gson gson = new Gson();
+                    final WorkModel model = gson.fromJson(jsonData, WorkModel.class);
+                    if (model.isSuccess()) {
+                        mContext.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                isSubmit = true;
+                                // 清空操作按钮
+                                setShowButton(null);
+                                btnChoice.setVisibility(View.GONE);
+                                ConstantsUtil.isLoading = true;
+                                if (StrUtil.equals(workId, "details")) {
+                                    DataSupport.deleteAll(PhotosBean.class, "processId=?", processId);
+                                    if (deleteWorkingBean != null) {
+                                        deleteWorkingBean.delete();
+                                    }
+                                }
+
+                                List<ButtonListModel> buttonList = model.getData().getButtonList();
+                                for (ButtonListModel buttonListModel : buttonList) {
+                                    if (StrUtil.equals(buttonListModel.getButtonId(), "submit")) {
+                                        boolean isEdit = buttonListModel.getNextShowFlowInfoList() == null || buttonListModel.getNextShowFlowInfoList().size() == 0 ? false : buttonListModel.getNextShowFlowInfoList().get(0).isEdit();
+                                        ConstantsUtil.buttonModel = buttonListModel;
+                                        buttonId = buttonListModel.getButtonId();
+                                        jumpSelectPersonal(isEdit);
+                                        return;
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                    }*/
+                } else {
+                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
+                }
+            }
+        });
+    }
+
+    /**
+     * 提交、驳回
+     */
+    /*private void submitData(String obj) {
         LoadingUtils.showLoading(mContext);
         String url = ConstantsUtil.startFlow;
 
@@ -821,7 +920,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                 }
             }
         });
-    }
+    }*/
 
     /**
      * 点击事件

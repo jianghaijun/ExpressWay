@@ -7,6 +7,7 @@
     <string name="owner">业主</string>
     <string name="supervision">监理</string>
     <string name="to_upload_photos">待上传照片</string>
+    <string name="choice_photos">选择照片</string>
     <string name="level_one">一级</string>
     <string name="show_photo">图片信息</string>
     <string name="up_load">上传</string>
@@ -149,6 +150,7 @@
     <string name="nine">9</string>
     <string name="ten">10</string>
     <string name="submit_yun">上传云端</string>
+    <string name="submit">提交</string>
     <string name="reject_photo">驳回原因：</string>
     <string name="remarks">审核意见：</string>
     <string name="hiddenTroubleHeadline">具体段落和部位：</string>
@@ -194,4 +196,20 @@
     <string name="take_picture">待拍照</string>
     <string name="unSubmit">未提交</string>
     <string name="submission">已提交</string>
+    <string name="name">姓名：</string>
+    <string name="sex">性别：</string>
+    <string name="nation">民族：</string>
+    <string name="address">籍贯：</string>
+    <string name="dateOfBirth">出生年月：</string>
+    <string name="identityNumber">身份号码：</string>
+    <string name="entry_date">进场时间：</string>
+    <string name="training_time">岗前培训时间：</string>
+    <string name="exit_time">退场时间：</string>
+    <string name="post">职务/工种：</string>
+    <string name="contract">所属分包合同：</string>
+    <string name="upload_id_num">上传身份证后自动显示</string>
+    <string name="please_speak">请说话</string>
+    <string name="speaking">说话中</string>
+    <string name="start">开始</string>
+    <string name="setting">设置</string>
 </resources>

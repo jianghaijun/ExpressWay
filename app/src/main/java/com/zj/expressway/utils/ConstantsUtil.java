@@ -49,13 +49,15 @@ public class ConstantsUtil {
     // 是否登录成功
     public static final String IS_LOGIN_SUCCESSFUL = "IS_LOGIN_SUCCESSFUL";
     // 通讯录地址
-    public static final String Mail_Url = "http://qyh.apih5.com/personWeb/";
+    public static final String Mail_Url = "http://114.116.12.219/tongren_mobile/#/Test/1";
     // 轮播图编辑
     public static final String Scroll_Photo = "http://114.116.12.219/tongren_mobile/#/newDetail/";
     // 地图
     public static final String Map = "http://114.116.12.219/tongren_mobile/#/map/123";
+    // 发起
+    public static final String star = "http://192.168.1.192/flow/#/flow/approveMobile/0";
     // 审核管理
-    public static final String audit_management = "http://192.168.1.192/flow/?code=";
+    public static final String audit_management = "http://192.168.1.192/flow/#/flow/tabsListMobile/0";
 
     // 登录
     public static final String LOGIN = prefix + "user/" + "login";
@@ -122,6 +124,10 @@ public class ConstantsUtil {
     public static final String openPageFlow = prefix + "openPageFlow";
     // 系统消息
     public static final String appGetMessageList = prefix + "appGetMessageList";
+    // 获取二维码扫描后人员详情
+    public static final String scanGetWorkerDetails = prefix + "scanGetWorkerDetails";
+    // 添加人员详情
+    public static final String appaAddContractWorker = prefix + "appaAddContractWorker";
 
     // 文件存储路径
     public static final String SAVE_PATH = "/mnt/sdcard/zjExpressway/";

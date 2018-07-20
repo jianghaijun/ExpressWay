@@ -132,5 +132,13 @@
    public final View *;
 }
 
+#确保openFileChooser方法不被混淆
+-keepclassmembers class * extends android.webkit.WebChromeClient{
+    public void openFileChooser(...);
+ }
+
+ #百度语音识别
+ -keep class com.baidu.speech.**{*;}
+
 
 

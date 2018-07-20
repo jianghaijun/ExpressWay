@@ -35,6 +35,8 @@
     <uses-feature android:name="android.hardware.camera" />
     <!--读取应用图标-->
     <uses-permission android:name="android.permission.READ_LOGS" />
+    <!--录音功能-->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <supports-screens
         android:anyDensity="true"
@@ -74,6 +76,20 @@
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote" />
+        <!-- 百度语音识别 -->
+        <meta-data
+            android:name="com.baidu.speech.APP_ID"
+            android:value="11553627" />
+        <meta-data
+            android:name="com.baidu.speech.API_KEY"
+            android:value="3eoTkhXHmrrVaDPt3VhTSojT" />
+        <meta-data
+            android:name="com.baidu.speech.SECRET_KEY"
+            android:value="Z0QTlfznOTQGAGinzlfjpp7WH9uulP6G" />
+        <!-- 百度语音识别 -->
+        <service
+            android:name="com.baidu.speech.VoiceRecognitionService"
+            android:exported="false" />
         <!-- 程序入口 -->
         <activity
             android:name=".activity.SplashScreenActivity"
@@ -181,8 +197,8 @@
         <activity
             android:name=".activity.AddProcessActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
         <!--二维码扫描-->
         <activity
             android:name=".activity.QrCodeScanActivity"
@@ -206,6 +222,29 @@
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateHidden" />
+        <!--身份证信息页面-->
+        <activity
+            android:name=".activity.IDNumberActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
+        <!--身份证信息页面-->
+        <activity
+            android:name="com.baidu.ocr.ui.camera.CameraActivity"
+            android:configChanges="screenSize|orientation"
+            android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" />
+
+        <activity
+            android:name="com.zj.expressway.ui.BaiduASRDigitalDialog"
+            android:configChanges="orientation|keyboardHidden|screenLayout"
+            android:theme="@android:style/Theme.Dialog"
+            android:exported="false"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="com.baidu.action.RECOGNIZE_SPEECH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

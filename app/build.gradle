@@ -102,15 +102,13 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-
     compile project(':graffiti')
-
+    compile project(':lfilepickerlibrary')
     // 系统jar
     compile 'com.android.support:support-v4:25.3.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-
     // 引入百度定位所需jar包
     compile files('libs/BaiduLBS_Android.jar')
     // 百分比布局所需jar包
@@ -138,8 +136,6 @@ dependencies {
     compile 'cn.jiguang.sdk:jcore:1.1.7'
     // 轮播图
     compile 'com.youth.banner:banner:1.4.10'
-    // 跑马灯文字
-    compile 'com.dalong:marqueeview:1.0.1'
     // 日期...工具类
     compile 'cn.hutool:hutool-all:4.0.9'
     // 图片选择器
@@ -172,8 +168,9 @@ dependencies {
     compile 'com.yanzhenjie:recyclerview-swipe:1.1.4'
     // 功能库（Zxing扫描与生成二维码条形码）
     compile 'cn.bingoogolapple:bga-qrcode-zxing:1.2.5'
-    // 文件选择
-    compile 'com.leon:lfilepickerlibrary:1.7.0'
-
+    // 身份证扫描
+    compile 'com.github.wenchaosong:OCR_identify:3.0.8'
     testCompile 'junit:junit:4.12'
+    compile files('libs/ocr-sdk.jar')
+    compile files('libs/bdasr_V3_20180320_9066860.jar')
 }

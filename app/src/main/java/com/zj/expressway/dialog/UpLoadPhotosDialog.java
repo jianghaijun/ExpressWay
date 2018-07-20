@@ -123,20 +123,20 @@ public class UpLoadPhotosDialog extends Dialog {
         Gson gson = new Gson();
         Map<String, File> fileMap = new HashMap<>();
         for (PhotosBean fileBean : upLoadPhotosBeenList) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("processId", fileBean.getOtherId());
-            map.put("troubleId", fileBean.getOtherId());
-            map.put("dangerId", fileBean.getOtherId());
-            map.put("fileDesc", fileBean.getPhotoDesc());
-            map.put("otherId", fileBean.getOtherId());
-            map.put("longitude", fileBean.getLongitude());
-            map.put("latitude", fileBean.getLatitude());
-            map.put("location", fileBean.getLocation() == null ? "" : fileBean.getLocation());
-            map.put("fileName", fileBean.getPhotoName());
-            map.put("fileType", fileBean.getPhotoType());
             if (type == 3 || type == 4) {
                 fileMap.put(fileBean.getPhotoName(), new File(fileBean.getUrl()));
             } else {
+                Map<String, Object> map = new HashMap<>();
+                map.put("processId", fileBean.getOtherId());
+                map.put("troubleId", fileBean.getOtherId());
+                map.put("dangerId", fileBean.getOtherId());
+                map.put("fileDesc", fileBean.getPhotoDesc());
+                map.put("otherId", fileBean.getOtherId());
+                map.put("longitude", fileBean.getLongitude());
+                map.put("latitude", fileBean.getLatitude());
+                map.put("location", fileBean.getLocation() == null ? "" : fileBean.getLocation());
+                map.put("fileName", fileBean.getPhotoName());
+                map.put("fileType", fileBean.getPhotoType());
                 fileMap.put(gson.toJson(map), new File(fileBean.getUrl()));
             }
         }

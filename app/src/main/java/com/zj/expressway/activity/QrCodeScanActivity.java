@@ -27,6 +27,7 @@ import java.util.List;
 import cn.bingoogolapple.qrcode.core.BGAQRCodeUtil;
 import cn.bingoogolapple.qrcode.core.QRCodeView;
 import cn.bingoogolapple.qrcode.zxing.ZXingView;
+import cn.hutool.core.util.StrUtil;
 
 
 /**
@@ -96,10 +97,16 @@ public class QrCodeScanActivity extends BaseActivity implements QRCodeView.Deleg
 
     @Override
     public void onScanQRCodeSuccess(String result) {
-        Uri uri = Uri.parse(result);
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        startActivity(intent);
-        this.finish();
+        if (StrUtil.containsAny(result, "qrcode/")) {
+            Intent intent = new Intent(mContext, IDNumberActivity.class);
+            intent.putExtra("url", result);
+            startActivity(intent);
+        } else {
+            Uri uri = Uri.parse(result);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            startActivity(intent);
+            this.finish();
+        }
         //zxView.startSpot(); // 延迟0.5秒后开始识别
     }
 

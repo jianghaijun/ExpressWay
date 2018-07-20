@@ -2,9 +2,15 @@ package com.zj.expressway.application;
 
 
 import android.app.Application;
+import android.util.Log;
 
+import com.baidu.ocr.sdk.OCR;
+import com.baidu.ocr.sdk.OnResultListener;
+import com.baidu.ocr.sdk.exception.OCRError;
+import com.baidu.ocr.sdk.model.AccessToken;
 import com.tencent.bugly.crashreport.CrashReport;
 import com.zj.expressway.service.LocationService;
+import com.zj.expressway.ui.DigitalDialogInput;
 
 import org.litepal.LitePal;
 import org.litepal.LitePalApplication;
@@ -38,6 +44,7 @@ import cn.bingoogolapple.swipebacklayout.BGASwipeBackHelper;
 public class MyApplication extends LitePalApplication {
     public static Application instance;
     public LocationService locationService;
+    private DigitalDialogInput digitalDialogInput;
 
     public static Application getInstance() {
         return instance;
@@ -60,5 +67,25 @@ public class MyApplication extends LitePalApplication {
          */
         BGASwipeBackHelper.init(this, null);
         locationService = new LocationService(getApplicationContext());
+        // 身份证扫描
+        OCR.getInstance(this).initAccessTokenWithAkSk(new OnResultListener<AccessToken>() {
+            @Override
+            public void onResult(AccessToken result) {
+
+            }
+
+            @Override
+            public void onError(OCRError error) {
+                error.printStackTrace();
+            }
+        }, getApplicationContext(), "zNtGML7QXUjFSt0VFiPfUf7x", "iLzLcn0m1pxRGkLV612LbbIUCBpz3wCd");
+    }
+
+    public DigitalDialogInput getDigitalDialogInput() {
+        return digitalDialogInput;
+    }
+
+    public void setDigitalDialogInput(DigitalDialogInput digitalDialogInput) {
+        this.digitalDialogInput = digitalDialogInput;
     }
 }

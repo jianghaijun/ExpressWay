@@ -1,32 +1,24 @@
 package com.zj.expressway.activity;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
-import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
-import android.webkit.GeolocationPermissions;
-import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.leon.lfilepickerlibrary.LFilePicker;
 import com.zj.expressway.InJavaScript.MailListInJavaScript;
-import com.zj.expressway.Manifest;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.listener.PermissionListener;
-import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
 import com.zj.expressway.utils.ToastUtil;
 import com.zj.expressway.utils.WebViewSettingUtil;
-import com.zj.expressway.view.CustomWebViewClient;
 
 import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
@@ -39,7 +31,7 @@ import cn.hutool.core.util.StrUtil;
 /**
  * 轮播图编辑页
  */
-public class EditScrollPhotoActivity extends BaseActivity implements CustomWebViewClient.WebViewClientListener {
+public class EditScrollPhotoActivity extends BaseActivity {
     @ViewInject(R.id.imgBtnLeft)
     private ImageView imgBtnLeft;
     @ViewInject(R.id.txtTitle)
@@ -49,8 +41,9 @@ public class EditScrollPhotoActivity extends BaseActivity implements CustomWebVi
     @ViewInject(R.id.wvMailList)
     private WebView wvMailList;
 
-    private ValueCallback<Uri> mUploadMessage;
-    private ValueCallback<Uri[]> mUploadCallbackAboveL;
+    private ValueCallback<Uri> uploadMessage;
+    private ValueCallback<Uri[]> uploadMessageAboveL;
+    private final static int FILE_CHOOSER_RESULT_CODE = 10000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,50 +65,74 @@ public class EditScrollPhotoActivity extends BaseActivity implements CustomWebVi
 
         WebViewSettingUtil.setSetting(wvMailList);
         wvMailList.addJavascriptInterface(new MailListInJavaScript(this, wvMailList), "android_api");
-        wvMailList.setWebViewClient(new CustomWebViewClient(this, this));
+
         wvMailList.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                // 获取当前位置权限
-                callback.invoke(origin, true, false);
-                super.onGeolocationPermissionsShowPrompt(origin, callback);
+            // For Android < 3.0
+            public void openFileChooser(ValueCallback<Uri> valueCallback) {
+                uploadMessage = valueCallback;
+                selectFile();
             }
 
-            @Override
-            public void onReceivedTitle(WebView view, String title) {
-                super.onReceivedTitle(view, title);
+            // For Android  >= 3.0
+            public void openFileChooser(ValueCallback valueCallback, String acceptType) {
+                uploadMessage = valueCallback;
+                selectFile();
             }
 
+            //For Android  >= 4.1
+            public void openFileChooser(ValueCallback<Uri> valueCallback, String acceptType, String capture) {
+                uploadMessage = valueCallback;
+                selectFile();
+            }
+
+            // For Android >= 5.0
             @Override
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                mUploadCallbackAboveL = filePathCallback;
+            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams) {
+                uploadMessageAboveL = filePathCallback;
                 selectFile();
                 return true;
             }
-
-            // For Android < 3.0
-            @SuppressWarnings("unused")
-            public void openFileChooser(ValueCallback<Uri> uploadMsg) {
-                openFileChooser(uploadMsg, "");
-            }
-
-            // For Android > 4.1.1
-            @SuppressWarnings("unused")
-            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture) {
-                openFileChooser(uploadMsg, acceptType);
-            }
-
-            public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType) {
-                if (mUploadMessage != null) {
-                    return;
-                }
-
-                mUploadMessage = uploadMsg;
-                selectFile();
-            }
         });
-
         wvMailList.loadUrl(getIntent().getStringExtra("url"));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == FILE_CHOOSER_RESULT_CODE) {
+            if (null == uploadMessage && null == uploadMessageAboveL) return;
+            /*Uri result;
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.M) {
+                result = Uri.fromFile(new File(list.get(0)));
+            } else {
+                result = FileProvider.getUriForFile(this, ProviderUtil.getFileProviderName(this), new File(list.get(0)));
+            }*/
+
+            Uri result = data.getData();
+
+            if (uploadMessageAboveL != null) {
+                Uri[] results = new Uri[1];
+                results[0] = result;
+                uploadMessageAboveL.onReceiveValue(results);
+                uploadMessageAboveL = null;
+            } else if (uploadMessage != null) {
+                uploadMessage.onReceiveValue(result);
+                uploadMessage = null;
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        if (uploadMessage != null) {
+            uploadMessage.onReceiveValue(null);
+            uploadMessage = null;
+        }
+        if (uploadMessageAboveL != null) {
+            uploadMessageAboveL.onReceiveValue(null);
+            uploadMessageAboveL = null;
+        }
+        super.onResume();
     }
 
     /**
@@ -143,59 +160,10 @@ public class EditScrollPhotoActivity extends BaseActivity implements CustomWebVi
      * 选择文件
      */
     private void choiceFile() {
-        new LFilePicker()
-                .withActivity(EditScrollPhotoActivity.this)
-                .withRequestCode(1000)
-                .withTitle("选择文件")
-                .withBackgroundColor("#0DACF4")
-                .withStartPath("/storage/emulated/0")//指定初始显示路径
-                //.withFileFilter(new String[] {".doc",".docx", ".xls", ".xlsx", ".pdf"}) // 设置文件格式
-                //.withMutilyMode(false) // 设置为单选
-                //.withIsGreater(false)//过滤文件大小 小于指定大小的文件
-                //.withFileSize(2 * 1024 * 1024)//指定文件大小为2M
-                .start();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            if (requestCode == 1000) {
-                List<String> list = data.getStringArrayListExtra("paths");
-                if (list.size() <= 0) {
-                    return;
-                }
-                Uri photoUri = Uri.parse(list.get(0));
-                if (mUploadCallbackAboveL != null) {
-                    Uri[] results = new Uri[]{Uri.parse(list.get(0))};
-                    mUploadCallbackAboveL.onReceiveValue(results);
-                    mUploadCallbackAboveL = null;
-                } else if (mUploadMessage != null) {
-                    mUploadMessage.onReceiveValue(photoUri);
-                    mUploadMessage = null;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onPageStared(WebView view, String url, Bitmap favicon) {
-
-    }
-
-    @Override
-    public void onPageFinished(WebView view, String url) {
-
-    }
-
-    @Override
-    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-
-    }
-
-    @Override
-    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");//设置类型，我这里是任意类型，任意后缀的可以这样写。
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        startActivityForResult(intent, FILE_CHOOSER_RESULT_CODE);
     }
 
     @Event({R.id.imgBtnLeft, R.id.btnQuery})
