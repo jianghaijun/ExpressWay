@@ -233,7 +233,7 @@
             android:name="com.baidu.ocr.ui.camera.CameraActivity"
             android:configChanges="screenSize|orientation"
             android:theme="@android:style/Theme.Holo.NoActionBar.Fullscreen" />
-
+        <!--百度语音-->
         <activity
             android:name="com.zj.expressway.ui.BaiduASRDigitalDialog"
             android:configChanges="orientation|keyboardHidden|screenLayout"

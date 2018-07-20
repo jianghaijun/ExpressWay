@@ -1,1 +1,1 @@
-include ':app', ':graffiti', ':lfilepickerlibrary'
+include ':app', ':graffiti'
