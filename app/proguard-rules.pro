@@ -135,6 +135,7 @@
 #确保openFileChooser方法不被混淆
 -keepclassmembers class * extends android.webkit.WebChromeClient{
     public void openFileChooser(...);
+    public boolean shouldOverrideUrlLoading(...);
  }
 
  #百度语音识别

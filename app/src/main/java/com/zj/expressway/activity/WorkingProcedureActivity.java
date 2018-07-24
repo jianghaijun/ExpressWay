@@ -64,6 +64,8 @@ public class WorkingProcedureActivity extends BaseActivity {
     private TextView txtUnSubmit;
     @ViewInject(R.id.txtSubmit)
     private TextView txtSubmit;
+    @ViewInject(R.id.viewLeft)
+    private View viewLeft;
 
     // viewPage
     private View layToBeAudited, layFinish;
@@ -88,6 +90,7 @@ public class WorkingProcedureActivity extends BaseActivity {
 
         llButtons.setVisibility(View.GONE);
         rlPhoto.setVisibility(View.GONE);
+        viewLeft.setVisibility(View.GONE);
         vToBeAudited.setBackgroundColor(ContextCompat.getColor(mContext, R.color.main_check_bg));
 
         initViewPageData();

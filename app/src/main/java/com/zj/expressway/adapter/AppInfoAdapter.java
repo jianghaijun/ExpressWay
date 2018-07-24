@@ -23,6 +23,7 @@ import com.zj.expressway.activity.EditScrollPhotoActivity;
 import com.zj.expressway.activity.ProcessReportActivity;
 import com.zj.expressway.activity.QrCodeScanActivity;
 import com.zj.expressway.activity.QualityInspectionActivity;
+import com.zj.expressway.activity.WorkingProcedureActivity;
 import com.zj.expressway.application.MyApplication;
 import com.zj.expressway.bean.AppInfoBean;
 import com.zj.expressway.control.MyRecognizer;
@@ -128,13 +129,13 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         break;
                     // 审核管理
                     case 3:
-                        /*intent = new Intent(mContext, WorkingProcedureActivity.class);
+                        intent = new Intent(mContext, WorkingProcedureActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
-                        mContext.startActivity(intent);*/
-                        intent = new Intent(mContext, EditScrollPhotoActivity.class);
+                        mContext.startActivity(intent);
+                        /*intent = new Intent(mContext, EditScrollPhotoActivity.class);
                         intent.putExtra("url", ConstantsUtil.audit_management);
                         intent.putExtra("title", "审核管理");
-                        mContext.startActivity(intent);
+                        mContext.startActivity(intent);*/
                         break;
                     // 工序报表
                     case 4:

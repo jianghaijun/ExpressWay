@@ -31,15 +31,17 @@ public class H5PopupWindow extends PopupWindow {
     private Activity mActivity;
     private View mView;
     private boolean isDetails;
+    private String url;
     private String processId;
     private WorkingBean deleteWorkingBean;
 
-    public H5PopupWindow(Activity mActivity, boolean isDetails, String processId, WorkingBean deleteWorkingBean) {
+    public H5PopupWindow(Activity mActivity, boolean isDetails, String processId, WorkingBean deleteWorkingBean, String url) {
         super();
         this.isDetails = isDetails;
         this.processId = processId;
         this.deleteWorkingBean = deleteWorkingBean;
         this.mActivity = mActivity;
+        this.url = url;
         this.initPopupWindow();
     }
 
@@ -65,7 +67,7 @@ public class H5PopupWindow extends PopupWindow {
         wvMailList.setBackgroundColor(0);
         wvMailList.getBackground().setAlpha(0);
         wvMailList.addJavascriptInterface(new H5JavaScript(mActivity, H5PopupWindow.this, isDetails, processId, deleteWorkingBean), "android_api");
-        wvMailList.loadUrl(ConstantsUtil.star);
+        wvMailList.loadUrl(url);
     }
 
     /**

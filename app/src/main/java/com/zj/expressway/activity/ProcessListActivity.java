@@ -59,6 +59,7 @@ public class ProcessListActivity extends BaseActivity {
     private boolean isFirstLoad = true, isTypeOneFirst = true;
     private int viewType, pagePosition = 1, processSum = 0, loadType = 0;
     private List<WorkingBean> workingBeanList = new ArrayList<>();
+    private boolean isFirst = true;
 
     /**
      * 重载
@@ -193,7 +194,7 @@ public class ProcessListActivity extends BaseActivity {
                 obj.put("flowStatus", "1");
                 if (processType.equals("1")) {
                     url = ConstantsUtil.getTodoListBySenduser;
-                    obj.put("flowId", "sxdehzl");
+                    obj.put("flowId", "zxHwGxProcess");
                 } else if (processType.equals("2")) {
                     url = ConstantsUtil.getTodoListBySenduser;
                     obj.put("flowId", "zxHwZlTrouble");
@@ -209,7 +210,7 @@ public class ProcessListActivity extends BaseActivity {
                 obj.put("flowStatus", "2");
                 if (processType.equals("1")) {
                     url = ConstantsUtil.getHasTodoListBySenduser;
-                    obj.put("flowId", "sxdehzl");
+                    obj.put("flowId", "zxHwGxProcess");
                 } else if (processType.equals("2")) {
                     url = ConstantsUtil.getHasTodoListBySenduser;
                     obj.put("flowId", "zxHwZlTrouble");
@@ -355,8 +356,8 @@ public class ProcessListActivity extends BaseActivity {
                 workingBeenSum = DataSupport.where("userId=? and type=?", userId, viewType + "").find(WorkingBean.class);
             } else {
                 if (str.equals("1")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "sxdehzl", start, end).find(WorkingBean.class);
-                    workingBeenSum = DataSupport.where("userId=? and type=? and flowId=?", userId, viewType + "", "sxdehzl").find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "zxHwGxProcess", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and flowId=?", userId, viewType + "", "zxHwGxProcess").find(WorkingBean.class);
                 } else if (str.equals("2")) {
                     workingBeen = DataSupport.where("userId=? and type=? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "zxHwZlTrouble", start, end).find(WorkingBean.class);
                     workingBeenSum = DataSupport.where("userId=? and type=? and flowId=?", userId, viewType + "", "zxHwZlTrouble").find(WorkingBean.class);
@@ -382,8 +383,8 @@ public class ProcessListActivity extends BaseActivity {
                 }
             } else {
                 if (str.equals("1")) {
-                    workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "sxdehzl", start, end).find(WorkingBean.class);
-                    workingBeenSum = DataSupport.where("userId=? and type=? and title like ? and flowId=?", userId, viewType + "", "%" + searchContext + "%", "sxdehzl").find(WorkingBean.class);
+                    workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "zxHwGxProcess", start, end).find(WorkingBean.class);
+                    workingBeenSum = DataSupport.where("userId=? and type=? and title like ? and flowId=?", userId, viewType + "", "%" + searchContext + "%", "zxHwGxProcess").find(WorkingBean.class);
                 } else if (str.equals("2")) {
                     workingBeen = DataSupport.where("userId=? and type=? and title like ? and flowId=? order by enterTime desc limit ?, ?", userId, viewType + "", "%" + searchContext + "%", "zxHwZlTrouble", start, end).find(WorkingBean.class);
                     workingBeenSum = DataSupport.where("userId=? and type=? and title like ? and flowId=?", userId, viewType + "", "%" + searchContext + "%", "zxHwZlTrouble").find(WorkingBean.class);
@@ -442,7 +443,11 @@ public class ProcessListActivity extends BaseActivity {
         if (isFirstLoad) {
             isFirstLoad = false;
         }
-        btnProcessNum.setText("" + processSum);
+
+        if (isFirst) {
+            isFirst = false;
+            btnProcessNum.setText("" + processSum);
+        }
 
         // 搜索无数据是显示选择工序按钮
         if (viewType == 1 && !isTypeOneFirst && workingBeanList.size() == 0) {

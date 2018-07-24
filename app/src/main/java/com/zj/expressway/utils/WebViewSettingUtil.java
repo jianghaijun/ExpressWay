@@ -44,7 +44,7 @@ public class WebViewSettingUtil {
 
             settings.setLoadWithOverviewMode(true);
             // 开启缓存功能
-            settings.setAppCacheEnabled(true);
+            settings.setAppCacheEnabled(false);
             // 开启 DOM storage API 功能
             settings.setDomStorageEnabled(true);
             // 设置数据库启用

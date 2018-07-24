@@ -56,7 +56,7 @@ public class EditScrollPhotoActivity extends BaseActivity {
         imgBtnLeft.setVisibility(View.VISIBLE);
         imgBtnLeft.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.back_btn));
         String title = getIntent().getStringExtra("title");
-        if (StrUtil.equals(title, "审核管理")) {
+        if (StrUtil.equals(title, "审核管理") || StrUtil.equals(title, "详情")) {
             actionBar.setVisibility(View.GONE);
         } else {
             txtTitle.setText(title);

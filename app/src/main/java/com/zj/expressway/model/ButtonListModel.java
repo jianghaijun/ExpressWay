@@ -11,7 +11,34 @@ import java.util.List;
 public class ButtonListModel {
     private String buttonId;
     private String buttonName;
+    private String buttonClass;
+    private String buttonFun;
+    private String icon;
     private List<NextShowFlow> nextShowFlowInfoList;
+
+    public String getButtonClass() {
+        return buttonClass;
+    }
+
+    public void setButtonClass(String buttonClass) {
+        this.buttonClass = buttonClass;
+    }
+
+    public String getButtonFun() {
+        return buttonFun;
+    }
+
+    public void setButtonFun(String buttonFun) {
+        this.buttonFun = buttonFun;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
 
     public String getButtonId() {
         return buttonId;

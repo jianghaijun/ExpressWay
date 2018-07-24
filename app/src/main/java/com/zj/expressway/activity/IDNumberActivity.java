@@ -235,7 +235,7 @@ public class IDNumberActivity extends BaseActivity {
             requestAuthority(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE}, new PermissionListener() {
                 @Override
                 public void agree() {
-                    showPhoto();
+                    takePhoto();
                 }
 
                 @Override
@@ -244,8 +244,19 @@ public class IDNumberActivity extends BaseActivity {
                 }
             });
         } else {
-            showPhoto();
+            takePhoto();
         }
+    }
+
+    /**
+     * 拍照
+     */
+    private void takePhoto() {
+        Intent intent = new Intent(mContext, CameraActivity.class);
+        filePath = ConstantsUtil.SAVE_PATH + System.currentTimeMillis() + ".png";
+        intent.putExtra(CameraActivity.KEY_OUTPUT_FILE_PATH, filePath);
+        intent.putExtra(CameraActivity.KEY_CONTENT_TYPE, CameraActivity.CONTENT_TYPE_ID_CARD_FRONT);
+        startActivityForResult(intent, 1001);
     }
 
     /**
@@ -565,7 +576,7 @@ public class IDNumberActivity extends BaseActivity {
                 break;
             // 职务、工种
             case R.id.txtPost:
-                if (positionList == null && positionList.size() == 0) {
+                if (positionList == null || positionList.size() == 0) {
                     ToastUtil.showShort(mContext, "暂无工种！");
                 } else {
                     showSelectDialog(positionList, 1);

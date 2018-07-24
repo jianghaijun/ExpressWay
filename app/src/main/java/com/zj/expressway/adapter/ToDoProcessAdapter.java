@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.zj.expressway.R;
 import com.zj.expressway.activity.ContractorDetailsActivity;
+import com.zj.expressway.activity.EditScrollPhotoActivity;
 import com.zj.expressway.activity.ReviewProgressActivity;
 import com.zj.expressway.activity.ToDoDetailsActivity;
 import com.zj.expressway.bean.WorkingBean;
@@ -158,6 +159,27 @@ public class ToDoProcessAdapter extends RecyclerView.Adapter<ToDoProcessAdapter.
         intent.putExtra("isLocalAdd", bean.getIsLocalAdd());
         intent.putExtra("isPopTakePhoto", isPopTakePhoto);
         mContext.startActivity(intent);
+
+        /*Intent intent;
+        if (bean.getFlowId().equals("zxHwZlTrouble")) {
+            intent = new Intent(mContext, EditScrollPhotoActivity.class);
+            SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
+        } else if (bean.getFlowId().equals("zxHwAqHiddenDanger")) {
+            intent = new Intent(mContext, EditScrollPhotoActivity.class);
+            SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "3");
+        } else {
+            intent = new Intent(mContext, ContractorDetailsActivity.class);
+        }
+        intent.putExtra("flowId", bean.getFlowId() == null ? "" : bean.getFlowId());
+        intent.putExtra("workId", bean.getWorkId() == null ? "" : bean.getWorkId());
+        intent.putExtra("mainTablePrimaryId", bean.getMainTablePrimaryId() == null ? "" : bean.getMainTablePrimaryId());
+        intent.putExtra("isToDo", true);
+        intent.putExtra("isLocalAdd", bean.getIsLocalAdd());
+        intent.putExtra("isPopTakePhoto", isPopTakePhoto);
+        intent.putExtra("title", "详情");
+        String url = ConstantsUtil.update + (bean.getFlowId() == null ? "" : bean.getFlowId()) + "/" + (bean.getWorkId() == null ? "" : bean.getWorkId());
+        intent.putExtra("url", url);
+        mContext.startActivity(intent);*/
     }
 
     /**

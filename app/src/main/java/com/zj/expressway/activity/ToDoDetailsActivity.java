@@ -34,6 +34,7 @@ import com.zj.expressway.bean.HiddenDangerTypeBean;
 import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.bean.Working_Bean;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.UpLoadPhotosDialog;
 import com.zj.expressway.listener.PermissionListener;
@@ -41,6 +42,7 @@ import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.listener.ShowPhotoListener;
 import com.zj.expressway.model.ButtonListModel;
 import com.zj.expressway.model.WorkModel;
+import com.zj.expressway.popwindow.H5PopupWindow;
 import com.zj.expressway.utils.AppInfoUtil;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -73,6 +75,7 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import cn.hzw.graffiti.GraffitiActivity;
 import cn.hzw.graffiti.GraffitiParams;
 import okhttp3.Call;
@@ -149,8 +152,11 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     private final int selectPersonal = 1004; // 选人
     private String checkType; // 质量or安全
     private String selectLevelId = ""; // 选中层级id
+    private String levelIdAll = ""; // 选中层级id
     private String userId; // 用户Id
     private String uuid = RandomUtil.randomUUID().replaceAll("-", "");
+
+    private String tType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,6 +229,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
             deleteWorkingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
             selectLevelId = deleteWorkingBean.getLevelId();
+            levelIdAll = deleteWorkingBean.getLevelIdAll();
             setTableData(deleteWorkingBean);
             setImgData(new ArrayList<PhotosBean>(), processId);
             setShowButton(setButtons());
@@ -241,6 +248,9 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
      * @param selectId
      */
     private void setHiddenTroubleType(boolean isAdd, String selectId) {
+        if (selectId == null) {
+            return;
+        }
         if (!isAdd) {
             typeList.add(addBean("安全管理", 100, selectId));
             typeList.add(addBean("文明施工", 101, selectId));
@@ -400,8 +410,14 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
         obj.put("workId", workId);
+        if (StrUtil.equals("2", checkType)) {
+            obj.put("apiName", "getZxHwZlTroubleDetails");
+        } else {
+            obj.put("apiName", "getZxHwAqHiddenDangerDetails");
+        }
+        obj.put("apiType", "POST");
         obj.put("flowId", flowId);
-        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.FLOW_DETAILS, obj.toString());
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.openFlow, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -418,7 +434,29 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                WorkingBean flowBean = model.getData().getMainTableObject();
+                                if (model.getData().getApiData() != null) {
+                                    Gson gson = new Gson();
+                                    WorkingBean flowBean = gson.fromJson(model.getData().getApiData(), WorkingBean.class);
+                                    Working_Bean flow_Bean = gson.fromJson(model.getData().getApiData(), Working_Bean.class);
+                                    //flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
+                                    //flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
+                                    setTableData(flowBean);
+                                    if (StrUtil.equals(flowId, "zxHwZlTrouble")) {
+                                        setImgData(flow_Bean.getZlAttachmentList(), workId);
+                                    } else {
+                                        setImgData(flow_Bean.getAqAttachmentList(), workId);
+                                    }
+                                    setShowButton(model.getData().getFlowButtons());
+                                    initTimeLineView(model.getData().getFlowHistoryList());
+                                    tType = StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType();
+                                    selectLevelId = flowBean.getLevelId();
+                                    levelIdAll = flowBean.getLevelIdAll();
+                                    setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType());
+                                }
+                                LoadingUtils.hideLoading();
+
+
+                                /*WorkingBean flowBean = model.getData().getMainTableObject();
                                 flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                 flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
                                 setTableData(flowBean);
@@ -429,8 +467,12 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                                 }
                                 setShowButton(model.getData().getButtonList());
                                 initTimeLineView(model.getData().getFlowHistoryList());
+                                tType = StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType();
+                                selectLevelId = flowBean.getLevelId();
+                                levelIdAll = flowBean.getLevelIdAll();
+
                                 setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType());
-                                LoadingUtils.hideLoading();
+                                LoadingUtils.hideLoading();*/
                             }
                         });
                     } else {
@@ -588,10 +630,10 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         } else if (StrUtil.isEmpty(edtDangerDescription.getText().toString())) {
             ToastUtil.showShort(mContext, "请填写隐患描述！");
             return false;
-        }/* else if (photosList.size() == 0) {
+        } else if (photosList.size() == 0) {
             ToastUtil.showShort(mContext, "请先拍照！");
             return false;
-        }*/ else {
+        } else {
             return true;
         }
     }
@@ -625,6 +667,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         bean.setType("2");
         if (StrUtil.isNotEmpty(selectLevelId)) {
             bean.setLevelId(selectLevelId);
+            bean.setLevelIdAll(levelIdAll);
         }
         bean.setFlowType(checkType);
         bean.setUserId(userId);
@@ -690,6 +733,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         Map<String, Object> tableDataMap = new HashMap<>();
         tableDataMap.put("levelNameAll", txtPressLocal.getText().toString());
         tableDataMap.put("levelId", selectLevelId);
+        tableDataMap.put("levelIdAll", levelIdAll);
         tableDataMap.put("createTime", System.currentTimeMillis());
         String type = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
         if (StrUtil.equals(type, "2")) {
@@ -774,23 +818,25 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         org.json.JSONObject starFlowData = new org.json.JSONObject(tableDataMap);
 
         SpUtil.put(mContext, "JSONData", data.toString());
-        SpUtil.put(mContext, "startFlowData", starFlowData.toString());
-        // 调用h5
-
-        /*H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean);
-        p.setTouchable(true);
-        p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
-        p.setOutsideTouchable(true);   //设置触摸外面时消失
-        p.showAtDropDownRight(view);*/
 
         Map<String, Object> newobj = new HashMap<>();
+        Map<String, Object> updataObj = new HashMap<>();
         if (StrUtil.equals(type, "2")) {
-            newobj.put("api", "addZxHwZlTrouble");
+            newobj.put("apiName", "addZxHwZlTrouble");
+            updataObj.put("apiName", "updateZxHwZlTrouble");
+            newobj.put("flowId", "zxHwZlTrouble");
+            updataObj.put("flowId", "zxHwZlTrouble");
         } else {
-            newobj.put("api", "addZxHwAqHiddenDanger");
+            newobj.put("apiName", "addZxHwAqHiddenDanger");
+            updataObj.put("apiName", "updateZxHwAqHiddenDanger");
+            newobj.put("flowId", "zxHwAqHiddenDanger");
+            updataObj.put("flowId", "zxHwAqHiddenDanger");
         }
 
         newobj.put("apiType", "POST");
+        updataObj.put("apiType", "POST");
+        newobj.put("title", txtPressLocal.getText().toString() + "→" + edtHiddenTroubleHeadline.getText().toString());
+        updataObj.put("title", txtPressLocal.getText().toString() + "→" + edtHiddenTroubleHeadline.getText().toString());
 
         if (StrUtil.equals(type, "2")) {
             apiBody.put("zlAttachmentList", jsonArr);
@@ -799,68 +845,19 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         }
 
         newobj.put("apiBody", apiBody);
+        updataObj.put("apiBody", apiBody);
 
-        submitData(new Gson().toJson(apiBody));
-    }
+        SpUtil.put(mContext, "startFlowData", new Gson().toJson(newobj));
+        SpUtil.put(mContext, "updateFlowData", new Gson().toJson(updataObj));
 
-    /**
-     * 提交、驳回
-     */
-    private void submitData(String obj) {
-        LoadingUtils.showLoading(mContext);
-//        String url = ConstantsUtil.startFlow;
-        String url = "addZxHwZlTrouble";
+        // 调用h5
+        H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean, ConstantsUtil.star);
+        p.setTouchable(true);
+        p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
+        p.setOutsideTouchable(true);   //设置触摸外面时消失
+        p.showAtDropDownRight(view);
 
-        Request request = ChildThreadUtil.getRequest(mContext, url, obj);
-        ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.server_exception));
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                jsonData = response.body().string().toString();
-                LoadingUtils.hideLoading();
-                if (JsonUtils.isGoodJson(jsonData)) {
-                    /*Gson gson = new Gson();
-                    final WorkModel model = gson.fromJson(jsonData, WorkModel.class);
-                    if (model.isSuccess()) {
-                        mContext.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                isSubmit = true;
-                                // 清空操作按钮
-                                setShowButton(null);
-                                btnChoice.setVisibility(View.GONE);
-                                ConstantsUtil.isLoading = true;
-                                if (StrUtil.equals(workId, "details")) {
-                                    DataSupport.deleteAll(PhotosBean.class, "processId=?", processId);
-                                    if (deleteWorkingBean != null) {
-                                        deleteWorkingBean.delete();
-                                    }
-                                }
-
-                                List<ButtonListModel> buttonList = model.getData().getButtonList();
-                                for (ButtonListModel buttonListModel : buttonList) {
-                                    if (StrUtil.equals(buttonListModel.getButtonId(), "submit")) {
-                                        boolean isEdit = buttonListModel.getNextShowFlowInfoList() == null || buttonListModel.getNextShowFlowInfoList().size() == 0 ? false : buttonListModel.getNextShowFlowInfoList().get(0).isEdit();
-                                        ConstantsUtil.buttonModel = buttonListModel;
-                                        buttonId = buttonListModel.getButtonId();
-                                        jumpSelectPersonal(isEdit);
-                                        return;
-                                    }
-                                }
-                            }
-                        });
-                    } else {
-                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
-                    }*/
-                } else {
-                    ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
-                }
-            }
-        });
+        //submitData(new Gson().toJson(apiBody));
     }
 
     /**
@@ -937,11 +934,21 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             buttonId = buttonModel.getButtonId();
             ConstantsUtil.buttonModel = buttonModel;
             boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-            if (buttonModel.getButtonId().contains("reject")) {
+            /*if (buttonModel.getButtonId().contains("reject")) {
                 jumpSelectPersonal(isEdit);
-            } else if (buttonModel.getButtonId().contains("save")) {
+            } else*/ if (buttonModel.getButtonId().contains("save")) {
                 ToastUtil.showShort(mContext, "保存成功！");
-            } else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
+            } else {
+                JSONObject actionMap = new JSONObject();
+                actionMap.put("operate", buttonModel.getButtonId());
+                actionMap.put("operateText", buttonModel.getButtonName());
+                actionMap.put("operateClazz", buttonModel.getButtonClass());
+                actionMap.put("operateFlag", 1);
+                actionMap.put("reOpen", false);
+                SpUtil.put(mContext, "actionDataTwo", actionMap);
+                SpUtil.put(mContext, "actionData", new Gson().toJson(actionMap));
+                toExaminePhoto(false);
+            } /*else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
                 if (imgBtnAdd.getVisibility() == View.VISIBLE) {
                     toExaminePhoto(false);
                 } else {
@@ -951,7 +958,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                 ToastUtil.showShort(mContext, "未知功能按钮");
             } else {
                 ToastUtil.showShort(mContext, "未知按钮");
-            }
+            }*/
         }
     }
 
@@ -994,7 +1001,6 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         }
     }
 
-
     /**
      * 上传照片--->提交审核
      *
@@ -1027,8 +1033,9 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                         if (isStart) {
                             submitData("", "", "", "");
                         } else {
-                            boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-                            jumpSelectPersonal(isEdit);
+                            /*boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                            jumpSelectPersonal(isEdit);*/
+                            submitData();
                         }
                     }
                 }
@@ -1039,8 +1046,9 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             if (isStart) {
                 submitData("", "", "", "");
             } else {
-                boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
-                jumpSelectPersonal(isEdit);
+                /*boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+                jumpSelectPersonal(isEdit);*/
+                submitData();
             }
         }
     }
@@ -1060,7 +1068,84 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
      * 提交、驳回
      */
     private void submitData() {
-        LoadingUtils.showLoading(mContext);
+        String type = (String) SpUtil.get(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
+        Map<String, Object> newObj = new HashMap<>();
+        Map<String, Object> updateObj = new HashMap<>();
+        if (StrUtil.equals(type, "2")) {
+            newObj.put("apiName", "getZxHwZlTroubleDetails");
+            updateObj.put("apiName", "updateZxHwZlTrouble");
+            newObj.put("flowId", "zxHwZlTrouble");
+            updateObj.put("flowId", "zxHwZlTrouble");
+        } else {
+            newObj.put("apiName", "getZxHwAqHiddenDangerDetails");
+            updateObj.put("apiName", "updateZxHwAqHiddenDanger");
+            newObj.put("flowId", "zxHwAqHiddenDanger");
+            updateObj.put("flowId", "zxHwAqHiddenDanger");
+        }
+
+        newObj.put("apiType", "POST");
+        updateObj.put("apiType", "POST");
+        newObj.put("title", txtPressLocal.getText().toString() + "→" + edtHiddenTroubleHeadline.getText().toString());
+        updateObj.put("title", txtPressLocal.getText().toString() + "→" + edtHiddenTroubleHeadline.getText().toString());
+
+
+        Map<String, Object> apiBody = new HashMap<>();
+
+        JSONArray jsonArr = new JSONArray(SpUtil.get(mContext, "uploadImgData", "[]"));
+        if (StrUtil.equals(type, "2")) {
+            apiBody.put("zlAttachmentList", jsonArr);
+        } else {
+            apiBody.put("aqAttachmentList", jsonArr);
+        }
+
+        apiBody.put("levelNameAll", txtPressLocal.getText().toString());
+        apiBody.put("createTime", DateUtil.parse(txtEntryTime.getText().toString(), "yyyy-MM-dd").getTime());
+        if (StrUtil.equals(flowId, "zxHwZlTrouble")) {
+            apiBody.put("troubleTitle", edtHiddenTroubleHeadline.getText().toString());
+            apiBody.put("troubleType", tType);
+            if (StrUtil.equals(selectText, "一般")) {
+                apiBody.put("troubleLevel", 1);
+            } else if (StrUtil.equals(selectText, "严重")) {
+                apiBody.put("troubleLevel", 2);
+            } else {
+                apiBody.put("troubleLevel", 3);
+            }
+            apiBody.put("troubleRequire", edtRectificationRequirements.getText().toString());
+            apiBody.put("troubleContent", edtDangerDescription.getText().toString());
+        } else {
+            apiBody.put("dangerTitle", edtHiddenTroubleHeadline.getText().toString());
+            apiBody.put("dangerType", tType);
+            if (StrUtil.equals(selectText, "一般")) {
+                apiBody.put("dangerLevel", 1);
+            } else {
+                apiBody.put("dangerLevel", 2);
+            }
+            apiBody.put("dangerRequire", edtRectificationRequirements.getText().toString());
+            apiBody.put("dangerContent", edtDangerDescription.getText().toString());
+        }
+
+        apiBody.put("deadline", DateUtil.parse(btnChangeDate.getText().toString(), "yyyy-MM-dd").getTime());
+        apiBody.put("levelId", selectLevelId);
+        apiBody.put("levelIdAll", levelIdAll);
+
+        newObj.put("apiBody", apiBody);
+        updateObj.put("apiBody", apiBody);
+
+        SpUtil.put(mContext, "startFlowData", new Gson().toJson(newObj));
+
+        JSONObject object = new JSONObject(jsonData);
+        JSONObject newObject = new JSONObject(object.getObj("data").toString());
+        newObject.put("apiBody", new Gson().toJson(apiBody));
+        SpUtil.put(mContext, "updateFlowData", new Gson().toJson(newObject));
+
+        // 调用h5
+        H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean, ConstantsUtil.update/* + flowId + "/" + workId*/);
+        p.setTouchable(true);
+        p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
+        p.setOutsideTouchable(true);   //设置触摸外面时消失
+        p.showAtDropDownRight(view);
+
+        /*LoadingUtils.showLoading(mContext);
         JSONObject object = new JSONObject(jsonData);
         String newJsonData, url;
         url = ConstantsUtil.submitFlow;
@@ -1118,7 +1203,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                     }
                 }
             }
-        });
+        });*/
     }
 
     /**
@@ -1198,6 +1283,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                     workId = "add";
                     txtPressLocal.setText(data.getStringExtra("procedureName"));
                     selectLevelId = data.getStringExtra("levelId");
+                    levelIdAll = data.getStringExtra("levelIdAll");
                     break;
                 // 拍照回调
                 case takePhoto:

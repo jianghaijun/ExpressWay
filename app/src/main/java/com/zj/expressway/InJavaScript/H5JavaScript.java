@@ -16,6 +16,8 @@ import com.zj.expressway.utils.SpUtil;
 
 import org.litepal.crud.DataSupport;
 
+import cn.hutool.json.JSONObject;
+
 /**
  * Create dell By 2018/7/9 9:37
  */
@@ -54,12 +56,29 @@ public class H5JavaScript extends BaseInJavaScript {
 
     @JavascriptInterface
     public String getSubmitData() {
-        return (String) SpUtil.get(mContext, "JSONData", "");
+        //return (String) SpUtil.get(mContext, "JSONData", "");
+        return (String) SpUtil.get(mContext, "startFlowData", "");
+    }
+
+    @JavascriptInterface
+    public String getUpdateData() {
+        return (String) SpUtil.get(mContext, "updateFlowData", "");
     }
 
     @JavascriptInterface
     public String getStartFlowData() {
-        return (String) SpUtil.get(mContext, "StartFlowData", "");
+        return (String) SpUtil.get(mContext, "startFlowData", "");
+    }
+
+    @JavascriptInterface
+    public String getActionData() {
+        return (String) SpUtil.get(mContext, "actionData", "");
+    }
+
+    @JavascriptInterface
+    public JSONObject getActionDataTwo() {
+        String s = (String) SpUtil.get(mContext, "actionData", "");
+        return new JSONObject(s);
     }
 
     @JavascriptInterface

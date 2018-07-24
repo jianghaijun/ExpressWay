@@ -15,7 +15,8 @@ import okhttp3.OkHttpClient;
 
 public class ConstantsUtil {
     // 中交路径
-    public static String BASE_URL = "http://114.116.12.219:8012/tongren/";
+    public static String BASE_URL = "http://47.96.150.231:8012/tongren/";
+//    public static String BASE_URL = "http://114.116.12.219:8012/tongren/";
     // 前缀
     public static String prefix = "";
     // accountId
@@ -49,15 +50,21 @@ public class ConstantsUtil {
     // 是否登录成功
     public static final String IS_LOGIN_SUCCESSFUL = "IS_LOGIN_SUCCESSFUL";
     // 通讯录地址
-    public static final String Mail_Url = "http://114.116.12.219/tongren_mobile/#/Test/1";
+//    public static final String Mail_Url = "http://114.116.12.219/tongren_mobile/#/Test/1";
+    public static final String Mail_Url = "http://47.96.150.231/member/#/Test/1";
     // 轮播图编辑
-    public static final String Scroll_Photo = "http://114.116.12.219/tongren_mobile/#/newDetail/";
+    public static final String Scroll_Photo = "http://47.96.150.231/member/#/newDetail/";
     // 地图
-    public static final String Map = "http://114.116.12.219/tongren_mobile/#/map/123";
+//    public static final String Map = "http://114.116.12.219/tongren_mobile/#/map/123";
+    public static final String Map = "http://47.96.150.231/member/#/map/123";
     // 发起
-    public static final String star = "http://192.168.1.192/flow/#/flow/approveMobile/0";
+    public static final String star = "http://47.96.150.231/app/#/app/approveMobile/0";
+//    public static final String star = "http://114.116.12.219/tongren_app/#/approveMobile/0";
+    // 更新
+    public static final String update = "http://47.96.150.231/app/#/app/ProcessMobileByApp/0/0";
+//    public static final String update = "http://114.116.12.219/tongren_app/#/ProcessMobileByApp/0/0";
     // 审核管理
-    public static final String audit_management = "http://192.168.1.192/flow/#/flow/tabsListMobile/0";
+    public static final String audit_management = "http://192.168.1.111:81/flow/#/flow/tabsListMobile/0";
 
     // 登录
     public static final String LOGIN = prefix + "user/" + "login";
@@ -118,6 +125,7 @@ public class ConstantsUtil {
     public static final String FLOW_DETAILS = prefix + "getSubmitFlow";
     // 新流程详情
     public static final String submitFlow = prefix + "submitFlow";
+    public static final String openFlow = prefix + "openFlow";
     // 发起流程
     public static final String startFlow = prefix + "startFlow";
     // 新流程详情
@@ -160,7 +168,7 @@ public class ConstantsUtil {
     public static final int TWO_THOUSAND = 2000;
     public static final int NUMBER_TWO_THOUSAND = 2000;
     // flowId
-    public static final String flowId = "sxdehzl";
+    public static final String flowId = "zxHwGxProcess";
     public static boolean isLoading = false;
 
     // 项目名称

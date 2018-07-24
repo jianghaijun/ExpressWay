@@ -2,6 +2,7 @@ package com.zj.expressway.model;
 
 
 import com.zj.expressway.bean.HistoryBean;
+import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
 
 import java.util.List;
@@ -25,8 +26,35 @@ public class WorkFlowModel {
     private String opinionContent;
     private WorkingBean mainTableDataObject;
     private List<ButtonListModel> buttonList;
+    private List<ButtonListModel> flowButtons;
+
+    private String apiData;
     private FileModel subTableObject;
     private List<HistoryBean> flowHistoryList;
+
+    public WorkingBean getMainTableDataObject() {
+        return mainTableDataObject;
+    }
+
+    public void setMainTableDataObject(WorkingBean mainTableDataObject) {
+        this.mainTableDataObject = mainTableDataObject;
+    }
+
+    public List<ButtonListModel> getFlowButtons() {
+        return flowButtons;
+    }
+
+    public void setFlowButtons(List<ButtonListModel> flowButtons) {
+        this.flowButtons = flowButtons;
+    }
+
+    public String getApiData() {
+        return apiData;
+    }
+
+    public void setApiData(String apiData) {
+        this.apiData = apiData;
+    }
 
     public String getOpinionShowFlag() {
         return opinionShowFlag;

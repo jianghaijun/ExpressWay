@@ -1,7 +1,9 @@
 package com.zj.expressway.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.net.http.SslError;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
@@ -37,6 +39,17 @@ public class CustomWebViewClient extends WebViewClient {
         onPageStartedCount = 0;
         onPageFinishedCount = 0;
         onReceivedErrorCount = 0;
+    }
+
+    @Override
+    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        if (url.startsWith("tel:")){
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            context.startActivity(intent);
+        } else if(url.startsWith("http:") || url.startsWith("https:")) {
+            view.loadUrl(url);
+        }
+        return true;
     }
 
     @Override

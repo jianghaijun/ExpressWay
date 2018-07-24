@@ -67,6 +67,7 @@
             </RelativeLayout>
 
             <View
+                android:id="@+id/viewLeft"
                 android:layout_width="@dimen/one_dp"
                 android:layout_height="match_parent"
                 android:layout_marginBottom="@dimen/ten_dp"
