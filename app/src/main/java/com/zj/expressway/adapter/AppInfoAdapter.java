@@ -110,6 +110,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     case 0:
                         intent = new Intent(mContext, AuditManagementActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "1");
+                        SpUtil.put(mContext, "PROCESS_TYPE", "1");
                         SpUtil.put(mContext, "showSelectBtn", true);
                         mContext.startActivity(intent);
                         break;
@@ -117,6 +118,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     case 1:
                         intent = new Intent(mContext, QualityInspectionActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "2");
+                        SpUtil.put(mContext, "PROCESS_TYPE", "2");
                         SpUtil.put(mContext, "showSelectBtn", true);
                         mContext.startActivity(intent);
                         break;
@@ -124,6 +126,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     case 2:
                         intent = new Intent(mContext, QualityInspectionActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "3");
+                        SpUtil.put(mContext, "PROCESS_TYPE", "3");
                         SpUtil.put(mContext, "showSelectBtn", true);
                         mContext.startActivity(intent);
                         break;
@@ -131,6 +134,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                     case 3:
                         intent = new Intent(mContext, WorkingProcedureActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
+                        SpUtil.put(mContext, "PROCESS_TYPE", "4");
                         mContext.startActivity(intent);
                         /*intent = new Intent(mContext, EditScrollPhotoActivity.class);
                         intent.putExtra("url", ConstantsUtil.audit_management);

@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.webkit.JavascriptInterface;
 
+import com.zj.expressway.activity.AuditManagementActivity;
 import com.zj.expressway.activity.MainActivity;
 import com.zj.expressway.activity.QualityInspectionActivity;
+import com.zj.expressway.activity.WorkingProcedureActivity;
 import com.zj.expressway.base.BaseInJavaScript;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.popwindow.H5PopupWindow;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
@@ -24,9 +27,9 @@ import cn.hutool.json.JSONObject;
 
 public class H5JavaScript extends BaseInJavaScript {
     private Activity mContext;
-    private H5PopupWindow h5Dialog;
     private boolean isDetails;
     private String processId;
+    private PromptListener promptListener;
     private WorkingBean deleteWorkingBean;
 
     public H5JavaScript(Context mContext) {
@@ -34,9 +37,9 @@ public class H5JavaScript extends BaseInJavaScript {
         this.mContext = (Activity) mContext;
     }
 
-    public H5JavaScript(Context mContext, H5PopupWindow h5Dialog, boolean isDetails, String processId, WorkingBean deleteWorkingBean) {
+    public H5JavaScript(Context mContext, PromptListener promptListener, boolean isDetails, String processId, WorkingBean deleteWorkingBean) {
         super(mContext);
-        this.h5Dialog = h5Dialog;
+        this.promptListener = promptListener;
         this.isDetails = isDetails;
         this.processId = processId;
         this.mContext = (Activity) mContext;
@@ -83,8 +86,8 @@ public class H5JavaScript extends BaseInJavaScript {
 
     @JavascriptInterface
     public void hiddenDialog() {
-        if (h5Dialog != null) {
-            h5Dialog.dismiss();
+        if (promptListener != null) {
+            promptListener.returnTrueOrFalse(true);
         }
     }
 
@@ -93,12 +96,26 @@ public class H5JavaScript extends BaseInJavaScript {
         // 清空操作按钮
         ConstantsUtil.isLoading = true;
         if (isDetails) {
-            DataSupport.deleteAll(PhotosBean.class, "processId=?", processId);
+            if (processId != null) {
+                DataSupport.deleteAll(PhotosBean.class, "processId=?", processId);
+            }
             if (deleteWorkingBean != null) {
                 deleteWorkingBean.delete();
             }
         }
         SpUtil.remove(mContext, "uploadImgData");
-        ScreenManagerUtil.popAllActivityExceptOne(QualityInspectionActivity.class);
+        String type = (String) SpUtil.get(mContext, "PROCESS_TYPE", "1");
+        switch (type) {
+            case "1":
+                ScreenManagerUtil.popAllActivityExceptOne(AuditManagementActivity.class);
+                break;
+            case "2":
+            case "3":
+                ScreenManagerUtil.popAllActivityExceptOne(QualityInspectionActivity.class);
+                break;
+            case "4":
+                ScreenManagerUtil.popAllActivityExceptOne(WorkingProcedureActivity.class);
+                break;
+        }
     }
 }

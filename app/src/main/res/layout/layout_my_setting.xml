@@ -79,6 +79,7 @@
         android:textSize="@dimen/sixteen_sp" />
 
     <View
+        android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/one_dp"
         android:background="@color/gray" />

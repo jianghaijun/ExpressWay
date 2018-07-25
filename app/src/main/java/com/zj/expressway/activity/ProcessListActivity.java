@@ -74,6 +74,10 @@ public class ProcessListActivity extends BaseActivity {
         userId = (String) SpUtil.get(mContext, ConstantsUtil.USER_ID, "");
     }
 
+    public void setIsFirst() {
+        isFirst = true;
+    }
+
     /**
      * 初始化
      *
@@ -403,6 +407,7 @@ public class ProcessListActivity extends BaseActivity {
         stopLoad();
         initProcessListData();
         if (isLoading) {
+            isLoading = false;
             LoadingUtils.hideLoading();
         }
     }

@@ -23,12 +23,9 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.Logger;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PhotosListAdapter;
 import com.zj.expressway.adapter.TimeLineAdapter;
-import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.base.BaseNoImmersionBarActivity;
 import com.zj.expressway.bean.HiddenDangerTypeBean;
 import com.zj.expressway.bean.HistoryBean;
@@ -75,7 +72,6 @@ import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import cn.hzw.graffiti.GraffitiActivity;
 import cn.hzw.graffiti.GraffitiParams;
 import okhttp3.Call;
@@ -157,6 +153,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     private String uuid = RandomUtil.randomUUID().replaceAll("-", "");
 
     private String tType;
+    private H5PopupWindow p;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -224,7 +221,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             txtEntryTime.setText(DateUtils.setDataToStr(System.currentTimeMillis()));
             setImgData(new ArrayList<PhotosBean>(), selectLevelId);
             setShowButton(setButtons());
-            setHiddenTroubleType(StrUtil.equals("2", checkType), "");
+            setHiddenTroubleType(StrUtil.equals("2", checkType), "", true);
         } else if (StrUtil.equals(workId, "details")) {
             List<WorkingBean> workingBeanList = DataSupport.where("processId = ? order by createTime desc", processId).find(WorkingBean.class);
             deleteWorkingBean = ObjectUtil.isNull(workingBeanList) || workingBeanList.size() == 0 ? null : workingBeanList.get(0);
@@ -235,7 +232,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             setShowButton(setButtons());
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", processId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
-            setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? deleteWorkingBean.getTroubleType() : deleteWorkingBean.getDangerType());
+            setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? deleteWorkingBean.getTroubleType() : deleteWorkingBean.getDangerType(), true);
         } else {
             initData();
         }
@@ -247,7 +244,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
      * @param isAdd
      * @param selectId
      */
-    private void setHiddenTroubleType(boolean isAdd, String selectId) {
+    private void setHiddenTroubleType(boolean isAdd, String selectId, boolean isCanClick) {
         if (selectId == null) {
             return;
         }
@@ -284,6 +281,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             } else {
                 checkBox.setChecked(false);
             }
+
             checkBox.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -294,6 +292,10 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                     }
                 }
             });
+
+            if (!isCanClick) {
+                checkBox.setClickable(false);
+            }
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams((DensityUtil.getScreenWidth() - DensityUtil.dip2px(90)) / 3, DensityUtil.dip2px(40));
             gridLType.addView(checkBox, params);
         }
@@ -342,7 +344,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             }
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", workId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
-            setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? workingBean.getTroubleType() : workingBean.getDangerType());
+            setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? workingBean.getTroubleType() : workingBean.getDangerType(), false);
         }
     }
 
@@ -451,7 +453,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
                                     tType = StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType();
                                     selectLevelId = flowBean.getLevelId();
                                     levelIdAll = flowBean.getLevelIdAll();
-                                    setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType());
+                                    setHiddenTroubleType(StrUtil.equals("2", checkType), StrUtil.equals("2", checkType) ? flowBean.getTroubleType() : flowBean.getDangerType(), false);
                                 }
                                 LoadingUtils.hideLoading();
 
@@ -501,14 +503,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             flowBean.saveOrUpdate("processId=?", workId);
         }
 
-        if (!StrUtil.equals(workId, "details")) {
-            btnChoice.setVisibility(View.GONE);
-            btnChangeDate.setEnabled(false);
-            edtHiddenTroubleHeadline.setFocusable(false);
-            edtRectificationRequirements.setFocusable(false);
-        }
-
-        txtPressLocal.setText(flowBean.getLevelNameAll());   // 工序位置
+        txtPressLocal.setText(flowBean.getLevelNameAll().replaceAll(",", "→"));   // 工序位置
         txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getCreateTime()));     // 检查时间
         if (StrUtil.equals(flowId, "zxHwZlTrouble")) {
             edtHiddenTroubleHeadline.setText(flowBean.getTroubleTitle());     // 隐患标题
@@ -538,6 +533,17 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             edtDangerDescription.setText(flowBean.getDangerContent());
         }
         btnChangeDate.setText(DateUtils.setDataToStr2(flowBean.getDeadline()));
+
+        if (!StrUtil.equals(workId, "details")) {
+            btnChoice.setVisibility(View.GONE);
+            btnChangeDate.setEnabled(false);
+            rBtn1.setClickable(false);
+            rBtn2.setClickable(false);
+            rBtn3.setClickable(false);
+            edtDangerDescription.setFocusable(false);
+            edtHiddenTroubleHeadline.setFocusable(false);
+            edtRectificationRequirements.setFocusable(false);
+        }
 
         // 控制拍照按钮是否显示
         if (!StrUtil.equals(workId, "add") && !StrUtil.equals(workId, "details") && !StrUtil.equals("1", flowBean.getFileOperationFlag())) {
@@ -584,8 +590,8 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             return;
         }
 
-        for (int i = 0; i < buttons.size(); i++) {
-            ButtonListModel buttonModel = buttons.get(i);
+        for (int i = buttons.size(); i > 0; i--) {
+            ButtonListModel buttonModel = buttons.get(i-1);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             lp.setMargins(DensityUtil.dip2px(5), 0, DensityUtil.dip2px(5), 0);
             lp.weight = 1;
@@ -601,6 +607,24 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             }
             llButtons.addView(button, lp);
         }
+
+        /*for (int i = 0; i < buttons.size(); i++) {
+            ButtonListModel buttonModel = buttons.get(i);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            lp.setMargins(DensityUtil.dip2px(5), 0, DensityUtil.dip2px(5), 0);
+            lp.weight = 1;
+            Button button = new Button(this);
+            button.setText(buttonModel.getButtonName());
+            button.setTextSize(14);
+            button.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+            button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.btn_blue));
+            if (StrUtil.equals(workId, "add") || StrUtil.equals(workId, "details")) {
+                button.setOnClickListener(new onClick(i + 1));
+            } else {
+                button.setOnClickListener(new ButtonClick(buttonModel));
+            }
+            llButtons.addView(button, lp);
+        }*/
     }
 
     /**
@@ -662,6 +686,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
      * 本地保存
      */
     private void saveLocation() {
+        ConstantsUtil.isLoading = true;
         WorkingBean bean = new WorkingBean();
         bean.setProcessId(StrUtil.equals(workId, "add") ? uuid : processId);
         bean.setType("2");
@@ -700,7 +725,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             bean.setDangerType(isSelectType());
             bean.setDangerContent(edtDangerDescription.getText().toString());
         }
-        bean.setDeadline(DateUtil.parse(btnChangeDate.getText().toString()).getTime());
+        bean.setDeadline(StrUtil.isEmpty(btnChangeDate.getText().toString()) ? System.currentTimeMillis() : DateUtil.parse(btnChangeDate.getText().toString()).getTime());
         bean.saveOrUpdate("processId=?", StrUtil.equals(workId, "add") ? uuid : processId);
     }
 
@@ -716,6 +741,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         edtHiddenTroubleHeadline.setText("");
         btnChangeDate.setText("");
         edtRectificationRequirements.setText("");
+        edtDangerDescription.setText("");
         photosList.clear();
         photosAdapter.notifyDataSetChanged();
     }
@@ -851,7 +877,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         SpUtil.put(mContext, "updateFlowData", new Gson().toJson(updataObj));
 
         // 调用h5
-        H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean, ConstantsUtil.star);
+        H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean, ConstantsUtil.star, promptListener);
         p.setTouchable(true);
         p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
         p.setOutsideTouchable(true);   //设置触摸外面时消失
@@ -859,6 +885,18 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
 
         //submitData(new Gson().toJson(apiBody));
     }
+
+    PromptListener promptListener = new PromptListener() {
+        @Override
+        public void returnTrueOrFalse(boolean trueOrFalse) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    p.dismiss();
+                }
+            });
+        }
+    };
 
     /**
      * 提交、驳回
@@ -933,20 +971,22 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         public void onClick(View v) {
             buttonId = buttonModel.getButtonId();
             ConstantsUtil.buttonModel = buttonModel;
-            boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
+            //boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
             /*if (buttonModel.getButtonId().contains("reject")) {
                 jumpSelectPersonal(isEdit);
-            } else*/ if (buttonModel.getButtonId().contains("save")) {
+            } else*/
+            if (buttonModel.getButtonId().contains("save")) {
                 ToastUtil.showShort(mContext, "保存成功！");
             } else {
-                JSONObject actionMap = new JSONObject();
+                /*JSONObject actionMap = new JSONObject();
                 actionMap.put("operate", buttonModel.getButtonId());
                 actionMap.put("operateText", buttonModel.getButtonName());
                 actionMap.put("operateClazz", buttonModel.getButtonClass());
                 actionMap.put("operateFlag", 1);
-                actionMap.put("reOpen", false);
-                SpUtil.put(mContext, "actionDataTwo", actionMap);
-                SpUtil.put(mContext, "actionData", new Gson().toJson(actionMap));
+                actionMap.put("reOpen", false);*/
+                Gson gson = new Gson();
+                SpUtil.put(mContext, "actionDataTwo", gson.toJson(buttonModel));
+                SpUtil.put(mContext, "actionData", gson.toJson(buttonModel));
                 toExaminePhoto(false);
             } /*else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
                 if (imgBtnAdd.getVisibility() == View.VISIBLE) {
@@ -1139,7 +1179,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         SpUtil.put(mContext, "updateFlowData", new Gson().toJson(newObject));
 
         // 调用h5
-        H5PopupWindow p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean, ConstantsUtil.update/* + flowId + "/" + workId*/);
+        p = new H5PopupWindow(mContext, StrUtil.equals(workId, "details"), processId, deleteWorkingBean, ConstantsUtil.update/* + flowId + "/" + workId*/, promptListener);
         p.setTouchable(true);
         p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
         p.setOutsideTouchable(true);   //设置触摸外面时消失
@@ -1416,6 +1456,9 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (p != null) {
+            p.dismiss();
+        }
         ScreenManagerUtil.popActivity(this);    // 退出当前activity
     }
 }

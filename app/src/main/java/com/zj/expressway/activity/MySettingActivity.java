@@ -80,6 +80,9 @@ public class MySettingActivity extends BaseActivity {
         myHolder.txtUserName.setText((String) SpUtil.get(mActivity, "UserName", ""));
         myHolder.btnCleanUpCaching.setText("清理网络图片缓存：" + GlideCatchUtil.getCacheSize());
 
+        myHolder.btnChangeIp.setVisibility(View.GONE);
+        myHolder.view.setVisibility(View.GONE);
+
         // 自定义图片加载器
         ISNav.getInstance().init(new ImageLoader() {
             @Override
@@ -762,6 +765,8 @@ public class MySettingActivity extends BaseActivity {
         private TextView txtUserName;
         @ViewInject(R.id.btnSignOut)
         private TextView btnSignOut;
+        @ViewInject(R.id.view)
+        private View view;
         @ViewInject(R.id.btnUpdatePassword)
         private Button btnUpdatePassword;
         @ViewInject(R.id.btnChangeIp)

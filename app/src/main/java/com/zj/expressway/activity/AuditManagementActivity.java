@@ -148,7 +148,12 @@ public class AuditManagementActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (ConstantsUtil.isLoading) {
-            initRecyclerViewData();
+            //takePictureActivity.setIsFirst();
+            toBeAuditedActivity.setIsFirst();
+            finishActivity.setIsFirst();
+            takePictureActivity.initData(1, txtTakePhoto, String.valueOf(SpUtil.get(mContext, "levelTypeZero", "")), true);
+            toBeAuditedActivity.initData(4, txtUnSubmit, String.valueOf(SpUtil.get(mContext, "levelTypeOne", "")), false);
+            finishActivity.initData(5, txtSubmit, String.valueOf(SpUtil.get(mContext, "levelTypeTwo", "")), false);
             ConstantsUtil.isLoading = false;
         }
     }
@@ -232,12 +237,15 @@ public class AuditManagementActivity extends BaseActivity {
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
             case 0:
+                SpUtil.put(mContext, "levelTypeZero", levelId);
                 takePictureActivity.initData(1, txtTakePhoto, levelId, true);
                 break;
             case 1:
+                SpUtil.put(mContext, "levelTypeOne", levelId);
                 toBeAuditedActivity.initData(4, txtUnSubmit, levelId, true);
                 break;
             case 2:
+                SpUtil.put(mContext, "levelTypeTwo", levelId);
                 finishActivity.initData(5, txtSubmit, levelId, true);
                 break;
         }
@@ -374,5 +382,8 @@ public class AuditManagementActivity extends BaseActivity {
                 bean.save();
             }
         }
+        SpUtil.remove(mContext, "levelTypeZero");
+        SpUtil.remove(mContext, "levelTypeOne");
+        SpUtil.remove(mContext, "levelTypeTwo");
     }
 }

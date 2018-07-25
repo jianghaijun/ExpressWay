@@ -66,8 +66,8 @@ public class ChangeIpActivity extends BaseActivity {
                     ToastUtil.showShort(this, "设置成功，请重新登录！");
                     SpUtil.put(this, "BASE_URL", edtNewIp.getText().toString());
                     SpUtil.put(this, "ACCOUNT_ID", edtNewAccountId.getText().toString());
-                    ConstantsUtil.BASE_URL = edtNewIp.getText().toString();
-                    ConstantsUtil.ACCOUNT_ID = edtNewAccountId.getText().toString();
+                    //ConstantsUtil.BASE_URL = edtNewIp.getText().toString();
+                    //ConstantsUtil.ACCOUNT_ID = edtNewAccountId.getText().toString();
                     SpUtil.put(this, ConstantsUtil.IS_LOGIN_SUCCESSFUL, false);
                     ScreenManagerUtil.popAllActivityExceptOne();
                     startActivity(new Intent(this, LoginActivity.class));

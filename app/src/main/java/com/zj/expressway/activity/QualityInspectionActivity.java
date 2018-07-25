@@ -172,7 +172,12 @@ public class QualityInspectionActivity extends BaseActivity {
         super.onResume();
         if (ConstantsUtil.isLoading) {
             ConstantsUtil.isLoading = false;
-            initRecyclerViewData();
+            qualityActivity.setIsFirst();
+            toDoActivity.setIsFirst();
+            hasToDoActivity.setIsFirst();
+            qualityActivity.initData(2, txtTakePhoto, null, true);
+            toDoActivity.initData(4, txtUnSubmit, String.valueOf(SpUtil.get(mContext, "levelTypeThree", "")), false);
+            hasToDoActivity.initData(5, txtSubmit, String.valueOf(SpUtil.get(mContext, "levelTypeFour", "")), false);
         }
     }
 
@@ -325,9 +330,11 @@ public class QualityInspectionActivity extends BaseActivity {
             case 0:
                 break;
             case 1:
+                SpUtil.get(mContext, "levelTypeThree", searchContext);
                 toDoActivity.initData(4, txtUnSubmit, searchContext, true);
                 break;
             case 2:
+                SpUtil.get(mContext, "levelTypeFour", searchContext);
                 hasToDoActivity.initData(5, txtSubmit, searchContext, true);
                 break;
         }
@@ -374,5 +381,7 @@ public class QualityInspectionActivity extends BaseActivity {
                 bean.save();
             }
         }
+        SpUtil.remove(mContext, "levelTypeThree");
+        SpUtil.remove(mContext, "levelTypeFour");
     }
 }

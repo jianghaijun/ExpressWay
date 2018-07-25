@@ -414,7 +414,7 @@ public class MainActivity extends BaseActivity implements CustomWebViewClient.We
             bottomNavigationBar.selectTab(arg0);
             if (arg0 == 1 && !isLoadSuccess) {
                 isLoadSuccess = !isLoadSuccess;
-                WebViewSettingUtil.setSetting(wvMailList);
+                WebViewSettingUtil.setSettingNoZoom(mContext, wvMailList);
                 wvMailList.addJavascriptInterface(new MailListInJavaScript(mContext, wvMailList), "android_api");
                 wvMailList.setWebViewClient(new CustomWebViewClient(MainActivity.this, mContext));
                 wvMailList.loadUrl(ConstantsUtil.Mail_Url);

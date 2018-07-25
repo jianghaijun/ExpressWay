@@ -12,7 +12,7 @@
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/one_px"
-        android:background="@null"/>
+        android:background="@null" />
 
     <include
         android:id="@+id/actionBar"
@@ -88,7 +88,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray"
@@ -131,7 +131,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -172,7 +172,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -235,7 +235,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -265,7 +265,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -306,7 +306,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -345,7 +345,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -384,7 +384,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -416,10 +416,9 @@
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
-
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -470,7 +469,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />

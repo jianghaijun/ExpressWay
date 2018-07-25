@@ -38,6 +38,7 @@ import com.zj.expressway.base.BaseModel;
 import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
+import com.zj.expressway.bean.Working_Bean;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.UpLoadPhotosDialog;
 import com.zj.expressway.listener.GPSLocationListener;
@@ -47,6 +48,7 @@ import com.zj.expressway.listener.ShowPhotoListener;
 import com.zj.expressway.manager.GPSLocationManager;
 import com.zj.expressway.model.ButtonListModel;
 import com.zj.expressway.model.WorkModel;
+import com.zj.expressway.popwindow.H5PopupWindow;
 import com.zj.expressway.service.LocationService;
 import com.zj.expressway.utils.AppInfoUtil;
 import com.zj.expressway.utils.ChildThreadUtil;
@@ -74,8 +76,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
@@ -122,6 +127,8 @@ public class ContractorDetailsActivity extends BaseActivity {
     private RecyclerView rvContractorDetails;
     @ViewInject(R.id.rlRemarks)
     private RelativeLayout rlRemarks;
+    @ViewInject(R.id.view)
+    private View view;
     // 时间轴
     @ViewInject(R.id.rvTimeMarker)
     private RecyclerView rvTimeMarker;
@@ -144,6 +151,10 @@ public class ContractorDetailsActivity extends BaseActivity {
     private WorkModel model;
     private boolean isToDo;
     private int leastTakePhotoNum, isLocalAdd; // 最少拍照数量
+    private String selectLevelId = ""; // 选中层级id
+    private String levelIdAll = ""; // 选中层级id
+    private String levelNameAll = ""; // 选中层级id
+    private H5PopupWindow p;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -259,8 +270,11 @@ public class ContractorDetailsActivity extends BaseActivity {
         JSONObject obj = new JSONObject();
         String url = "";
         if (isToDo) {
+            obj.put("flowId", flowId);
             obj.put("workId", workId);
-            url += ConstantsUtil.FLOW_DETAILS;
+            obj.put("apiName", "getZxHwGxProcessDetails");
+            obj.put("apiType", "POST");
+            url += ConstantsUtil.openFlow;
         } else {
             obj.put("flowId", flowId);
             obj.put("mainTablePrimaryId", mainTablePrimaryId);
@@ -283,26 +297,56 @@ public class ContractorDetailsActivity extends BaseActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                WorkingBean flowBean = model.getData().getMainTableObject();
-                                flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
-                                flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
-                                mainTableId = model.getData().getMainTablePrimaryId();
-                                setTableData(flowBean);
-                                setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
-
-                                List<ButtonListModel> buttons = new ArrayList<>();
-                                if (!isToDo) {
-                                    ButtonListModel btnModel = new ButtonListModel();
-                                    btnModel.setButtonId("localSubmit");
-                                    btnModel.setButtonName("确认提交");
-                                    buttons.add(btnModel);
+                                if (isToDo) {
+                                    if (model.getData().getApiData() != null) {
+                                        Gson gson = new Gson();
+                                        WorkingBean flowBean = gson.fromJson(model.getData().getApiData(), WorkingBean.class);
+                                        Working_Bean flow_Bean = gson.fromJson(model.getData().getApiData(), Working_Bean.class);
+                                        flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
+                                        flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
+                                        setTableData(flowBean);
+                                        setImgData(flow_Bean.getGxAttachmentList());
+                                        List<ButtonListModel> buttons = new ArrayList<>();
+                                        if (!isToDo) {
+                                            ButtonListModel btnModel = new ButtonListModel();
+                                            btnModel.setButtonId("localSubmit");
+                                            btnModel.setButtonName("确认提交");
+                                            buttons.add(btnModel);
+                                        } else {
+                                            buttons = model.getData().getFlowButtons();
+                                        }
+                                        setShowButton(buttons);
+                                        initTimeLineView(model.getData().getFlowHistoryList());
+                                        levelNameAll = flowBean.getLevelNameAll();
+                                        selectLevelId = flowBean.getLevelId();
+                                        levelIdAll = flowBean.getLevelIdAll();
+                                    }
+                                    LoadingUtils.hideLoading();
                                 } else {
-                                    buttons = model.getData().getButtonList();
-                                }
+                                    WorkingBean flowBean = model.getData().getMainTableObject();
+                                    flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
+                                    flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
+                                    mainTableId = model.getData().getMainTablePrimaryId();
+                                    setTableData(flowBean);
+                                    setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
 
-                                setShowButton(buttons);
-                                initTimeLineView(model.getData().getFlowHistoryList());
-                                LoadingUtils.hideLoading();
+                                    List<ButtonListModel> buttons = new ArrayList<>();
+                                    if (!isToDo) {
+                                        ButtonListModel btnModel = new ButtonListModel();
+                                        btnModel.setButtonId("localSubmit");
+                                        btnModel.setButtonName("确认提交");
+                                        buttons.add(btnModel);
+                                    } else {
+                                        buttons = model.getData().getButtonList();
+                                    }
+
+                                    levelNameAll = flowBean.getLevelNameAll();
+                                    selectLevelId = flowBean.getLevelId();
+                                    levelIdAll = flowBean.getLevelIdAll();
+                                    setShowButton(buttons);
+                                    initTimeLineView(model.getData().getFlowHistoryList());
+                                    LoadingUtils.hideLoading();
+                                }
                             }
                         });
                     } else {
@@ -339,7 +383,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getEnterTime()));    // 检查时间
         txtLocation.setText(flowBean.getLocation());    // 拍照位置
         txtRejectPhoto.setText(flowBean.getDismissal()); // 驳回原因
-        processPath = flowBean.getLevelNameAll().replace(",", "→") + "→" + flowBean.getProcessName();
+        processPath = flowBean.getLevelNameAll().replace(",", "→")/* + "→" + flowBean.getProcessName()*/;
         // 控制拍照按钮是否显示
         if (!StrUtil.equals("1", flowBean.getFileOperationFlag())) {
             imgBtnAdd.setVisibility(View.GONE);
@@ -388,7 +432,8 @@ public class ContractorDetailsActivity extends BaseActivity {
             return;
         }
 
-        for (ButtonListModel buttonModel : buttons) {
+        for (int i = buttons.size(); i > 0; i--) {
+            ButtonListModel buttonModel = buttons.get(i-1);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
             lp.setMargins(DensityUtil.dip2px(5), 0, DensityUtil.dip2px(5), 0);
             lp.weight = 1;
@@ -400,6 +445,20 @@ public class ContractorDetailsActivity extends BaseActivity {
             button.setOnClickListener(new ButtonClick(buttonModel));
             llButtons.addView(button, lp);
         }
+
+
+        /*for (ButtonListModel buttonModel : buttons) {
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+            lp.setMargins(DensityUtil.dip2px(5), 0, DensityUtil.dip2px(5), 0);
+            lp.weight = 1;
+            Button button = new Button(this);
+            button.setText(buttonModel.getButtonName());
+            button.setTextSize(14);
+            button.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+            button.setBackground(ContextCompat.getDrawable(mContext, R.drawable.btn_blue));
+            button.setOnClickListener(new ButtonClick(buttonModel));
+            llButtons.addView(button, lp);
+        }*/
     }
 
     /**
@@ -415,15 +474,48 @@ public class ContractorDetailsActivity extends BaseActivity {
         @Override
         public void onClick(View v) {
             buttonId = buttonModel.getButtonId();
-            if (buttonModel.getButtonId().contains("reject")) {
+            /*if (buttonModel.getButtonId().contains("reject")) {
                 boolean isEdit = buttonModel.getNextShowFlowInfoList() == null || buttonModel.getNextShowFlowInfoList().size() == 0 ? false : buttonModel.getNextShowFlowInfoList().get(0).isEdit();
                 Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                 ConstantsUtil.buttonModel = buttonModel;
                 intent.putExtra("isEdit", isEdit);
                 startActivityForResult(intent, 201);
-            } else if (buttonModel.getButtonId().contains("save")) {
+            } else*/ if (buttonModel.getButtonId().contains("save")) {
                 ToastUtil.showShort(mContext, "保存成功！");
-            } else if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
+            } else if (buttonModel.getButtonId().contains("localSubmit")) {
+                if (isLocalAdd == 1) {
+                    ToastUtil.showShort(mContext, "请先将工序同步至服务器后再进行提交！");
+                } else if (photosList.size() < leastTakePhotoNum) {
+                    ToastUtil.showShort(mContext, "拍照数量不能小于最少拍照张数！");
+                } else if (!JudgeNetworkIsAvailable.isNetworkAvailable(mContext)) {
+                    ToastUtil.showShort(mContext, getString(R.string.not_network));
+                } else if (!JudgeNetworkIsAvailable.GetNetworkType(mContext).equals("WIFI")) {
+                    PromptDialog promptDialog = new PromptDialog(mContext, new PromptListener() {
+                        @Override
+                        public void returnTrueOrFalse(boolean trueOrFalse) {
+                            if (trueOrFalse) {
+                                Gson gson = new Gson();
+                                SpUtil.put(mContext, "actionDataTwo", gson.toJson(buttonModel));
+                                SpUtil.put(mContext, "actionData", gson.toJson(buttonModel));
+                                toExaminePhoto(false);
+                            }
+                        }
+                    }, "提示", "当前网络为移动网络,是否继续上传?", "否", "是");
+                    promptDialog.setCancelable(false);
+                    promptDialog.setCanceledOnTouchOutside(false);
+                    promptDialog.show();
+                } else {
+                    Gson gson = new Gson();
+                    SpUtil.put(mContext, "actionDataTwo", gson.toJson(buttonModel));
+                    SpUtil.put(mContext, "actionData", gson.toJson(buttonModel));
+                    toExaminePhoto(false);
+                }
+            } else {
+                Gson gson = new Gson();
+                SpUtil.put(mContext, "actionDataTwo", gson.toJson(buttonModel));
+                SpUtil.put(mContext, "actionData", gson.toJson(buttonModel));
+                toExaminePhoto(true);
+            }/* if (buttonModel.getButtonId().contains("submit") || buttonModel.getButtonId().contains("rejectSubmit")) {
                 if (imgBtnAdd.getVisibility() == View.VISIBLE) {
                     ConstantsUtil.buttonModel = buttonModel;
                     toExaminePhoto(true);
@@ -460,8 +552,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                 }
             } else {
                 ToastUtil.showShort(mContext, "未知按钮");
-            }
-
+            }*/
         }
     }
 
@@ -469,7 +560,65 @@ public class ContractorDetailsActivity extends BaseActivity {
      * 提交、驳回
      */
     private void submitData(final boolean isToDoType) {
-        LoadingUtils.showLoading(mContext);
+        Map<String, Object> tableDataMap = new HashMap<>();
+        tableDataMap.put("levelNameAll", levelNameAll);
+        tableDataMap.put("levelId", selectLevelId);
+        tableDataMap.put("levelIdAll", levelIdAll);
+        tableDataMap.put("processId", processId);
+        tableDataMap.put("remarks", edtRemarks.getText().toString());
+        tableDataMap.put("processName", txtWorkingName.getText().toString());
+        tableDataMap.put("processCode", txtWorkingNo.getText().toString());
+        tableDataMap.put("photoContent", txtTakePhotoRequirement.getText().toString());
+        tableDataMap.put("photoDistance", txtDistanceAngle.getText().toString());
+        tableDataMap.put("photoNumber", StrUtil.equals(txtTakePhotoNum.getText().toString(), "无要求") ? 0 : leastTakePhotoNum);
+        tableDataMap.put("enterTime", DateUtil.parse(txtEntryTime.getText().toString()).getTime());
+        tableDataMap.put("location", txtLocation.getText().toString());
+        JSONArray jsonArr = new JSONArray(SpUtil.get(mContext, "uploadImgData", "[]"));
+        tableDataMap.put("gxAttachmentList", jsonArr);
+        if (!isToDoType) {
+            Map<String, Object> newobj = new HashMap<>();
+            Map<String, Object> updataObj = new HashMap<>();
+            newobj.put("apiName", "updateZxHwGxProcess");
+            updataObj.put("apiName", "updateZxHwGxProcess");
+            newobj.put("flowId", "zxHwGxProcess");
+            updataObj.put("flowId", "zxHwGxProcess");
+
+            newobj.put("apiType", "POST");
+            updataObj.put("apiType", "POST");
+            newobj.put("title", levelNameAll);
+            updataObj.put("title", levelNameAll);
+
+            newobj.put("apiBody", tableDataMap);
+            updataObj.put("apiBody", tableDataMap);
+
+            SpUtil.put(mContext, "startFlowData", new Gson().toJson(newobj));
+            SpUtil.put(mContext, "updateFlowData", new Gson().toJson(updataObj));
+
+            // 调用h5
+            p = new H5PopupWindow(mContext, false, processId, null, ConstantsUtil.star, promptListener);
+            p.setTouchable(true);
+            p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
+            p.setOutsideTouchable(true);   //设置触摸外面时消失
+            p.showAtDropDownRight(view);
+        } else {
+            JSONObject object = new JSONObject(jsonData);
+            JSONObject newObject = new JSONObject(object.getObj("data").toString());
+            newObject.put("apiBody", new Gson().toJson(tableDataMap));
+            SpUtil.put(mContext, "updateFlowData", new Gson().toJson(newObject));
+
+            // 调用h5
+            p = new H5PopupWindow(mContext, false, processId, null, ConstantsUtil.update/* + flowId + "/" + workId*/, promptListener);
+            p.setTouchable(true);
+            p.setFocusable(true); //设置点击menu以外其他地方以及返回键退出
+            p.setOutsideTouchable(true);   //设置触摸外面时消失
+            p.showAtDropDownRight(view);
+        }
+
+
+
+
+
+        /*LoadingUtils.showLoading(mContext);
         JSONObject object = new JSONObject(jsonData);
         String newJsonData, url;
         if (isToDoType) {
@@ -538,8 +687,20 @@ public class ContractorDetailsActivity extends BaseActivity {
                     }
                 }
             }
-        });
+        });*/
     }
+
+    PromptListener promptListener = new PromptListener() {
+        @Override
+        public void returnTrueOrFalse(boolean trueOrFalse) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    p.dismiss();
+                }
+            });
+        }
+    };
 
     /**
      * 图片点击事件监听--->全屏预览图片
@@ -728,28 +889,30 @@ public class ContractorDetailsActivity extends BaseActivity {
                             photosAdapter.notifyDataSetChanged();
                         }
 
-                        if (isToDoType) {
+                        /*if (isToDoType) {
                             boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
                             Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                             intent.putExtra("isEdit", isEdit);
                             startActivityForResult(intent, 201);
                         } else {
                             submitData(isToDoType);
-                        }
+                        }*/
+                        submitData(isToDoType);
                     }
                 }
             });
             upLoadPhotosDialog.setCanceledOnTouchOutside(false);
             upLoadPhotosDialog.show();
         } else {
-            if (isToDoType) {
+            /*if (isToDoType) {
                 boolean isEdit = ConstantsUtil.buttonModel.getNextShowFlowInfoList() == null || ConstantsUtil.buttonModel.getNextShowFlowInfoList().size() == 0 ? false : ConstantsUtil.buttonModel.getNextShowFlowInfoList().get(0).isEdit();
                 Intent intent = new Intent(mContext, PersonnelSelectionActivity.class);
                 intent.putExtra("isEdit", isEdit);
                 startActivityForResult(intent, 201);
             } else {
                 submitData(isToDoType);
-            }
+            }*/
+            submitData(isToDoType);
         }
     }
 
@@ -995,6 +1158,9 @@ public class ContractorDetailsActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (p != null) {
+            p.dismiss();
+        }
         ScreenManagerUtil.popActivity(this);    // 退出当前activity
         // 终止定位
         if (gpsLocationManager != null) {

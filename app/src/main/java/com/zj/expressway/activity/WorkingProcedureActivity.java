@@ -9,6 +9,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.CookieSyncManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -21,6 +22,7 @@ import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.SearchRecordBean;
 import com.zj.expressway.utils.ConstantsUtil;
 import com.zj.expressway.utils.ScreenManagerUtil;
+import com.zj.expressway.utils.SpUtil;
 import com.zj.expressway.utils.ToastUtil;
 
 import org.litepal.crud.DataSupport;
@@ -145,7 +147,6 @@ public class WorkingProcedureActivity extends BaseActivity {
                 searchBar.updateLastSuggestions(searchBar.getLastSuggestions());
             }
         });
-
         initRecyclerViewData();
     }
 
@@ -154,7 +155,10 @@ public class WorkingProcedureActivity extends BaseActivity {
         super.onResume();
         if (ConstantsUtil.isLoading) {
             ConstantsUtil.isLoading = false;
-            initRecyclerViewData();
+            toBeAuditedActivity.setIsFirst();
+            finishActivity.setIsFirst();
+            toBeAuditedActivity.initData(4, txtUnSubmit, String.valueOf(SpUtil.get(mContext, "levelTypeFive", "")), true);
+            finishActivity.initData(5, txtSubmit, String.valueOf(SpUtil.get(mContext, "levelTypeSix", "")), false);
         }
     }
 
@@ -211,9 +215,11 @@ public class WorkingProcedureActivity extends BaseActivity {
     private void searchProcessData(String levelId) {
         switch (vpWorkingProcedure.getCurrentItem()) {
             case 0:
+                SpUtil.put(mContext, "levelTypeFive", levelId);
                 toBeAuditedActivity.initData(4, txtUnSubmit, levelId, true);
                 break;
             case 1:
+                SpUtil.put(mContext, "levelTypeSix", levelId);
                 finishActivity.initData(5, txtSubmit, levelId, true);
                 break;
         }
@@ -336,5 +342,7 @@ public class WorkingProcedureActivity extends BaseActivity {
                 bean.save();
             }
         }
+        SpUtil.remove(mContext, "levelTypeFive");
+        SpUtil.remove(mContext, "levelTypeSix");
     }
 }

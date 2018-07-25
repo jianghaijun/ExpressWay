@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
+import com.orhanobut.logger.AndroidLogAdapter;
+import com.orhanobut.logger.Logger;
 import com.zj.expressway.R;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.UserInfo;
@@ -18,6 +20,7 @@ import com.zj.expressway.listener.PermissionListener;
 import com.zj.expressway.model.LoginModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.utils.DataCleanManager;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
@@ -30,6 +33,7 @@ import org.xutils.view.annotation.Event;
 import org.xutils.view.annotation.ViewInject;
 import org.xutils.x;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -85,6 +89,35 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 清除WebView缓存
+     */
+    public void clearWebViewCache(){
+        DataCleanManager.cleanDatabaseByName(mContext, "databases.db");
+        DataCleanManager.cleanInternalCache(mContext);
+        DataCleanManager.cleanExternalCache(mContext);
+    }
+
+    /**
+     * 递归删除 文件/文件夹
+     *
+     * @param file
+     */
+    public void deleteFile(File file) {
+        if (file.exists()) {
+            if (file.isFile()) {
+                file.delete();
+            } else if (file.isDirectory()) {
+                File files[] = file.listFiles();
+                for (int i = 0; i < files.length; i++) {
+                    deleteFile(files[i]);
+                }
+            }
+            file.delete();
+        } else {
+        }
+    }
+
     @Event({R.id.btnLogin})
     private void onClick(View v) {
         switch (v.getId()) {
@@ -94,6 +127,7 @@ public class LoginActivity extends BaseActivity {
                 } else if (StrUtil.isEmpty(edtUserPassWord.getText().toString().trim())) {
                     ToastUtil.showShort(this, getString(R.string.please_input_user_password));
                 } else {
+                    clearWebViewCache();
                     if (JudgeNetworkIsAvailable.isNetworkAvailable(this)) {
                         if (!isLogin) {
                             isLogin = true;

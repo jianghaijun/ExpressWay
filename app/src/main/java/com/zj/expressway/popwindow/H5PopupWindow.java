@@ -3,28 +3,20 @@ package com.zj.expressway.popwindow;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.ColorDrawable;
-import android.support.v4.content.ContextCompat;
-import android.text.method.ScrollingMovementMethod;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.WebView;
 import android.widget.PopupWindow;
-import android.widget.TableLayout;
-import android.widget.TableRow;
-import android.widget.TextView;
 
 import com.zj.expressway.InJavaScript.H5JavaScript;
 import com.zj.expressway.R;
-import com.zj.expressway.bean.ProcessDictionaryBean;
 import com.zj.expressway.bean.WorkingBean;
-import com.zj.expressway.utils.ConstantsUtil;
+import com.zj.expressway.listener.PromptListener;
 import com.zj.expressway.utils.WebViewSettingUtil;
 
-import org.litepal.crud.DataSupport;
 import org.xutils.common.util.DensityUtil;
-
-import java.util.List;
 
 
 public class H5PopupWindow extends PopupWindow {
@@ -34,11 +26,13 @@ public class H5PopupWindow extends PopupWindow {
     private String url;
     private String processId;
     private WorkingBean deleteWorkingBean;
+    private PromptListener promptListener;
 
-    public H5PopupWindow(Activity mActivity, boolean isDetails, String processId, WorkingBean deleteWorkingBean, String url) {
+    public H5PopupWindow(Activity mActivity, boolean isDetails, String processId, WorkingBean deleteWorkingBean, String url, PromptListener promptListener) {
         super();
         this.isDetails = isDetails;
         this.processId = processId;
+        this.promptListener = promptListener;
         this.deleteWorkingBean = deleteWorkingBean;
         this.mActivity = mActivity;
         this.url = url;
@@ -62,11 +56,24 @@ public class H5PopupWindow extends PopupWindow {
         this.setBackgroundDrawable(background);
         this.draw();
 
-        WebView wvMailList = (WebView) mView.findViewById(R.id.wvMailList);
-        WebViewSettingUtil.setSetting(wvMailList);
+        final WebView wvMailList = (WebView) mView.findViewById(R.id.wvMailList);
+        WebViewSettingUtil.setSettingNoZoom(mActivity,wvMailList);
         wvMailList.setBackgroundColor(0);
         wvMailList.getBackground().setAlpha(0);
-        wvMailList.addJavascriptInterface(new H5JavaScript(mActivity, H5PopupWindow.this, isDetails, processId, deleteWorkingBean), "android_api");
+        wvMailList.clearHistory();
+        wvMailList.clearFormData();
+        wvMailList.clearCache(true);
+        CookieSyncManager.createInstance(mActivity);
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.removeAllCookie();
+        wvMailList.addJavascriptInterface(new H5JavaScript(mActivity, new PromptListener() {
+            @Override
+            public void returnTrueOrFalse(boolean trueOrFalse) {
+                if (trueOrFalse) {
+                    promptListener.returnTrueOrFalse(true);
+                }
+            }
+        }, isDetails, processId, deleteWorkingBean), "android_api");
         wvMailList.loadUrl(url);
     }
 
