@@ -61,7 +61,7 @@
                     android:background="@null"
                     android:gravity="left|center"
                     android:minHeight="@dimen/forty"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -98,7 +98,7 @@
                     android:background="@null"
                     android:gravity="left|center"
                     android:minHeight="@dimen/forty"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -134,7 +134,7 @@
                     android:background="@null"
                     android:gravity="left|center"
                     android:minHeight="@dimen/forty"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -172,7 +172,7 @@
                     android:minHeight="@dimen/forty"
                     android:paddingBottom="@dimen/five_dp"
                     android:paddingTop="@dimen/five_dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -208,7 +208,7 @@
                     android:background="@null"
                     android:gravity="left|center"
                     android:minHeight="@dimen/forty"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -244,7 +244,7 @@
                     android:background="@null"
                     android:gravity="left|center"
                     android:minHeight="@dimen/forty"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -278,7 +278,7 @@
                     android:layout_toRightOf="@+id/entryTime"
                     android:background="@null"
                     android:gravity="left|center"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -315,7 +315,7 @@
                     android:background="@null"
                     android:gravity="left|center"
                     android:minHeight="@dimen/forty"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
@@ -397,11 +397,12 @@
                     android:layout_marginTop="@dimen/five_dp"
                     android:layout_toLeftOf="@+id/ibRemarks"
                     android:layout_toRightOf="@+id/txtRemarks"
-                    android:background="@drawable/gray_stroke_white_solid_bg"
+                    android:background="@null"
                     android:gravity="left|center"
+                    android:hint="请输入审核意见"
                     android:minHeight="@dimen/forty"
                     android:padding="@dimen/five_dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
 
                 <ImageButton

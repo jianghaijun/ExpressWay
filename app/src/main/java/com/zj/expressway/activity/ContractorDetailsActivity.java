@@ -32,6 +32,7 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.speech.asr.SpeechConstant;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PhotosListAdapter;
 import com.zj.expressway.adapter.TimeLineAdapter;
@@ -52,6 +53,7 @@ import com.zj.expressway.listener.ShowPhotoListener;
 import com.zj.expressway.manager.GPSLocationManager;
 import com.zj.expressway.model.ButtonListModel;
 import com.zj.expressway.model.WorkModel;
+import com.zj.expressway.model.WorkProcessModel;
 import com.zj.expressway.popwindow.H5PopupWindow;
 import com.zj.expressway.recognization.ChainRecogListener;
 import com.zj.expressway.service.LocationService;
@@ -161,6 +163,7 @@ public class ContractorDetailsActivity extends BaseActivity {
     private double longitude, latitude;
     private Gson gson = new Gson();
     private WorkModel model;
+    WorkProcessModel workProcessModel = null;
     private boolean isToDo;
     private int leastTakePhotoNum, isLocalAdd; // 最少拍照数量
     private String selectLevelId = ""; // 选中层级id
@@ -281,17 +284,17 @@ public class ContractorDetailsActivity extends BaseActivity {
     private void getData(final boolean isToDo) {
         LoadingUtils.showLoading(mContext);
         JSONObject obj = new JSONObject();
+        obj.put("processId", processId);
         String url = "";
         if (isToDo) {
             obj.put("flowId", flowId);
             obj.put("workId", workId);
-            obj.put("apiName", "getZxHwGxProcessDetails");
+            obj.put("apiName", "getZxHwGxProcessDetailsByFlowWorkId");
             obj.put("apiType", "POST");
             url += ConstantsUtil.openFlow;
         } else {
-            obj.put("flowId", flowId);
-            obj.put("mainTablePrimaryId", mainTablePrimaryId);
-            url += ConstantsUtil.openPageFlow;
+            obj.put("apih5FlowStatus", "0");
+            url += ConstantsUtil.getZxHwGxProcessDetails;
         }
         Request request = ChildThreadUtil.getRequest(mContext, url, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
@@ -305,8 +308,12 @@ public class ContractorDetailsActivity extends BaseActivity {
                 jsonData = response.body().string().toString();
                 if (JsonUtils.isGoodJson(jsonData)) {
                     // 解析
-                    model = gson.fromJson(jsonData, WorkModel.class);
-                    if (model.isSuccess()) {
+                    if (isToDo) {
+                        model = gson.fromJson(jsonData, WorkModel.class);
+                    } else {
+                        workProcessModel = gson.fromJson(jsonData, WorkProcessModel.class);
+                    }
+                    if (isToDo ? model.isSuccess() : workProcessModel.isSuccess()) {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -315,6 +322,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                                         Gson gson = new Gson();
                                         WorkingBean flowBean = gson.fromJson(model.getData().getApiData(), WorkingBean.class);
                                         Working_Bean flow_Bean = gson.fromJson(model.getData().getApiData(), Working_Bean.class);
+                                        processId = flowBean.getProcessId();
                                         flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                         flowBean.setOpinionField(model.getData().getNodeVars().getOpinionField());
                                         flowBean.setOpinionFieldName(model.getData().getFlowVars().getOpinionFieldName());
@@ -338,7 +346,26 @@ public class ContractorDetailsActivity extends BaseActivity {
                                     }
                                     LoadingUtils.hideLoading();
                                 } else {
-                                    WorkingBean flowBean = model.getData().getMainTableObject();
+                                    WorkingBean flowBean = workProcessModel.getData();
+                                    flowBean.setFileOperationFlag("1");
+                                    flowBean.setOpinionShowFlag("");
+                                    mainTableId = processId;
+                                    setImgData(null);
+                                    List<ButtonListModel> buttons = new ArrayList<>();
+                                    ButtonListModel btnModel = new ButtonListModel();
+                                    btnModel.setButtonId("localSubmit");
+                                    btnModel.setButtonName("确认提交");
+                                    buttons.add(btnModel);
+
+                                    levelNameAll = flowBean.getLevelNameAll();
+                                    selectLevelId = flowBean.getLevelId();
+                                    levelIdAll = flowBean.getLevelIdAll();
+                                    setShowButton(buttons);
+                                    setTableData(flowBean);
+                                    initTimeLineView(null);
+                                    LoadingUtils.hideLoading();
+
+                                    /*WorkingBean flowBean = model.getData().getMainTableObject();
                                     flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                     flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
                                     mainTableId = model.getData().getMainTablePrimaryId();
@@ -359,12 +386,12 @@ public class ContractorDetailsActivity extends BaseActivity {
                                     setShowButton(buttons);
                                     setTableData(flowBean);
                                     initTimeLineView(model.getData().getFlowHistoryList());
-                                    LoadingUtils.hideLoading();
+                                    LoadingUtils.hideLoading();*/
                                 }
                             }
                         });
                     } else {
-                        ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
+                        ChildThreadUtil.checkTokenHidden(mContext,isToDo ? model.getMessage() : workProcessModel.getMessage(), isToDo ? model.getCode() : workProcessModel.getCode());
                     }
                 } else {
                     ChildThreadUtil.toastMsgHidden(mContext, getString(R.string.json_error));
@@ -426,7 +453,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                 for (int i = 0; i < opinionFieldNames.length; i++) {
                     String opinionFieldNameKey = StrUtil.subBefore(opinionFieldNames[i], "|", true);
                     String opinionFieldNameTitle = StrUtil.subAfter(opinionFieldNames[i], "|", true);
-                    if(StrUtil.isEmpty(String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)))) {
+                    if(StrUtil.isNotEmpty(String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)))) {
                         setOptions(opinionFieldNameTitle, i, String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)));
                     }
                 }
@@ -679,7 +706,7 @@ public class ContractorDetailsActivity extends BaseActivity {
             Map<String, Object> newobj = new HashMap<>();
             Map<String, Object> updataObj = new HashMap<>();
             newobj.put("apiName", "updateZxHwGxProcess");
-            newobj.put("apiNameByCreate", "updateZxHwGxProcess");
+            newobj.put("apiNameByCreate", "updateZxHwGxProcessByCreate");
             updataObj.put("apiName", "updateZxHwGxProcess");
             updataObj.put("apiNameByCreate", "updateZxHwGxProcess");
             newobj.put("flowId", "zxHwGxProcess");

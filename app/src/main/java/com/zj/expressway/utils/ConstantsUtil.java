@@ -15,8 +15,8 @@ import okhttp3.OkHttpClient;
 
 public class ConstantsUtil {
     // 中交路径
-//    public static final String BASE_URL = "http://192.168.1.118:8080/web/";
-    public static final String BASE_URL = "http://47.96.150.231:8012/tongren/";
+    public static final String BASE_URL = "http://192.168.1.118:8080/web/";
+//    public static final String BASE_URL = "http://47.96.150.231:8012/tongren/";
     // 前缀
     public static String prefix = "";
     // accountId
@@ -59,11 +59,11 @@ public class ConstantsUtil {
 //    public static final String Map = "http://192.168.1.192/tongren_mobile/#/map/123";
     public static final String Map = "http://47.96.150.231/member/#/map/123";
     // 发起
-//    public static final String star = "http://192.168.1.118/app/#/app/approveMobileByApp";
-    public static final String star = "http://47.96.150.231/app/#/app/approveMobileByApp";
+    public static final String star = "http://192.168.1.118/app/#/app/approveMobileByApp";
+//    public static final String star = "http://47.96.150.231/app/#/app/approveMobileByApp";
     // 更新
-//    public static final String update = "http://192.168.1.118/app/#/app/processMobileByApp";
-    public static final String update = "http://47.96.150.231/app/#/app/processMobileByApp";
+    public static final String update = "http://192.168.1.118/app/#/app/processMobileByApp";
+//    public static final String update = "http://47.96.150.231/app/#/app/processMobileByApp";
 
     // 登录
     public static final String LOGIN = prefix + "user/" + "login";
@@ -128,7 +128,8 @@ public class ConstantsUtil {
     // 发起流程
     public static final String startFlow = prefix + "startFlow";
     // 新流程详情
-    public static final String openPageFlow = prefix + "openPageFlow";
+//    public static final String openPageFlow = prefix + "openPageFlow";
+    public static final String getZxHwGxProcessDetails = prefix + "getZxHwGxProcessDetails";
     // 系统消息
     public static final String appGetMessageList = prefix + "appGetMessageList";
     // 获取二维码扫描后人员详情
@@ -168,7 +169,7 @@ public class ConstantsUtil {
     public static final int NUMBER_TWO_THOUSAND = 2000;
     // flowId
     public static final String flowId = "zxHwGxProcess";
-    public static boolean isLoading = false;
+    public static boolean isLoading = false, isFirst = false;
 
     // 项目名称
     public static String projectName = "中交一公局";

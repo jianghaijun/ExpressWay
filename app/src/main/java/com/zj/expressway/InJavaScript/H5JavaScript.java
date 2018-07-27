@@ -107,6 +107,7 @@ public class H5JavaScript extends BaseInJavaScript {
         String type = (String) SpUtil.get(mContext, "PROCESS_TYPE", "1");
         switch (type) {
             case "1":
+                ConstantsUtil.isFirst = true;
                 ScreenManagerUtil.popAllActivityExceptOne(AuditManagementActivity.class);
                 break;
             case "2":

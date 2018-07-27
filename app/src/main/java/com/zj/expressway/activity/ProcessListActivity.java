@@ -193,6 +193,7 @@ public class ProcessListActivity extends BaseActivity {
             case 1:
                 url = ConstantsUtil.getZxHwGxProcessList;
                 obj.put("flowStatus", "0");
+                obj.put("apih5FlowStatus", "-1");
                 break;
             case 4:
                 // 待办

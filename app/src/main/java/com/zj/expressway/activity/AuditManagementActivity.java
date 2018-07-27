@@ -148,7 +148,10 @@ public class AuditManagementActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (ConstantsUtil.isLoading) {
-            //takePictureActivity.setIsFirst();
+            if (ConstantsUtil.isFirst) {
+                ConstantsUtil.isFirst = false;
+                takePictureActivity.setIsFirst();
+            }
             toBeAuditedActivity.setIsFirst();
             finishActivity.setIsFirst();
             takePictureActivity.initData(1, txtTakePhoto, String.valueOf(SpUtil.get(mContext, "levelTypeZero", "")), true);

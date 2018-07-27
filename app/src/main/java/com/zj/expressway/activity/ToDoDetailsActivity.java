@@ -440,12 +440,13 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         JSONObject obj = new JSONObject();
         obj.put("workId", workId);
         if (StrUtil.equals("2", checkType)) {
-            obj.put("apiName", "getZxHwZlTroubleDetails");
+            obj.put("apiName", "getZxHwZlTroubleDetailsByFlowWorkId");
         } else {
-            obj.put("apiName", "getZxHwAqHiddenDangerDetails");
+            obj.put("apiName", "getZxHwAqHiddenDangerDetailsByFlowWorkId");
         }
         obj.put("apiType", "POST");
         obj.put("flowId", flowId);
+        obj.put("processId", processId);
         Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.openFlow, obj.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
@@ -576,6 +577,7 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             rBtn1.setClickable(false);
             rBtn2.setClickable(false);
             rBtn3.setClickable(false);
+            btnChangeDate.setCompoundDrawables(null, null, null, null);
             edtDangerDescription.setFocusable(false);
             edtHiddenTroubleHeadline.setFocusable(false);
             edtRectificationRequirements.setFocusable(false);
@@ -983,18 +985,22 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
         Map<String, Object> updataObj = new HashMap<>();
         if (StrUtil.equals(type, "2")) {
             newobj.put("apiName", "addZxHwZlTrouble");
-            newobj.put("apiNameByCreate", "updateZxHwZlTrouble");
+            newobj.put("apiNameByCreate", "updateZxHwZlTroubleByCreate");
             updataObj.put("apiName", "updateZxHwZlTrouble");
             updataObj.put("apiNameByCreate", "updateZxHwZlTrouble");
             newobj.put("flowId", "zxHwZlTrouble");
             updataObj.put("flowId", "zxHwZlTrouble");
+            newobj.put("troubleId", objId);
+            updataObj.put("troubleId", objId);
         } else {
             newobj.put("apiName", "addZxHwAqHiddenDanger");
-            newobj.put("apiNameByCreate", "updateZxHwAqHiddenDanger");
+            newobj.put("apiNameByCreate", "updateZxHwAqHiddenDangerByCreate");
             updataObj.put("apiName", "updateZxHwAqHiddenDanger");
-            updataObj.put("apiNameByCreate", "updateZxHwZlTrouble");
+            updataObj.put("apiNameByCreate", "updateZxHwAqHiddenDanger");
             newobj.put("flowId", "zxHwAqHiddenDanger");
             updataObj.put("flowId", "zxHwAqHiddenDanger");
+            newobj.put("dangerId", objId);
+            updataObj.put("dangerId", objId);
         }
 
         newobj.put("apiType", "POST");
@@ -1256,13 +1262,17 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             updateObj.put("apiNameByCreate", "updateZxHwZlTrouble");
             newObj.put("flowId", "zxHwZlTrouble");
             updateObj.put("flowId", "zxHwZlTrouble");
+            newObj.put("troubleId", objId);
+            updateObj.put("troubleId", objId);
         } else {
-            newObj.put("apiName", "updateZxHwZlTrouble");
-            newObj.put("apiNameByCreate", "updateZxHwZlTrouble");
+            newObj.put("apiName", "updateZxHwAqHiddenDanger");
+            newObj.put("apiNameByCreate", "updateZxHwAqHiddenDanger");
             updateObj.put("apiName", "updateZxHwAqHiddenDanger");
-            updateObj.put("apiNameByCreate", "updateZxHwZlTrouble");
+            updateObj.put("apiNameByCreate", "updateZxHwAqHiddenDanger");
             newObj.put("flowId", "zxHwAqHiddenDanger");
             updateObj.put("flowId", "zxHwAqHiddenDanger");
+            newObj.put("dangerId", objId);
+            updateObj.put("dangerId", objId);
         }
 
         newObj.put("apiType", "POST");
@@ -1324,8 +1334,8 @@ public class ToDoDetailsActivity extends BaseNoImmersionBarActivity {
             newObject.put("apiName", "updateZxHwZlTrouble");
             newObject.put("apiNameByCreate", "updateZxHwZlTrouble");
         } else {
-            newObject.put("apiName", "updateZxHwZlTrouble");
-            newObject.put("apiNameByCreate", "updateZxHwZlTrouble");
+            newObject.put("apiName", "updateZxHwAqHiddenDanger");
+            newObject.put("apiNameByCreate", "updateZxHwAqHiddenDanger");
         }
         newObject.put("apiBody", new Gson().toJson(apiBody));
         SpUtil.put(mContext, "updateFlowData", new Gson().toJson(newObject));
