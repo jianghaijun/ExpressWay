@@ -264,7 +264,6 @@ public class SDKAnimationView extends View {
 
     public SDKAnimationView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // TODO Auto-generated constructor stub
         mGriddingPaint = new Paint();
         mGriddingPaint.setStrokeWidth(1);
         mBaiduLogePaint = new Paint();
@@ -399,7 +398,6 @@ public class SDKAnimationView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // TODO Auto-generated method stub
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         // 用控件宽度值计算高度值，从而保持采样格为方形。
@@ -747,7 +745,6 @@ public class SDKAnimationView extends View {
      * @param state 动画状态
      */
     public void startVoiceAnimation(int state) {
-        // TODO Auto-generated method stub
         switch (state) {
             case NO_ANIMATION_STATE:
                 resetAnimation();
@@ -808,7 +805,6 @@ public class SDKAnimationView extends View {
 
         @Override
         public void run() {
-            // TODO Auto-generated method stub
             invalidate();
             post(this);
         }

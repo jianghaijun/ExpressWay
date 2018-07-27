@@ -135,6 +135,7 @@ public class AppInfoAdapter extends RecyclerView.Adapter<AppInfoAdapter.AppInfoH
                         intent = new Intent(mContext, WorkingProcedureActivity.class);
                         SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
                         SpUtil.put(mContext, "PROCESS_TYPE", "4");
+                        SpUtil.put(mContext, "MANAGER_TYPE", "1");
                         mContext.startActivity(intent);
                         /*intent = new Intent(mContext, EditScrollPhotoActivity.class);
                         intent.putExtra("url", ConstantsUtil.audit_management);

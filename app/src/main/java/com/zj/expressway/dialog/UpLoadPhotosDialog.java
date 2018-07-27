@@ -220,4 +220,10 @@ public class UpLoadPhotosDialog extends Dialog {
                     }
                 });
     }
+
+    @Override
+    public void show() {
+        super.show();
+        getWindow().setWindowAnimations(R.style.DialogInAndOutAnim);
+    }
 }

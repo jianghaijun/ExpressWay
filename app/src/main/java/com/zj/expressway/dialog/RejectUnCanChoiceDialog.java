@@ -83,4 +83,10 @@ public class RejectUnCanChoiceDialog extends Dialog implements View.OnClickListe
                 break;
         }
     }
+
+    @Override
+    public void show() {
+        super.show();
+        getWindow().setWindowAnimations(R.style.DialogInAndOutAnim);
+    }
 }

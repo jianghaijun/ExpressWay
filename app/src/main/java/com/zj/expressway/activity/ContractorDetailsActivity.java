@@ -18,7 +18,9 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -28,6 +30,7 @@ import android.widget.TextView;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
+import com.baidu.speech.asr.SpeechConstant;
 import com.google.gson.Gson;
 import com.zj.expressway.R;
 import com.zj.expressway.adapter.PhotosListAdapter;
@@ -39,6 +42,7 @@ import com.zj.expressway.bean.HistoryBean;
 import com.zj.expressway.bean.PhotosBean;
 import com.zj.expressway.bean.WorkingBean;
 import com.zj.expressway.bean.Working_Bean;
+import com.zj.expressway.control.MyRecognizer;
 import com.zj.expressway.dialog.PromptDialog;
 import com.zj.expressway.dialog.UpLoadPhotosDialog;
 import com.zj.expressway.listener.GPSLocationListener;
@@ -49,7 +53,10 @@ import com.zj.expressway.manager.GPSLocationManager;
 import com.zj.expressway.model.ButtonListModel;
 import com.zj.expressway.model.WorkModel;
 import com.zj.expressway.popwindow.H5PopupWindow;
+import com.zj.expressway.recognization.ChainRecogListener;
 import com.zj.expressway.service.LocationService;
+import com.zj.expressway.ui.BaiduASRDigitalDialog;
+import com.zj.expressway.ui.DigitalDialogInput;
 import com.zj.expressway.utils.AppInfoUtil;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
@@ -77,6 +84,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -119,14 +127,18 @@ public class ContractorDetailsActivity extends BaseActivity {
     private TextView txtBidsPath;
     @ViewInject(R.id.llButtons)
     private LinearLayout llButtons;
-    @ViewInject(R.id.edtRemarks)
-    private EditText edtRemarks;
     @ViewInject(R.id.imgBtnAdd)
     private ImageButton imgBtnAdd;
     @ViewInject(R.id.rvContractorDetails)
     private RecyclerView rvContractorDetails;
     @ViewInject(R.id.rlRemarks)
     private RelativeLayout rlRemarks;
+    @ViewInject(R.id.edtRemarks)
+    private EditText edtRemarks;
+    @ViewInject(R.id.llOptions)
+    private LinearLayout llOptions;
+    @ViewInject(R.id.ibRemarks)
+    private ImageButton ibRemarks;
     @ViewInject(R.id.view)
     private View view;
     // 时间轴
@@ -155,6 +167,7 @@ public class ContractorDetailsActivity extends BaseActivity {
     private String levelIdAll = ""; // 选中层级id
     private String levelNameAll = ""; // 选中层级id
     private H5PopupWindow p;
+    private MyRecognizer myRecognizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,7 +201,6 @@ public class ContractorDetailsActivity extends BaseActivity {
             if (!isToDo) {
                 workingBean.setFileOperationFlag("1");
             }
-            setTableData(workingBean);
             setImgData(new ArrayList<PhotosBean>());
             List<ButtonListModel> buttons = new ArrayList<>();
             if (StrUtil.isNotEmpty(workingBean.getFileOperationFlag()) && workingBean.getFileOperationFlag().equals("1")) {
@@ -198,6 +210,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                 buttons.add(btnModel);
             }
             setShowButton(buttons);
+            setTableData(workingBean);
             List<HistoryBean> flowHistoryList = DataSupport.where("processId=?", isToDo ? workId : processId).find(HistoryBean.class);
             initTimeLineView(ObjectUtil.isNull(flowHistoryList) ? new ArrayList<HistoryBean>() : flowHistoryList);
         }
@@ -303,8 +316,9 @@ public class ContractorDetailsActivity extends BaseActivity {
                                         WorkingBean flowBean = gson.fromJson(model.getData().getApiData(), WorkingBean.class);
                                         Working_Bean flow_Bean = gson.fromJson(model.getData().getApiData(), Working_Bean.class);
                                         flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
-                                        flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
-                                        setTableData(flowBean);
+                                        flowBean.setOpinionField(model.getData().getNodeVars().getOpinionField());
+                                        flowBean.setOpinionFieldName(model.getData().getFlowVars().getOpinionFieldName());
+                                        flowBean.setRemarks(flowBean.getOpinionContent());
                                         setImgData(flow_Bean.getGxAttachmentList());
                                         List<ButtonListModel> buttons = new ArrayList<>();
                                         if (!isToDo) {
@@ -316,6 +330,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                                             buttons = model.getData().getFlowButtons();
                                         }
                                         setShowButton(buttons);
+                                        setTableData(flowBean);
                                         initTimeLineView(model.getData().getFlowHistoryList());
                                         levelNameAll = flowBean.getLevelNameAll();
                                         selectLevelId = flowBean.getLevelId();
@@ -327,9 +342,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                                     flowBean.setFileOperationFlag(model.getData().getFileOperationFlag());
                                     flowBean.setOpinionShowFlag(model.getData().getOpinionShowFlag());
                                     mainTableId = model.getData().getMainTablePrimaryId();
-                                    setTableData(flowBean);
                                     setImgData(model.getData().getSubTableObject().getZxHwGxAttachment().getSubTableObject());
-
                                     List<ButtonListModel> buttons = new ArrayList<>();
                                     if (!isToDo) {
                                         ButtonListModel btnModel = new ButtonListModel();
@@ -344,6 +357,7 @@ public class ContractorDetailsActivity extends BaseActivity {
                                     selectLevelId = flowBean.getLevelId();
                                     levelIdAll = flowBean.getLevelIdAll();
                                     setShowButton(buttons);
+                                    setTableData(flowBean);
                                     initTimeLineView(model.getData().getFlowHistoryList());
                                     LoadingUtils.hideLoading();
                                 }
@@ -379,19 +393,105 @@ public class ContractorDetailsActivity extends BaseActivity {
             txtTakePhotoNum.setText("最少拍照" + flowBean.getPhotoNumber() + "张");  // 拍照张三
         }
 
+        if (llButtons.getVisibility() == View.GONE) {
+            edtRemarks.setFocusable(false);
+            edtRemarks.setClickable(false);
+        }
+        edtRemarks.setText(flowBean.getRemarks());
+
         leastTakePhotoNum = Integer.valueOf(StrUtil.isEmpty(flowBean.getPhotoNumber()) ? "3" : flowBean.getPhotoNumber());
         txtEntryTime.setText(DateUtils.setDataToStr(flowBean.getEnterTime()));    // 检查时间
         txtLocation.setText(flowBean.getLocation());    // 拍照位置
         txtRejectPhoto.setText(flowBean.getDismissal()); // 驳回原因
         processPath = flowBean.getLevelNameAll().replace(",", "→")/* + "→" + flowBean.getProcessName()*/;
+        // 显示意见
+        if (StrUtil.isNotEmpty(flowBean.getOpinionFieldName())) {
+            llOptions.setVisibility(View.VISIBLE);
+            Map<String, Object> jsonObjectOpinionField = new HashMap<>();
+            jsonObjectOpinionField.put("opinionField1", flowBean.getOpinionField1());
+            jsonObjectOpinionField.put("opinionField2", flowBean.getOpinionField2());
+            jsonObjectOpinionField.put("opinionField3", flowBean.getOpinionField3());
+            jsonObjectOpinionField.put("opinionField4", flowBean.getOpinionField4());
+            jsonObjectOpinionField.put("opinionField5", flowBean.getOpinionField5());
+            jsonObjectOpinionField.put("opinionField6", flowBean.getOpinionField6());
+            jsonObjectOpinionField.put("opinionField7", flowBean.getOpinionField7());
+            jsonObjectOpinionField.put("opinionField8", flowBean.getOpinionField8());
+            jsonObjectOpinionField.put("opinionField9", flowBean.getOpinionField9());
+            jsonObjectOpinionField.put("opinionField10", flowBean.getOpinionField10());
+            String flowVars = flowBean.getOpinionFieldName();
+            // 多个
+            if(flowVars.indexOf("_")>=0) {
+                // 循环添加
+                String[] opinionFieldNames = flowVars.split("_");
+                for (int i = 0; i < opinionFieldNames.length; i++) {
+                    String opinionFieldNameKey = StrUtil.subBefore(opinionFieldNames[i], "|", true);
+                    String opinionFieldNameTitle = StrUtil.subAfter(opinionFieldNames[i], "|", true);
+                    if(StrUtil.isEmpty(String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)))) {
+                        setOptions(opinionFieldNameTitle, i, String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)));
+                    }
+                }
+                // 单个
+            } else {
+                String opinionFieldNameKey = StrUtil.subBefore(flowBean.getOpinionFieldName(), "|", true);
+                String opinionFieldNameTitle = StrUtil.subAfter(flowBean.getOpinionFieldName(), "|", true);
+                if(StrUtil.isNotEmpty(String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)))) {
+                    setOptions(opinionFieldNameTitle, 1, String.valueOf(jsonObjectOpinionField.get(opinionFieldNameKey)));
+                }
+            }
+        }
+
         // 控制拍照按钮是否显示
         if (!StrUtil.equals("1", flowBean.getFileOperationFlag())) {
             imgBtnAdd.setVisibility(View.GONE);
         }
         // 控制意见栏是否显示
-        if (!StrUtil.equals("1", flowBean.getOpinionShowFlag())) {
+        if (StrUtil.isEmpty(flowBean.getOpinionField())) {
             rlRemarks.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * 动态添加意见
+     * @param sTitle
+     * @param i
+     * @param sContent
+     */
+    private void setOptions(String sTitle, int i, String sContent) {
+        // 添加外层布局
+        RelativeLayout relativeLayout = new RelativeLayout(this);
+        RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        relativeLayout.setBackground(null);
+        // 向RelativeLayout中添加子布局--->分割线
+        View v = new View(this);
+        v.setBackgroundColor(ContextCompat.getColor(mContext, R.color.gray));
+        RelativeLayout.LayoutParams vl = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, 1);
+        vl.leftMargin = DensityUtil.dip2px(10);
+        vl.rightMargin = DensityUtil.dip2px(10);
+        relativeLayout.addView(v, vl);
+        // 向RelativeLayout中添加子布局--->标题
+        TextView txtTitle = new TextView(this);
+        txtTitle.setId(1000000 + i);
+        RelativeLayout.LayoutParams ll = new RelativeLayout.LayoutParams(DensityUtil.dip2px(80), ViewGroup.LayoutParams.WRAP_CONTENT);
+        ll.addRule(RelativeLayout.CENTER_VERTICAL);
+        txtTitle.setBackground(null);
+        txtTitle.setGravity(Gravity.RIGHT);
+        txtTitle.setText(sTitle);
+        txtTitle.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+        txtTitle.setTextSize(14);
+        relativeLayout.addView(txtTitle, ll);
+        // 向RelativeLayout中添加子布局--->内容
+        TextView txtContent = new TextView(this);
+        RelativeLayout.LayoutParams llContent = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        llContent.addRule(RelativeLayout.LEFT_OF, 1000000 + i);
+        txtContent.setBackground(null);
+        txtContent.setGravity(Gravity.LEFT|Gravity.CENTER);
+        txtContent.setMinHeight(DensityUtil.dip2px(40));
+        txtContent.setPadding(0, DensityUtil.dip2px(5), DensityUtil.dip2px(10), DensityUtil.dip2px(5));
+        txtContent.setText(sContent);
+        txtContent.setTextColor(ContextCompat.getColor(mContext, R.color.dark_b));
+        txtContent.setTextSize(14);
+        relativeLayout.addView(txtContent, llContent);
+        llOptions.addView(relativeLayout, rl);
     }
 
     /**
@@ -565,7 +665,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         tableDataMap.put("levelId", selectLevelId);
         tableDataMap.put("levelIdAll", levelIdAll);
         tableDataMap.put("processId", processId);
-        tableDataMap.put("remarks", edtRemarks.getText().toString());
+        tableDataMap.put("opinionContent", edtRemarks.getText().toString());
         tableDataMap.put("processName", txtWorkingName.getText().toString());
         tableDataMap.put("processCode", txtWorkingNo.getText().toString());
         tableDataMap.put("photoContent", txtTakePhotoRequirement.getText().toString());
@@ -579,7 +679,9 @@ public class ContractorDetailsActivity extends BaseActivity {
             Map<String, Object> newobj = new HashMap<>();
             Map<String, Object> updataObj = new HashMap<>();
             newobj.put("apiName", "updateZxHwGxProcess");
+            newobj.put("apiNameByCreate", "updateZxHwGxProcess");
             updataObj.put("apiName", "updateZxHwGxProcess");
+            updataObj.put("apiNameByCreate", "updateZxHwGxProcess");
             newobj.put("flowId", "zxHwGxProcess");
             updataObj.put("flowId", "zxHwGxProcess");
 
@@ -603,6 +705,7 @@ public class ContractorDetailsActivity extends BaseActivity {
         } else {
             JSONObject object = new JSONObject(jsonData);
             JSONObject newObject = new JSONObject(object.getObj("data").toString());
+            newObject.put("apiName", "updateZxHwGxProcess");
             newObject.put("apiBody", new Gson().toJson(tableDataMap));
             SpUtil.put(mContext, "updateFlowData", new Gson().toJson(newObject));
 
@@ -1113,10 +1216,64 @@ public class ContractorDetailsActivity extends BaseActivity {
                     jsonData = object.toString();
                     submitData(true);
                     break;
+                case 202:
+                    if (myRecognizer != null) {
+                        myRecognizer.release();
+                    }
+
+                    String message = edtRemarks.getText().toString();
+                    ArrayList results = data.getStringArrayListExtra("results");
+                    edtRemarks.setText(message);
+                    break;
                 default:
                     break;
             }
+        } else {
+            if (myRecognizer != null) {
+                myRecognizer.release();
+            }
         }
+    }
+
+    /**
+     * 申请语音输入权限
+     */
+    private void initVoicePermissions() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            String permissions[] = {android.Manifest.permission.RECORD_AUDIO,
+                    android.Manifest.permission.READ_PHONE_STATE,
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+            requestAuthority(permissions, new PermissionListener() {
+                @Override
+                public void agree() {
+                    speechInput();
+                }
+
+                @Override
+                public void refuse(List<String> refusePermission) {
+                    ToastUtil.showShort(mContext, "您拒绝了语音输入所需权限权限!");
+                }
+            });
+        } else {
+            speechInput();
+        }
+    }
+
+    /**
+     * 语音输入
+     */
+    private void speechInput() {
+        // 1. 确定识别参数
+        Map<String, Object> params = new LinkedHashMap<>();
+        params.put(SpeechConstant.ACCEPT_AUDIO_VOLUME, false);
+        params.put(SpeechConstant.VAD_ENDPOINT_TIMEOUT, 0); // 长语音
+        ChainRecogListener listener = new ChainRecogListener();
+        myRecognizer = new MyRecognizer(mContext, listener);
+        DigitalDialogInput input = new DigitalDialogInput(myRecognizer, listener, params);
+        Intent intent = new Intent(mContext, BaiduASRDigitalDialog.class);
+        ((MyApplication) mContext.getApplicationContext()).setDigitalDialogInput(input);
+        mContext.startActivityForResult(intent, 202);
     }
 
     /**
@@ -1124,7 +1281,7 @@ public class ContractorDetailsActivity extends BaseActivity {
      *
      * @param v
      */
-    @Event({R.id.imgBtnLeft, R.id.imgBtnAdd})
+    @Event({R.id.imgBtnLeft, R.id.imgBtnAdd, R.id.ibRemarks})
     private void onClick(View v) {
         switch (v.getId()) {
             // 返回
@@ -1151,6 +1308,10 @@ public class ContractorDetailsActivity extends BaseActivity {
                         checkPhotosPermission();
                     }
                 }
+                break;
+            // 意见语音
+            case R.id.ibRemarks:
+                initVoicePermissions();
                 break;
         }
     }

@@ -153,6 +153,7 @@
     <string name="submit">提交</string>
     <string name="reject_photo">驳回原因：</string>
     <string name="remarks">审核意见：</string>
+    <string name="rectification_remarks">整改意见：</string>
     <string name="hiddenTroubleHeadline">具体段落和部位：</string>
     <string name="hiddenTroubleLevel">隐患级别：</string>
     <string name="hiddenTroubleType">隐患类型：</string>

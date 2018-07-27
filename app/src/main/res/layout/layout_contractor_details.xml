@@ -67,7 +67,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -104,7 +104,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -140,7 +140,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -178,7 +178,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -214,7 +214,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -250,7 +250,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -284,7 +284,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -328,7 +328,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -357,6 +357,14 @@
                     android:textSize="@dimen/fourteen_sp" />
             </RelativeLayout>
 
+            <LinearLayout
+                android:id="@+id/llOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
             <RelativeLayout
                 android:id="@+id/rlRemarks"
                 android:layout_width="match_parent"
@@ -365,7 +373,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -386,15 +394,24 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/five_dp"
-                    android:layout_marginRight="@dimen/ten_dp"
                     android:layout_marginTop="@dimen/five_dp"
+                    android:layout_toLeftOf="@+id/ibRemarks"
                     android:layout_toRightOf="@+id/txtRemarks"
                     android:background="@drawable/gray_stroke_white_solid_bg"
                     android:gravity="left|center"
-                    android:minHeight="@dimen/eighty_dp"
+                    android:minHeight="@dimen/forty"
                     android:padding="@dimen/five_dp"
                     android:textColor="@color/black"
                     android:textSize="@dimen/fourteen_sp" />
+
+                <ImageButton
+                    android:id="@+id/ibRemarks"
+                    android:layout_width="@dimen/forty"
+                    android:layout_height="@dimen/forty"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:src="@drawable/voice" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -407,7 +424,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/one_dp"
+                    android:layout_height="@dimen/one_px"
                     android:layout_marginLeft="@dimen/ten_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@color/gray" />
@@ -718,7 +735,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />
@@ -792,7 +809,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/one_dp"
+                android:layout_height="@dimen/one_px"
                 android:layout_marginLeft="@dimen/ten_dp"
                 android:layout_marginRight="@dimen/ten_dp"
                 android:background="@color/gray" />

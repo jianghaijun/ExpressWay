@@ -11,16 +11,14 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.gson.Gson;
-import com.orhanobut.logger.AndroidLogAdapter;
-import com.orhanobut.logger.Logger;
 import com.zj.expressway.R;
+import com.zj.expressway.application.MyApplication;
 import com.zj.expressway.base.BaseActivity;
 import com.zj.expressway.bean.UserInfo;
 import com.zj.expressway.listener.PermissionListener;
 import com.zj.expressway.model.LoginModel;
 import com.zj.expressway.utils.ChildThreadUtil;
 import com.zj.expressway.utils.ConstantsUtil;
-import com.zj.expressway.utils.DataCleanManager;
 import com.zj.expressway.utils.JsonUtils;
 import com.zj.expressway.utils.JudgeNetworkIsAvailable;
 import com.zj.expressway.utils.LoadingUtils;
@@ -92,29 +90,40 @@ public class LoginActivity extends BaseActivity {
     /**
      * 清除WebView缓存
      */
-    public void clearWebViewCache(){
-        DataCleanManager.cleanDatabaseByName(mContext, "databases.db");
-        DataCleanManager.cleanInternalCache(mContext);
-        DataCleanManager.cleanExternalCache(mContext);
+    public void clearWebViewCache() {
+        String path = MyApplication.getInstance().getCacheDir() + "/../app_webview/Local Storage";
+        deleteFolderFile(path, true);
     }
 
     /**
      * 递归删除 文件/文件夹
      *
-     * @param file
+     * @param filePath
+     * @param deleteThisPath
+     * @return
      */
-    public void deleteFile(File file) {
-        if (file.exists()) {
-            if (file.isFile()) {
-                file.delete();
-            } else if (file.isDirectory()) {
+    private static boolean deleteFolderFile(String filePath, boolean deleteThisPath) {
+        try {
+            File file = new File(filePath);
+            if (file.isDirectory()) {
                 File files[] = file.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    deleteFile(files[i]);
+                for (File file1 : files) {
+                    deleteFolderFile(file1.getAbsolutePath(), true);
                 }
             }
-            file.delete();
-        } else {
+            if (deleteThisPath) {
+                if (!file.isDirectory()) {
+                    file.delete();
+                } else {
+                    if (file.listFiles().length == 0) {
+                        file.delete();
+                    }
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
@@ -203,7 +212,7 @@ public class LoginActivity extends BaseActivity {
                                 userInfo.saveOrUpdate("userId=?", userInfo.getUserId());
                                 // 设置极光别名
                                 int sequence = (int) System.currentTimeMillis();
-                                JPushInterface.setAlias(mContext, sequence, userInfo.getUserId());
+                                JPushInterface.setAlias(mContext, sequence, userInfo.getUserKey());
                                 LoadingUtils.hideLoading();
                                 isLogin = false;
                                 SpUtil.put(mContext, ConstantsUtil.IS_LOGIN_SUCCESSFUL, true);

@@ -64,6 +64,7 @@ public class SlippingHintDialog extends Dialog implements View.OnClickListener {
         layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
         getWindow().getDecorView().setPadding(0, 0, 0, 0);
         layoutParams.alpha = 100;
+        getWindow().setWindowAnimations(R.style.DialogInAndOutAnim);
         getWindow().setAttributes(layoutParams);
     }
 

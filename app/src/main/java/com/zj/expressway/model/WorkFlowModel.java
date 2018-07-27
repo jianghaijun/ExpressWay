@@ -2,7 +2,7 @@ package com.zj.expressway.model;
 
 
 import com.zj.expressway.bean.HistoryBean;
-import com.zj.expressway.bean.PhotosBean;
+import com.zj.expressway.bean.NodeVarsBean;
 import com.zj.expressway.bean.WorkingBean;
 
 import java.util.List;
@@ -27,10 +27,27 @@ public class WorkFlowModel {
     private WorkingBean mainTableDataObject;
     private List<ButtonListModel> buttonList;
     private List<ButtonListModel> flowButtons;
-
     private String apiData;
+    private NodeVarsBean nodeVars;
+    private NodeVarsBean flowVars;
     private FileModel subTableObject;
     private List<HistoryBean> flowHistoryList;
+
+    public NodeVarsBean getFlowVars() {
+        return flowVars;
+    }
+
+    public void setFlowVars(NodeVarsBean flowVars) {
+        this.flowVars = flowVars;
+    }
+
+    public NodeVarsBean getNodeVars() {
+        return nodeVars == null ? new NodeVarsBean() : nodeVars;
+    }
+
+    public void setNodeVars(NodeVarsBean nodeVars) {
+        this.nodeVars = nodeVars;
+    }
 
     public WorkingBean getMainTableDataObject() {
         return mainTableDataObject;

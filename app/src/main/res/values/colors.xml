@@ -38,6 +38,7 @@
     <color name="prompt_dialog_reminder_bg">#F2F2F2</color>
     <!-- 深灰色 -->
     <color name="dark_grey">#7F7F7F</color>
+    <color name="dark_b">#453f3f</color>
 
     !-- 深灰色 -->
     <color name="search_color">#888888</color>

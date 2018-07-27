@@ -79,4 +79,10 @@ public class SelectPhotoWayDialog extends Dialog implements View.OnClickListener
                 break;
         }
     }
+
+    @Override
+    public void show() {
+        super.show();
+        getWindow().setWindowAnimations(R.style.DialogInAndOutAnim);
+    }
 }

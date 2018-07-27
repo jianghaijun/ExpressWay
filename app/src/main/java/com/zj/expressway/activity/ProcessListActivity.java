@@ -181,6 +181,7 @@ public class ProcessListActivity extends BaseActivity {
         if (!StrUtil.isEmpty(searchContext)) {
             if (viewType == 1) {
                 obj.put("levelIdAll", searchContext);
+                obj.put("apih5FlowStatu", 0);
             } else {
                 obj.put("title", searchContext);
             }

@@ -74,14 +74,14 @@
                         android:id="@+id/txtPressLocal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/btnChoice"
                         android:background="@null"
                         android:gravity="left|center"
+                        android:hint="请选择位置"
                         android:minHeight="@dimen/forty"
                         android:paddingBottom="@dimen/five_dp"
                         android:paddingTop="@dimen/five_dp"
-                        android:textColor="@color/black"
+                        android:textColor="@color/dark_b"
                         android:textSize="@dimen/fourteen_sp" />
                 </RelativeLayout>
             </LinearLayout>
@@ -153,15 +153,25 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/five_dp"
-                    android:layout_marginRight="@dimen/ten_dp"
                     android:layout_marginTop="@dimen/five_dp"
+                    android:layout_toLeftOf="@+id/ibPosition"
                     android:layout_toRightOf="@+id/txtHiddenTroubleHeadline"
-                    android:background="@drawable/gray_stroke_white_solid_bg"
+                    android:background="@null"
                     android:gravity="left|center"
+                    android:hint="请输入段落和部位"
                     android:minHeight="@dimen/forty"
                     android:padding="@dimen/five_dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
+
+                <ImageButton
+                    android:id="@+id/ibPosition"
+                    android:layout_width="@dimen/forty"
+                    android:layout_height="@dimen/forty"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:src="@drawable/voice" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -203,7 +213,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="@string/commonly"
-                        android:textColor="@color/black"
+                        android:textColor="@color/dark_b"
                         android:textSize="@dimen/fourteen_sp" />
 
                     <RadioButton
@@ -212,7 +222,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="@string/serious"
-                        android:textColor="@color/black"
+                        android:textColor="@color/dark_b"
                         android:textSize="@dimen/fourteen_sp" />
 
                     <RadioButton
@@ -221,7 +231,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:text="@string/critical"
-                        android:textColor="@color/black"
+                        android:textColor="@color/dark_b"
                         android:textSize="@dimen/fourteen_sp" />
                 </RadioGroup>
 
@@ -294,7 +304,7 @@
                     android:layout_marginRight="@dimen/ten_dp"
                     android:background="@null"
                     android:gravity="left|center"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
             </LinearLayout>
 
@@ -323,19 +333,22 @@
                     android:textSize="@dimen/fourteen_sp" />
 
 
-                <Button
+                <TextView
                     android:id="@+id/btnChangeDate"
-                    style="?android:attr/borderlessButtonStyle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginBottom="@dimen/five_dp"
                     android:layout_marginRight="@dimen/ten_dp"
                     android:layout_marginTop="@dimen/five_dp"
                     android:layout_toRightOf="@+id/txtRectificationPeriod"
-                    android:background="@drawable/gray_stroke_white_solid_bg"
+                    android:background="@null"
                     android:drawableRight="@drawable/date"
+                    android:gravity="left|center"
+                    android:hint="请选择整改期限"
                     android:minHeight="@dimen/forty"
-                    android:paddingRight="@dimen/ten_dp" />
+                    android:paddingLeft="@dimen/five_dp"
+                    android:paddingRight="@dimen/ten_dp"
+                    android:textColor="@color/dark_b" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -366,15 +379,25 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/five_dp"
-                    android:layout_marginRight="@dimen/ten_dp"
                     android:layout_marginTop="@dimen/five_dp"
+                    android:layout_toLeftOf="@+id/ibDangerDescription"
                     android:layout_toRightOf="@+id/txtDangerDescription"
-                    android:background="@drawable/gray_stroke_white_solid_bg"
+                    android:background="@null"
                     android:gravity="left|center"
-                    android:minHeight="@dimen/sixty_dp"
+                    android:hint="请输入描述"
+                    android:minHeight="@dimen/forty"
                     android:padding="@dimen/five_dp"
-                    android:textColor="@color/black"
+                    android:textColor="@color/dark_b"
                     android:textSize="@dimen/fourteen_sp" />
+
+                <ImageButton
+                    android:id="@+id/ibDangerDescription"
+                    android:layout_width="@dimen/forty"
+                    android:layout_height="@dimen/forty"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:src="@drawable/voice" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -405,15 +428,83 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/five_dp"
-                    android:layout_marginRight="@dimen/ten_dp"
                     android:layout_marginTop="@dimen/five_dp"
+                    android:layout_toLeftOf="@+id/ibRectificationRequirements"
                     android:layout_toRightOf="@+id/txtRectificationRequirements"
-                    android:background="@drawable/gray_stroke_white_solid_bg"
+                    android:background="@null"
                     android:gravity="left|center"
-                    android:minHeight="@dimen/sixty_dp"
+                    android:hint="请输入整改要求"
+                    android:minHeight="@dimen/forty"
                     android:padding="@dimen/five_dp"
+                    android:textColor="@color/dark_b"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <ImageButton
+                    android:id="@+id/ibRectificationRequirements"
+                    android:layout_width="@dimen/forty"
+                    android:layout_height="@dimen/forty"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:src="@drawable/voice" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/llOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+            <RelativeLayout
+                android:id="@+id/rlRemarks"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/one_px"
+                    android:layout_marginLeft="@dimen/ten_dp"
+                    android:layout_marginRight="@dimen/ten_dp"
+                    android:background="@color/gray" />
+
+                <TextView
+                    android:id="@+id/txtRemarks"
+                    android:layout_width="@dimen/eighty_dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:gravity="right|center"
+                    android:text="@string/rectification_remarks"
                     android:textColor="@color/black"
                     android:textSize="@dimen/fourteen_sp" />
+
+                <EditText
+                    android:id="@+id/edtRemarks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/five_dp"
+                    android:layout_marginTop="@dimen/five_dp"
+                    android:layout_toLeftOf="@+id/ibRemarks"
+                    android:layout_toRightOf="@+id/txtRemarks"
+                    android:background="@null"
+                    android:gravity="left|center"
+                    android:hint="请输入整改意见"
+                    android:minHeight="@dimen/forty"
+                    android:padding="@dimen/five_dp"
+                    android:textColor="@color/dark_b"
+                    android:textSize="@dimen/fourteen_sp" />
+
+                <ImageButton
+                    android:id="@+id/ibRemarks"
+                    android:layout_width="@dimen/forty"
+                    android:layout_height="@dimen/forty"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@null"
+                    android:src="@drawable/voice" />
             </RelativeLayout>
 
             <View

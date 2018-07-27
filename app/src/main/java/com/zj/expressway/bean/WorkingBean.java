@@ -73,6 +73,7 @@ public class WorkingBean extends DataSupport implements Serializable {
     private String opinionContent;
     private String flowType;
     private String troubleTitle; // 标题
+    private String troubleId; // 标题
     private String troubleType; // 标题
     private String dangerTitle;
     private String troubleLevel; // 隐患级别
@@ -81,10 +82,135 @@ public class WorkingBean extends DataSupport implements Serializable {
     private long deadline; // 整改期限
     private String troubleRequire; // 整改内容
     private String dangerContent; // 整改内容
+    private String dangerId; // 整改内容
     private String troubleContent; // 整改内容
     private String dangerRequire;
     private int isLocalAdd;     // 是否是本地添加 1：是 2：否
     private String levelLevel;     // 是否是本地添加 1：是 2：否
+    private String opinionField;     // 是否显示意见栏
+    private String opinionFieldName;     // 是否显示意见栏
+    private String opinionField1;     // 是否显示意见栏
+    private String opinionField2;     // 是否显示意见栏
+    private String opinionField3;     // 是否显示意见栏
+    private String opinionField4;     // 是否显示意见栏
+    private String opinionField5;     // 是否显示意见栏
+    private String opinionField6;     // 是否显示意见栏
+    private String opinionField7;     // 是否显示意见栏
+    private String opinionField8;     // 是否显示意见栏
+    private String opinionField9;     // 是否显示意见栏
+    private String opinionField10;     // 是否显示意见栏
+
+    public String getTroubleId() {
+        return troubleId;
+    }
+
+    public void setTroubleId(String troubleId) {
+        this.troubleId = troubleId;
+    }
+
+    public String getDangerId() {
+        return dangerId;
+    }
+
+    public void setDangerId(String dangerId) {
+        this.dangerId = dangerId;
+    }
+
+    public String getOpinionFieldName() {
+        return opinionFieldName;
+    }
+
+    public void setOpinionFieldName(String opinionFieldName) {
+        this.opinionFieldName = opinionFieldName;
+    }
+
+    public String getOpinionField1() {
+        return opinionField1;
+    }
+
+    public void setOpinionField1(String opinionField1) {
+        this.opinionField1 = opinionField1;
+    }
+
+    public String getOpinionField2() {
+        return opinionField2;
+    }
+
+    public void setOpinionField2(String opinionField2) {
+        this.opinionField2 = opinionField2;
+    }
+
+    public String getOpinionField3() {
+        return opinionField3;
+    }
+
+    public void setOpinionField3(String opinionField3) {
+        this.opinionField3 = opinionField3;
+    }
+
+    public String getOpinionField4() {
+        return opinionField4;
+    }
+
+    public void setOpinionField4(String opinionField4) {
+        this.opinionField4 = opinionField4;
+    }
+
+    public String getOpinionField5() {
+        return opinionField5;
+    }
+
+    public void setOpinionField5(String opinionField5) {
+        this.opinionField5 = opinionField5;
+    }
+
+    public String getOpinionField6() {
+        return opinionField6;
+    }
+
+    public void setOpinionField6(String opinionField6) {
+        this.opinionField6 = opinionField6;
+    }
+
+    public String getOpinionField7() {
+        return opinionField7;
+    }
+
+    public void setOpinionField7(String opinionField7) {
+        this.opinionField7 = opinionField7;
+    }
+
+    public String getOpinionField8() {
+        return opinionField8;
+    }
+
+    public void setOpinionField8(String opinionField8) {
+        this.opinionField8 = opinionField8;
+    }
+
+    public String getOpinionField9() {
+        return opinionField9;
+    }
+
+    public void setOpinionField9(String opinionField9) {
+        this.opinionField9 = opinionField9;
+    }
+
+    public String getOpinionField10() {
+        return opinionField10;
+    }
+
+    public void setOpinionField10(String opinionField10) {
+        this.opinionField10 = opinionField10;
+    }
+
+    public String getOpinionField() {
+        return opinionField;
+    }
+
+    public void setOpinionField(String opinionField) {
+        this.opinionField = opinionField;
+    }
 
     public String getDangerContent() {
         return dangerContent;

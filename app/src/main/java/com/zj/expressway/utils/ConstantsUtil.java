@@ -59,10 +59,10 @@ public class ConstantsUtil {
 //    public static final String Map = "http://192.168.1.192/tongren_mobile/#/map/123";
     public static final String Map = "http://47.96.150.231/member/#/map/123";
     // 发起
-//    public static final String star = "http://192.168.1.192/tongren_app/#/tongren_app/approveMobileByApp";
+//    public static final String star = "http://192.168.1.118/app/#/app/approveMobileByApp";
     public static final String star = "http://47.96.150.231/app/#/app/approveMobileByApp";
     // 更新
-//    public static final String update = "http://192.168.1.192/tongren_app/#/tongren_app/processMobileByApp";
+//    public static final String update = "http://192.168.1.118/app/#/app/processMobileByApp";
     public static final String update = "http://47.96.150.231/app/#/app/processMobileByApp";
 
     // 登录
@@ -134,7 +134,7 @@ public class ConstantsUtil {
     // 获取二维码扫描后人员详情
     public static final String scanGetWorkerDetails = prefix + "scanGetWorkerDetails";
     // 添加人员详情
-    public static final String appaAddContractWorker = prefix + "appaAddContractWorker";
+    public static final String appAddContractWorker = prefix + "appAddContractWorker";
 
     // 文件存储路径
     public static final String SAVE_PATH = "/mnt/sdcard/zjExpressway/";

@@ -451,7 +451,7 @@ public class IDNumberActivity extends BaseActivity {
      */
     private void submit(JSONObject map) {
         LoadingUtils.showLoading(mContext);
-        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.appaAddContractWorker, map.toString());
+        Request request = ChildThreadUtil.getRequest(mContext, ConstantsUtil.appAddContractWorker, map.toString());
         ConstantsUtil.okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -466,6 +466,7 @@ public class IDNumberActivity extends BaseActivity {
                     final BaseModel model = gson.fromJson(data, BaseModel.class);
                     if (model.isSuccess()) {
                         ChildThreadUtil.toastMsgHidden(mContext, model.getMessage());
+                        IDNumberActivity.this.finish();
                     } else {
                         ChildThreadUtil.checkTokenHidden(mContext, model.getMessage(), model.getCode());
                     }

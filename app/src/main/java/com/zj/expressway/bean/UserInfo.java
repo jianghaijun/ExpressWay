@@ -12,10 +12,19 @@ public class UserInfo extends DataSupport implements Serializable {
     private String realName;
     private String userName;
     private String userId;
+    private String userKey;
     private String userPwd;
     private String imageUrl;
     private String token;
     private String userLevel;
+
+    public String getUserKey() {
+        return userKey;
+    }
+
+    public void setUserKey(String userKey) {
+        this.userKey = userKey;
+    }
 
     public String getImageUrl() {
         return imageUrl;

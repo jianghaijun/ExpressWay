@@ -6,6 +6,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.youth.banner.Banner;
@@ -103,6 +104,31 @@ public class AppActivity extends BaseActivity {
             }
         });
 
+        // 待审批点击
+        hold.llToBeExamined.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, WorkingProcedureActivity.class);
+                SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
+                SpUtil.put(mContext, "MANAGER_TYPE", "1");
+                SpUtil.put(mContext, "PROCESS_TYPE", "4");
+                mContext.startActivity(intent);
+            }
+        });
+
+        // 已审批点击
+        hold.llHaveBeenApproved.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, WorkingProcedureActivity.class);
+                SpUtil.put(mContext, ConstantsUtil.PROCESS_LIST_TYPE, "4");
+                SpUtil.put(mContext, "MANAGER_TYPE", "2");
+                SpUtil.put(mContext, "PROCESS_TYPE", "4");
+                mContext.startActivity(intent);
+            }
+        });
+
+
         // 添加图片、标题
         List<AppInfoBean> appInfoList = new ArrayList<>();
         AppInfoBean bean = new AppInfoBean();
@@ -173,6 +199,10 @@ public class AppActivity extends BaseActivity {
         private RecyclerView rvAppInfo;
         @ViewInject(R.id.txtEnterPriseInfo)
         private TextView txtEnterPriseInfo;
+        @ViewInject(R.id.llToBeExamined)
+        private LinearLayout llToBeExamined;
+        @ViewInject(R.id.llHaveBeenApproved)
+        private LinearLayout llHaveBeenApproved;
 
     }
 }

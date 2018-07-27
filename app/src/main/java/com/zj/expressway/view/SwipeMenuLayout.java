@@ -266,7 +266,6 @@ public class SwipeMenuLayout extends ViewGroup {
                 MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
                 if (lp.height == LayoutParams.MATCH_PARENT) {
                     // Temporarily force children to reuse their old measured width
-                    // FIXME: this may not be right for something like wrapping text?
                     int oldWidth = lp.width;//measureChildWithMargins 这个函数会用到宽，所以要保存一下
                     lp.width = child.getMeasuredWidth();
                     // Remeasure with new dimensions

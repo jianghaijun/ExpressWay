@@ -196,7 +196,13 @@ public class WorkingProcedureActivity extends BaseActivity {
 
         vpWorkingProcedure.setOnPageChangeListener(new MyOnPageChangeListener());
         vpWorkingProcedure.setAdapter(mPagerAdapter);
-        vpWorkingProcedure.setCurrentItem(0);
+        String str = (String) SpUtil.get(mContext, "MANAGER_TYPE", "1");
+        if (StrUtil.equals(str, "1")) {
+            vpWorkingProcedure.setCurrentItem(0);
+        } else {
+            setStates(1);
+            vpWorkingProcedure.setCurrentItem(1);
+        }
     }
 
     /**
